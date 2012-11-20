@@ -14,11 +14,18 @@ class root.Token
 class root.Sequence extends root.Token
     constructor: (patternString) ->
         @pattern = new Array()
-        for char in patternString.split("")
+        i = 0
+        while i < patternString.length
+            char = patternString.charAt(i)
             switch char
+                when "\\"
+                    actualChar = patternString.charAt(++i)
+                    @pattern.push(new Character(actualChar))
                 when "^" then @pattern.push(new StartAnchor())
                 when "$" then @pattern.push(new EndAnchor())
+                when "." then @pattern.push(new Wildcard())
                 else @pattern.push(new Character(char))
+            i++         
             
     matches: (input, currentPosition) ->
         i = 0
@@ -26,8 +33,8 @@ class root.Sequence extends root.Token
             unless currentPosition = subpattern.matches(input, currentPosition)
                 break
         return currentPosition
-                            
-        
+
+# This represents a single literal character
 class root.Character extends root.Token
     constructor: (@character) ->
     
@@ -36,6 +43,15 @@ class root.Character extends root.Token
             return currentPosition + 1
         return false
         
+        
+class root.Wildcard extends root.Token
+    constructor: () ->
+    matches: (input, currentPosition) ->
+        unless input[currentPosition] in ["\n", "\r", 1]
+            return currentPosition + 1
+        return false
+        
+        
 class root.StartAnchor extends root.Token
     constructor: () ->
     
@@ -43,6 +59,7 @@ class root.StartAnchor extends root.Token
         if input[currentPosition - 1] == -1
             return currentPosition
         return false
+
         
 class root.EndAnchor extends root.Token
     constructor: () ->

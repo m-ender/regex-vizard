@@ -5,14 +5,12 @@ class root.RegexEngine
 
     match: (regexString, inputString) ->
         console.log("Regex string:", regexString)
-        console.log("Input string:", inputString)
-        
         regex = new Sequence(regexString)
-        
         console.log("Regex pattern:", regex)
         
         # Build character array and surround it with -1 and 1 as guards for the
         # start and end of the input string
+        console.log("Input string:", inputString)
         input = [-1].concat(inputString.split(""))
         input.push(1)
         console.log("Input:", input)

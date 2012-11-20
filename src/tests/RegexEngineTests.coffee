@@ -7,14 +7,14 @@ TestCase("RegexEngine Tests",
             #On a client
             @RegexEngine = new window.RegexEngine
             
-    "testMatchSingleCharacter": () -> 
+    "testSingleCharacter": () -> 
         assertTrue(@RegexEngine.match("a", "a"))
         assertTrue(@RegexEngine.match("a", "bar"))
         assertTrue(@RegexEngine.match("a", "bra"))
         assertTrue(@RegexEngine.match("a", "abra"))
         assertFalse(@RegexEngine.match("a", "b"))
 
-    "testMatchMultipleCharacters": () ->
+    "testMultipleCharacters": () ->
         assertTrue(@RegexEngine.match("aa", "aa"))    
         assertTrue(@RegexEngine.match("aa", "baar"))
         assertTrue(@RegexEngine.match("aa", "braa"))
@@ -54,4 +54,46 @@ TestCase("RegexEngine Tests",
         assertFalse(@RegexEngine.match("^bar$", "abar"))
         assertFalse(@RegexEngine.match("^bar$", "bara"))
         assertFalse(@RegexEngine.match("^bar$", "abara"))
+        
+    "testWildcard": () ->
+        assertFalse(@RegexEngine.match(".", ""))
+        assertTrue(@RegexEngine.match(".", "."))
+        assertTrue(@RegexEngine.match(".", "a"))
+        assertTrue(@RegexEngine.match("..", "ab"))
+        assertTrue(@RegexEngine.match("..", "cc"))
+        assertTrue(@RegexEngine.match(".a.", "bar"))
+        assertFalse(@RegexEngine.match(".a.", "a"))
+        assertFalse(@RegexEngine.match(".", "\n"))
+        assertFalse(@RegexEngine.match(".", "\r"))
+        assertTrue(@RegexEngine.match(".", " "))
+        assertTrue(@RegexEngine.match(".", "\t"))
+        assertFalse(@RegexEngine.match("a.", "a\nb"))
+    
+    # Note that every \\ becomes a single \ in the string, which then becomes the regex
+    # i.e. matching a literal \ requires regex "\\\\", because the engine needs to
+    # receive two backslashes, so that the first escapes the second one
+    "testEscapedCharacters": () ->
+        assertTrue(@RegexEngine.match("a\\^", "a^"))
+        assertTrue(@RegexEngine.match("\\$a", "$a"))
+        assertTrue(@RegexEngine.match("\\\\", "\\"))
+        assertTrue(@RegexEngine.match("\\(", "("))
+        assertTrue(@RegexEngine.match("\\)", ")"))
+        assertTrue(@RegexEngine.match("^\\(a\\)$", "(a)"))
+        assertTrue(@RegexEngine.match("\\[", "["))
+        assertTrue(@RegexEngine.match("\\]", "]"))
+        assertTrue(@RegexEngine.match("^\\[ab\\]$", "[ab]"))
+        assertTrue(@RegexEngine.match("^a\\|b$", "a|b"))
+        assertFalse(@RegexEngine.match("a\\|b", "a"))
+        assertTrue(@RegexEngine.match("\\*", "*"))
+        assertFalse(@RegexEngine.match("a\\*", "aaa"))
+        assertTrue(@RegexEngine.match("\\+", "+"))
+        assertFalse(@RegexEngine.match("a\\+", "aaa"))
+        assertTrue(@RegexEngine.match("a\\?", "a?"))
+        assertFalse(@RegexEngine.match("a\\?", "?"))
+        assertTrue(@RegexEngine.match("\\.", "."))
+        assertFalse(@RegexEngine.match("\\.", "a"))
+        assertTrue(@RegexEngine.match("\\{", "{"))
+        assertTrue(@RegexEngine.match("\\}", "}"))
+        assertTrue(@RegexEngine.match("a\\{2}", "a{2}"))
+        assertFalse(@RegexEngine.match("a\\{2\\}", "aa"))
 )
