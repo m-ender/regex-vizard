@@ -1,1 +1,1 @@
-java -jar "$Env:JSTESTDRIVER_DIR\JsTestDriver-1.3.5.jar" --tests all
+java -jar "$Env:JSTESTDRIVER_DIR\JsTestDriver-1.3.5.jar" --tests all --captureConsole
