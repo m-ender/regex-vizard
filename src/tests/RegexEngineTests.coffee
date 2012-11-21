@@ -7,6 +7,10 @@ TestCase("RegexEngine Tests",
             #On a client
             @RegexEngine = new window.RegexEngine
             
+    "testEmptyPattern": () ->
+        assertTrue(@RegexEngine.match("", ""))
+        assertTrue(@RegexEngine.match("", "a"))
+            
     "testSingleCharacter": () -> 
         assertTrue(@RegexEngine.match("a", "a"))
         assertTrue(@RegexEngine.match("a", "bar"))
@@ -96,4 +100,18 @@ TestCase("RegexEngine Tests",
         assertTrue(@RegexEngine.match("\\}", "}"))
         assertTrue(@RegexEngine.match("a\\{2}", "a{2}"))
         assertFalse(@RegexEngine.match("a\\{2\\}", "aa"))
+        
+    "testAlternation": () ->
+        assertTrue(@RegexEngine.match("a|b", "a", true))
+        assertTrue(@RegexEngine.match("a|b", "b"))
+        assertTrue(@RegexEngine.match("a|b", "ab"))
+        assertFalse(@RegexEngine.match("a|b", ""))
+        assertFalse(@RegexEngine.match("a|b", "c"))
+        assertTrue(@RegexEngine.match("a|b|c", "c"))
+        assertTrue(@RegexEngine.match("a|b|", "c"))
+        assertTrue(@RegexEngine.match("a||b", "c"))
+        assertTrue(@RegexEngine.match("|a|b", "c"))
+        assertTrue(@RegexEngine.match("^a|b$", "abc"))
+        assertTrue(@RegexEngine.match("^a|b$", "cab"))
+        assertFalse(@RegexEngine.match("^a|b$", "cabc"))
 )
