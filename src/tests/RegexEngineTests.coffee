@@ -102,7 +102,7 @@ TestCase("RegexEngine Tests",
         assertFalse(@RegexEngine.match("a\\{2\\}", "aa"))
         
     "testAlternation": () ->
-        assertTrue(@RegexEngine.match("a|b", "a", true))
+        assertTrue(@RegexEngine.match("a|b", "a"))
         assertTrue(@RegexEngine.match("a|b", "b"))
         assertTrue(@RegexEngine.match("a|b", "ab"))
         assertFalse(@RegexEngine.match("a|b", ""))
@@ -114,4 +114,66 @@ TestCase("RegexEngine Tests",
         assertTrue(@RegexEngine.match("^a|b$", "abc"))
         assertTrue(@RegexEngine.match("^a|b$", "cab"))
         assertFalse(@RegexEngine.match("^a|b$", "cabc"))
+        
+    "testGrouping": () ->
+        assertTrue(@RegexEngine.match("(a)", "a"))
+        assertTrue(@RegexEngine.match("(a)b", "ab"))
+        assertTrue(@RegexEngine.match("a(b|c)d", "abd"))
+        assertTrue(@RegexEngine.match("a(b|c)d", "acd"))
+        assertFalse(@RegexEngine.match("a(b|c)d", "ab"))
+        assertFalse(@RegexEngine.match("a(b|c)d", "cd"))
+        assertFalse(@RegexEngine.match("a(b|c)d", "ad"))
+        assertTrue(@RegexEngine.match("a(|b|c)d", "ad"))
+        assertTrue(@RegexEngine.match("a(b||c)d", "ad"))
+        assertTrue(@RegexEngine.match("a(b|c|)d", "ad"))
+        assertTrue(@RegexEngine.match("^(a|b)$", "a"))
+        assertTrue(@RegexEngine.match("^(a|b)$", "b"))
+        assertFalse(@RegexEngine.match("^(a|b)$", "abc"))
+        assertTrue(@RegexEngine.match("(a|b)(c|d)", "ac"))
+        assertTrue(@RegexEngine.match("(a|b)(c|d)", "bc"))
+        assertTrue(@RegexEngine.match("(a|b)(c|d)", "ad"))
+        assertTrue(@RegexEngine.match("(a|b)(c|d)", "bd"))
+        assertFalse(@RegexEngine.match("^(a|b)(c|d)$", "abcd"))
+        assertFalse(@RegexEngine.match("(a|b)(c|d)", "ab"))
+        assertFalse(@RegexEngine.match("(a|b)(c|d)", "cd"))
+        assertTrue(@RegexEngine.match("a(b|c(d|e))", "ab"))
+        assertTrue(@RegexEngine.match("a(b|c(d|e))", "acd"))
+        assertTrue(@RegexEngine.match("a(b|c(d|e))", "ace"))
+        assertFalse(@RegexEngine.match("a(b|c(d|e))", "ac"))
+        assertFalse(@RegexEngine.match("a(b|c(d|e))", "ad"))
+        assertFalse(@RegexEngine.match("a(b|c(d|e))", "ae"))
+        assertFalse(@RegexEngine.match("^a(b|c(d|e))$", "abd"))
+        assertFalse(@RegexEngine.match("^a(b|c(d|e))$", "abe"))
+    
+    "testBacktracking": () ->
+        assertTrue(@RegexEngine.match("(a|ab|abc)d", "ad"))
+        assertTrue(@RegexEngine.match("(a|ab|abc)d", "abd"))
+        assertTrue(@RegexEngine.match("(a|ab|abc)d", "abcd"))
+    
+    "testInvalidSyntax": () ->
+        that = this
+        assertException(
+            () -> 
+                that.RegexEngine.match("\\", "")
+            "NothingToEscapeException")
+        assertException(
+            () -> 
+                that.RegexEngine.match(")", "")
+            "UnmatchedClosingParenthesisException")
+        assertException(
+            () -> 
+                that.RegexEngine.match("())", "")
+            "UnmatchedClosingParenthesisException")
+        assertException(
+            () -> 
+                that.RegexEngine.match("(", "")
+            "MissingClosingParenthesisException")
+        assertException(
+            () -> 
+                that.RegexEngine.match("()(", "")
+            "MissingClosingParenthesisException")            
+        assertException(
+            () -> 
+                that.RegexEngine.match("(()", "")
+            "MissingClosingParenthesisException")
 )

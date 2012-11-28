@@ -6,6 +6,12 @@ class root.RegexEngine
     match: (regexString, inputString, report = false) ->
         console.log("Regex string:", regexString) if report
         regex = new Sequence(regexString)
+        if regex.remainder
+            throw {
+                name: "UnmatchedClosingParenthesisException"
+                message: "Unmatched closing parenthesis \")\""
+            }
+                
         console.log("Regex pattern:", regex) if report
         
         # Build character array and surround it with -1 and 1 as guards for the
