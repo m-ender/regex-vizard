@@ -8,7 +8,79 @@ TestCase("RegexEngine Tests",
             @RegexEngine = new window.RegexEngine
             
     "testParsing": () ->
-        assertTrue(@RegexEngine.match("d.(ab?|c|)*$", "dd", true))
+        @RegexEngine.parsePattern("d.(ab?|c|)*$")
+    
+    "testInvalidSyntax": () ->
+        that = this
+        assertException(
+            () -> 
+                that.RegexEngine.match("\\", "")
+            "NothingToEscapeException")
+        assertException(
+            () -> 
+                that.RegexEngine.match(")", "")
+            "UnmatchedClosingParenthesisException")
+        assertException(
+            () -> 
+                that.RegexEngine.match("())", "")
+            "UnmatchedClosingParenthesisException")
+        assertException(
+            () -> 
+                that.RegexEngine.match("(", "")
+            "MissingClosingParenthesisException")
+        assertException(
+            () -> 
+                that.RegexEngine.match("()(", "")
+            "MissingClosingParenthesisException")            
+        assertException(
+            () -> 
+                that.RegexEngine.match("(()", "")
+            "MissingClosingParenthesisException")
+    
+    "testCharacterToken": () ->
+        state = @RegexEngine.setupInitialState("ab")
+        token = new Character("a")
+        assertEquals(2, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        assertEquals(2, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        state.currentPosition = 2
+        assertEquals(false, token.nextMatch(state))
+        state.currentPosition = 3
+        assertEquals(false, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        
+        state.currentPosition = 1
+        token = new Character("b")
+        assertEquals(false, token.nextMatch(state))
+        state.currentPosition = 2
+        assertEquals(3, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        assertEquals(3, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        state.currentPosition = 3
+        assertEquals(false, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+    
+    "testWildcardToken": () ->
+        state = @RegexEngine.setupInitialState("a\nb\r")
+        token = new Wildcard()
+        assertEquals(2, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        assertEquals(2, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        state.currentPosition = 2
+        assertEquals(false, token.nextMatch(state))
+        state.currentPosition = 3
+        assertEquals(4, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        assertEquals(4, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
+        state.currentPosition = 4
+        assertEquals(false, token.nextMatch(state))
+        state.currentPosition = 5
+        assertEquals(false, token.nextMatch(state))
+        assertEquals(false, token.nextMatch(state))
             
     "testEmptyPattern": () ->
         assertTrue(@RegexEngine.match("", ""))
@@ -152,31 +224,4 @@ TestCase("RegexEngine Tests",
         assertTrue(@RegexEngine.match("(a|ab|abc)d", "ad"))
         assertTrue(@RegexEngine.match("(a|ab|abc)d", "abd"))
         assertTrue(@RegexEngine.match("(a|ab|abc)d", "abcd"))
-    
-    "testInvalidSyntax": () ->
-        that = this
-        assertException(
-            () -> 
-                that.RegexEngine.match("\\", "")
-            "NothingToEscapeException")
-        assertException(
-            () -> 
-                that.RegexEngine.match(")", "")
-            "UnmatchedClosingParenthesisException")
-        assertException(
-            () -> 
-                that.RegexEngine.match("())", "")
-            "UnmatchedClosingParenthesisException")
-        assertException(
-            () -> 
-                that.RegexEngine.match("(", "")
-            "MissingClosingParenthesisException")
-        assertException(
-            () -> 
-                that.RegexEngine.match("()(", "")
-            "MissingClosingParenthesisException")            
-        assertException(
-            () -> 
-                that.RegexEngine.match("(()", "")
-            "MissingClosingParenthesisException")
 )
