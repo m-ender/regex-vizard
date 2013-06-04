@@ -7,6 +7,9 @@ TestCase("RegexEngine Tests",
             #On a client
             @RegexEngine = new window.RegexEngine
             
+    "testParsing": () ->
+        assertTrue(@RegexEngine.match("d.(ab?|c|)*$", "dd", true))
+            
     "testEmptyPattern": () ->
         assertTrue(@RegexEngine.match("", ""))
         assertTrue(@RegexEngine.match("", "a"))
