@@ -23,45 +23,6 @@ class root.Token
 class root.RootToken extends root.Token
     nextMatch: (state, report) ->
         return @subtokens[0].nextMatch(state,report)
-
-class root.Alternation extends root.Token
-    constructor: (token) ->
-        super(token)
-        @i = 0 # the first subtoken to try upon calling nextMatch
-
-    nextMatch: (state, report) ->
-        result = subtokens[@i].nextMatch(state, report)
-        while result == 0
-            result = subtokens[@i].nextMatch(state, report)
-        if result == false
-            ++@i
-    
-# This encapsulates concatenation.
-# Empty (sub)patterns are also represented by (empty) sequences
-class root.Sequence extends root.Token
-    constructor: () ->
-        super()
-        @i = 0 # the first subtoken to try upon calling nextMatch
-        
-    nextMatch: (state, report) ->
-        result = state.currentPosition
-        while @i >= 0 and @i < subtokens.length
-            result = subtokens[@i].nextMatch(state, report)
-            while result == 0
-                result = subtokens[@i].nextMatch(state, report)
-            if result == false
-                --@i
-            else
-                ++@i
-        if result == false            # if the sequence cannot match
-            @i = 0                    # start over next time
-        else                          # if the sequence found a match
-            @i = subtokens.length - 1 # start by asking for another match from the last subtoken next time
-        return result
-
-class root.Group extends root.Token            
-    matches: (state, report) ->
-        return @pattern.matches(state, report)
         
 # This represents a single literal character
 class root.Character extends root.Token
@@ -69,23 +30,26 @@ class root.Character extends root.Token
         super()
         @reset()
         
+    reset: () ->
+        @attempted = false
+        
     nextMatch: (state, report) ->
         if @attempted
             @reset()
             return false
-        console.log(state)
+        
         if state.input[state.currentPosition] == @character
             @attempted = true
             return state.currentPosition + 1
         return false
         
-    reset: () ->
-        @attempted = false
-        
 class root.Wildcard extends root.Token
     constructor: () ->
         super()
         @reset()
+        
+    reset: () ->
+        @attempted = false
         
     nextMatch: (state, report) ->
         if @attempted
@@ -97,13 +61,13 @@ class root.Wildcard extends root.Token
             return state.currentPosition + 1
         return false
         
-    reset: () ->
-        @attempted = false
-        
 class root.StartAnchor extends root.Token    
     constructor: () ->
         super()
         @reset()
+        
+    reset: () ->
+        @attempted = false
         
     nextMatch: (state, report) ->
         if @attempted
@@ -114,15 +78,15 @@ class root.StartAnchor extends root.Token
             @attempted = true
             return state.currentPosition
         return false
-        
-    reset: () ->
-        @attempted = false
 
         
 class root.EndAnchor extends root.Token    
     constructor: () ->
         super()
         @reset()
+        
+    reset: () ->
+        @attempted = false
         
     nextMatch: (state, report) ->
         if @attempted
@@ -133,33 +97,91 @@ class root.EndAnchor extends root.Token
             @attempted = true
             return state.currentPosition
         return false
+
+class root.Alternation extends root.Token
+    constructor: (token) ->
+        super(token)
+        @reset()
         
     reset: () ->
-        @attempted = false
+        @i = 0 # the first subtoken to try upon calling nextMatch
+
+    nextMatch: (state, report) ->
+        if @i == @subtokens.length
+            @reset()
+            return false
+            
+        result = @subtokens[@i].nextMatch(state, report)
+        
+        if result != false
+            return result
+        else
+            ++@i
+            return 0
+
+# This encapsulates concatenation.
+# Empty (sub)patterns are also represented by (empty) sequences
+class root.Sequence extends root.Token
+    constructor: () ->
+        super()
+        @reset()
+        
+    reset: () ->
+        @i = 0 # the first subtoken to try upon calling nextMatch
+        @pos = [] # "current" positions that were used by successful subtokens
+        
+    nextMatch: (state, report) ->
+        if @i == -1
+            @reset()
+            return false
+            
+        if @i == @subtokens.length
+            --@i
+            result = state.currentPosition
+            if @pos.length > 0
+                state.currentPosition = @pos.pop()
+            return result
+
+        result = @subtokens[@i].nextMatch(state, report)
+        switch result
+            when 0
+                return 0
+            when false
+                --@i
+                if @pos.length > 0
+                    state.currentPosition = @pos.pop()
+                return 0
+            else
+                ++@i
+                @pos.push(state.currentPosition)
+                state.currentPosition = result
+                return @nextMatch(state, report)
+
+class root.Group extends root.Token            
+    nextMatch: (state, report) ->
+        return @subtokens[0].nextMatch(state, report)
         
 class root.Quantifier extends root.Token
     constructor: (token, @min, @max) ->
         super(token)
         @reset()
-                
+
     reset: () ->
         @repetitions = []
         
 class root.Option extends root.Quantifier
-    constructor: () ->
-        super()
+    constructor: (token) ->
+        super(token, 0, 1)
         @reset()
         
-    nextMatch: () ->
+    nextMatch: (state, report) ->
         switch @repetitions
             when 1
-                result = subtokens[0].nextMatch(state, report)
-                while result == 0
-                    result = subtokens[0].nextMatch(state, report)
+                result = @subtokens[0].nextMatch(state, report)
                 
-                if result > 0
+                if result != false
                     return result
-                if result == false
+                else
                     --@repetitions
                     return 0
             when 0
@@ -168,8 +190,6 @@ class root.Option extends root.Quantifier
             when -1
                 @reset()
                 return false
-        
-        
         
     reset: () ->
         @repetitions = 1

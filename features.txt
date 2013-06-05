@@ -1,0 +1,21 @@
+Four areas:
+- subject string
+- regex
+- currently captured submatches
+- active modifiers
+
+Visualisation elements:
+- start: - string and regex are white, cursor points at position before first character
+         - opening parenthises fly to capture-area, to visualise counting of groups
+
+- matching literals: a shadowy version of the character flies out of the pattern towards the string; if there's a match, both light up green; if there's no match, red flash, backtrack
+- repetition: a small counter hovers above the quantifier, showing how many repetitions are currently in use; in the string it should be able to identify the boundaries of each repetition (perhaps by highlighting)
+- character classes: shorthands and ranges are expanded and the corresponding character from the class is highlighted as in the literal case (same goes for lower/upper case variants when using the i-modifier)
+- capturing groups: at the closing parenthesis, (a copy of) the matched substring flies to the corresponding capture slot
+- backreferences: the corresponding captured substring appears and is matched literally
+- alternation: currently unused alternatives are greyed out
+- lookarounds: are collapsed in the pattern after they have matched
+- modifiers light up when they are relevant
+-- i: when a letter is expanded into lower and upper case variant (also in character classes)
+-- m: when an anchor matches a line beginning or end that is not the string's beginning or end
+-- s: when . matches a line break character

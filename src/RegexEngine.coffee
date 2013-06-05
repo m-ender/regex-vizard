@@ -14,8 +14,14 @@ class root.RegexEngine
         state = @setupInitialState(inputString)        
         console.log("Input:", state.input) if report
 
-        while state.startingPosition < state.input.length and not regex.matches(state, report)
-            state.currentPosition = ++state.startingPosition
+        while state.startingPosition < state.input.length
+            result = regex.nextMatch(state, report)
+            while result == 0
+                result = regex.nextMatch(state, report)
+            if result == false
+                state.currentPosition = ++state.startingPosition
+            else
+                break
         
         return state.startingPosition < state.input.length
         
@@ -47,7 +53,7 @@ class root.RegexEngine
                             message: "There is nothing to escape. Most likely, the pattern ends in a backslash \"\\\""
                             index: i
                         }
-                    actualChar = patternString.charAt(i+1)
+                    actualChar = string.charAt(i+1)
                     append(new Character(actualChar))
                     i += 2
                 when "^"
@@ -79,14 +85,20 @@ class root.RegexEngine
                     ++i
                 when "?"
                     st = current.subtokens
-                    st[st.length-1]
                     if st[st.length-1].subtokens.length == 0
                         throw {
                             name: "NothingToRepeatException"
                             message: "The is nothing to repeat for quantifier \"" + char + "\" at index " + i
                             index: i
                         }
-                    append(new Option(remove())) # take the currently last token, stuff it into an Option token and append the option instead
+                    target = remove()
+                    unless (target instanceof Group) or (target instanceof Character) or (target instanceof Wildcard)
+                        throw {
+                            name: "NothingToRepeatException"
+                            message: "The is nothing to repeat for quantifier \"" + char + "\" at index " + i + ". Only groups, characters and wildcard may be quantified."
+                            index: i
+                        }
+                    append(new Option()) # take the currently last token, stuff it into an Option token and append the option instead
                     ++i
                 else
                     append(new Character(char))

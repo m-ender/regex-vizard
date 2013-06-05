@@ -1,0 +1,29 @@
+This file lists notes on how different browsers implemented edge cases in the ECMAScript regex specification:
+
+=====================
+Quantified assertions
+=====================
+
+The grammar in section 15.10 (http://www.ecma-international.org/ecma-262/5.1/#sec-15.10) states explicitly
+that quantifiers can only be applied to Atoms, which don't include Assertions (all forms of 0-width constructs).
+While at least Chrome and Firefox seem to adhere to this when it comes to ^, $ and \b, they do allow (at least)
+a ?-quantifier after a lookahead. Moreover, in that case they seem to optimise out the lookahead (as it cannot
+affect the match), so that capturing groups inside the lookahead are always undefined (even if the lookahead
+would match).
+
+Test snippets:
+
+/^?a/.exec("a")
+/a$?/.exec("a")
+/a\b?/.exec("a")
+/a\B?/.exec("a")
+/a(?=b(c))?/.exec("a")
+/a(?=b(c))?/.exec("abc")
+/a(?!b)?/.exec("ab")
+
+===================
+Escaping c, x and u
+===================
+
+I am not quite sure how to interpret the standard here, but in any case the implementations are inconsistent.
+(More details to follow)
