@@ -6,28 +6,193 @@ TestCase("ParsingTests",
         else
             #On a client
             @RegexEngine = new window.RegexEngine
+        
+    "testCharacter": () ->
+        regex = @RegexEngine.parsePattern("a")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: Character
+                subtokens: []
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+        
+    "testEscapedCharacter": () ->
+        regex = @RegexEngine.parsePattern("\\?")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: Character
+                subtokens: []
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+        
+    "testWildcard": () ->
+        regex = @RegexEngine.parsePattern(".")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: Wildcard
+                subtokens: []
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+        
+    "testStartAnchor": () ->
+        regex = @RegexEngine.parsePattern("^")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: StartAnchor
+                subtokens: []
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+        
+    "testEndAnchor": () ->
+        regex = @RegexEngine.parsePattern("$")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: EndAnchor
+                subtokens: []
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+
+    "testSequence": () ->
+        regex = @RegexEngine.parsePattern("abc")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: Sequence
+                subtokens: [
+                    type: Character
+                    subtokens: []
+                   ,
+                    type: Character
+                    subtokens: []
+                   ,
+                    type: Character
+                    subtokens: []
+                ]
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+
+    "testAlternation": () ->
+        regex = @RegexEngine.parsePattern("a|b|c")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: Alternation
+                subtokens: [
+                    type: Character
+                    subtokens: []
+                   ,
+                    type: Character
+                    subtokens: []
+                   ,
+                    type: Character
+                    subtokens: []
+                ]
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+
+    "testOption": () ->
+        regex = @RegexEngine.parsePattern("a?")
+        console.log(regex)
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: Option
+                subtokens: [
+                    type: Character
+                    subtokens: []
+                ]
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+        
+    "testGroup": () ->
+        regex = @RegexEngine.parsePattern("(a)")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: Group
+                subtokens: [
+                    type: Character
+                    subtokens: []
+                ]
+            ]
+        @assertSyntaxTree(expectedTree, regex)
             
-    "testParsing": () ->
-        @RegexEngine.parsePattern("d.(ab?|c|)*$")
+    "testComplexExpression": () ->
+        @RegexEngine.parsePattern("d.(ab?|c|)?$")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: Sequence
+                subtokens: [
+                    type: Character
+                    subtokens: []
+                   ,
+                    type: Wildcard
+                    subtokens: []
+                   ,
+                    type: Option
+                    subtokens: [
+                        type: Group
+                        subtokens: [
+                            type: Alternation
+                            subtokens: [
+                                type: Sequence
+                                subtokens: [
+                                    type: Character
+                                    subtokens: []
+                                   ,
+                                    type: Option
+                                    subtokens: [
+                                        type: Character
+                                        subtokens: []
+                                    ]
+                                ]
+                               ,
+                                type: Character
+                                subtokens: []
+                               ,
+                                type: Sequence
+                                subtokens: []
+                            ]
+                        ]
+                    ]
+                   ,
+                    type: EndAnchor
+                    subtokens: []                    
+                ]
+            ]
     
     "testInvalidSyntax": () ->
         that = this
         
-        checkError = (pattern, exception) ->
+        assertParsingException = (pattern, exception) ->
             assertException(
                 () -> that.RegexEngine.parsePattern(pattern)
                 exception
             )
             
-        checkError("\\", "NothingToEscapeException")
-        checkError(")", "UnmatchedClosingParenthesisException")
-        checkError("())", "UnmatchedClosingParenthesisException")
-        checkError("(", "MissingClosingParenthesisException")
-        checkError("()(", "MissingClosingParenthesisException")            
-        checkError("(()", "MissingClosingParenthesisException")
-        checkError("?", "NothingToRepeatException")
-        checkError("a(?)", "NothingToRepeatException")
-        checkError("a|?", "NothingToRepeatException")
-        checkError("^?", "NothingToRepeatException")
-        checkError("$?", "NothingToRepeatException")
+        assertParsingException("\\", "NothingToEscapeException")
+        assertParsingException(")", "UnmatchedClosingParenthesisException")
+        assertParsingException("())", "UnmatchedClosingParenthesisException")
+        assertParsingException("(", "MissingClosingParenthesisException")
+        assertParsingException("()(", "MissingClosingParenthesisException")            
+        assertParsingException("(()", "MissingClosingParenthesisException")
+        assertParsingException("?", "NothingToRepeatException")
+        assertParsingException("a(?)", "NothingToRepeatException")
+        assertParsingException("a|?", "NothingToRepeatException")
+        assertParsingException("^?", "NothingToRepeatException")
+        assertParsingException("$?", "NothingToRepeatException")
+        
+    assertSyntaxTree: (expectedTree, actualTree) ->
+        assertTrue(actualTree.constructor is expectedTree.type)
+        assertEquals(expectedTree.subtokens.length, actualTree.subtokens.length)
+        i = 0
+        for subtoken in expectedTree.subtokens
+            @assertSyntaxTree(subtoken, actualTree.subtokens[i])
+            ++i
 )

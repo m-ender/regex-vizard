@@ -98,7 +98,7 @@ class root.RegexEngine
                             message: "The is nothing to repeat for quantifier \"" + char + "\" at index " + i + ". Only groups, characters and wildcard may be quantified."
                             index: i
                         }
-                    append(new Option()) # take the currently last token, stuff it into an Option token and append the option instead
+                    append(new Option(target)) # take the currently last token, stuff it into an Option token and append the option instead
                     ++i
                 else
                     append(new Character(char))
