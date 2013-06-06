@@ -169,5 +169,21 @@ TestCase("MatchingTests",
         assertTrue(@RegexEngine.match("(ab)*", "ababab"))
         assertTrue(@RegexEngine.match("a*ab", "aaaab"))
         assertTrue(@RegexEngine.match("^(a|b)*$", "abababbaabab"))
-        assertTrue(@RegexEngine.match("a(bc)?d", "ad"))
+        
+    "testRepeatOneOrMore": () ->
+        assertFalse(@RegexEngine.match("a+", ""))
+        assertTrue(@RegexEngine.match("a+", "a"))
+        assertTrue(@RegexEngine.match("a+", "aa"))
+        assertTrue(@RegexEngine.match("a+", "aaaaa"))
+        assertFalse(@RegexEngine.match("^a+$", ""))
+        assertTrue(@RegexEngine.match("^a+$", "a"))
+        assertTrue(@RegexEngine.match("^a+$", "aa"))
+        assertTrue(@RegexEngine.match("^a+$", "aaaaa"))
+        assertTrue(@RegexEngine.match("(ab)+", "ababab"))
+        assertTrue(@RegexEngine.match("a+ab", "aaaab"))
+        assertTrue(@RegexEngine.match("^(a|b)+$", "abababbaabab"))
+        
+    "testInfiniteLoop": () ->
+        assertFalse(@RegexEngine.match("^(a*)*$", "b"))
+        assertFalse(@RegexEngine.match("^(a?)+$", "b"))
 )

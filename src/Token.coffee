@@ -170,12 +170,16 @@ class root.Quantifier extends root.Token
         @instances = [@clone(@subtokens[0])] # instances of the subtoken used for the individual repetitions
         @pos = []                            # "current" positions that were used for successful matches
         @result = false
+        @emptyInstances = 0
         
     nextMatch: (state, report) ->
-        if @result and @instances.length >= @min
+        if @result
             result = @result
             @result = false
-            return result
+            if @instances.length >= @min
+                return result
+            else
+                return 0
             
         if @instances.length == 0
             @reset()
@@ -185,7 +189,9 @@ class root.Quantifier extends root.Token
             @instances.pop()
             result = state.currentPosition
             if @pos.length > 0
-                state.currentPosition = @pos.pop()
+                state.currentPosition = @pos.pop()            
+            if result == state.currentPosition
+                --@emptyInstances
             return result
             
         instance = @instances.pop()
@@ -199,9 +205,17 @@ class root.Quantifier extends root.Token
                 @result = state.currentPosition
                 if @pos.length > 0
                     state.currentPosition = @pos.pop()
+                    if @result == state.currentPosition
+                        --@emptyInstances
                 return 0
             else
                 @instances.push(instance)
+                if result == state.currentPosition and @emptyInstances >= @min
+                    return @nextMatch(state, report)
+                
+                if result == state.currentPosition
+                    ++@emptyInstances
+                
                 @instances.push(@clone(@subtokens[0]))
                 @pos.push(state.currentPosition)
                 state.currentPosition = result
@@ -247,3 +261,7 @@ class root.Option extends root.Quantifier
 class root.RepeatZeroOrMore extends root.Quantifier
     constructor: (token) ->
         super(token, 0, Infinity)
+        
+class root.RepeatOneOrMore extends root.Quantifier
+    constructor: (token) ->
+        super(token, 1, Infinity)

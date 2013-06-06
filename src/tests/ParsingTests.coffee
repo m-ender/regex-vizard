@@ -120,6 +120,19 @@ TestCase("ParsingTests",
                 ]
             ]
         @assertSyntaxTree(expectedTree, regex)
+
+    "testRepeatOneOrMore": () ->
+        regex = @Parser.parsePattern("a+")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: RepeatOneOrMore
+                subtokens: [
+                    type: Character
+                    subtokens: []
+                ]
+            ]
+        @assertSyntaxTree(expectedTree, regex)
         
     "testGroup": () ->
         regex = @Parser.parsePattern("(a)")
@@ -205,6 +218,11 @@ TestCase("ParsingTests",
         assertParsingException("a|*", "NothingToRepeatException")
         assertParsingException("^*", "NothingToRepeatException")
         assertParsingException("$*", "NothingToRepeatException")
+        assertParsingException("+", "NothingToRepeatException")
+        assertParsingException("a(+)", "NothingToRepeatException")
+        assertParsingException("a|+", "NothingToRepeatException")
+        assertParsingException("^+", "NothingToRepeatException")
+        assertParsingException("$+", "NothingToRepeatException")
         
     assertSyntaxTree: (expectedTree, actualTree) ->
         console.log(actualTree.constructor, expectedTree.type)

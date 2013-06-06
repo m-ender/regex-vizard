@@ -54,7 +54,7 @@ class root.Parser
                         }
                     current = nestingStack.pop()
                     ++i
-                when "?", "*"
+                when "?", "*", "+"
                     i = @parseQuantifier(current, char, i)
                 else
                     @append(current, new Character(char))
@@ -95,6 +95,7 @@ class root.Parser
         
         quantifierClass =
             "*": RepeatZeroOrMore
+            "+": RepeatOneOrMore
             "?": Option
             
         @append(current, new (quantifierClass[char])(target)) # take the currently last token, stuff it into an appropriate quantifier token and append the option instead
