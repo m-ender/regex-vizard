@@ -27,3 +27,23 @@ Escaping c, x and u
 
 I am not quite sure how to interpret the standard here, but in any case the implementations are inconsistent.
 (More details to follow)
+
+================
+Unmatched braces
+================
+
+Unescaped braces are only treated as quantifiers if they form a syntactically correct quantifier. If they do not
+(e.g. they are unmatched at the current nesting level, or their contents are not of the format "m" or "m," or "m,n"),
+they are always treated as literal braces.
+
+Test snippets:
+
+/a\{2}/.exec("a{2}")
+/a{2\}/.exec("a{2}")
+/a{2/.exec("a{2")
+/a2}/.exec("a2}")
+/a{2(})/.exec("a{2}")
+/a({)2}/.exec("a{2}")
+/a{2,a}/.exec("a{2,a}")
+/a{2,()}/.exec("a{2}")
+/a{a}/.exec("a{a}")

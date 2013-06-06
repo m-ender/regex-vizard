@@ -72,6 +72,84 @@ TestCase("TokenTests",
             3
         ])
         
+    "testAlternationToken": () ->
+        state = @RegexEngine.setupInitialState("abc")
+        # Put together token for regex /a|b|c/
+        token = new Alternation()
+        token.subtokens.push(new Character("a"))
+        token.subtokens.push(new Character("b"))
+        token.subtokens.push(new Character("c"))
+        @assertNextMatchSequence(token, state, [
+            2 # subtoken "a" matches
+            0 # subtoken "a" cannot backtrack, so subtoken fails
+            0 # subtoken "b" fails
+            0 # subtoken "c" fails
+        ])
+        state.currentPosition = 2 # advance to position before b
+        @assertNextMatchSequence(token, state, [
+            0
+            3
+            0
+            0
+        ])
+        state.currentPosition = 3 # advance to position before c
+        @assertNextMatchSequence(token, state, [
+            0
+            0
+            4
+            0
+        ])
+        state.currentPosition = 4 # advance to end of string
+        @assertNextMatchSequence(token, state, [
+            0
+            0
+            0
+        ])
+        
+    "testSequenceToken": () ->
+        state = @RegexEngine.setupInitialState("abc")
+        # Put together token for regex /abc/
+        token = new Sequence()
+        token.subtokens.push(new Character("a"))
+        token.subtokens.push(new Character("b"))
+        token.subtokens.push(new Character("c"))
+        @assertNextMatchSequence(token, state, [
+            4 # all subtokens match on first attempt
+            0 # subtoken "c" cannot backtrack, so subtoken fails
+            0 # subtoken "b" cannot backtrack, so subtoken fails
+            0 # subtoken "a" cannot backtrack, so subtoken fails
+        ])
+        
+        # Put together token for regex /ab?b/
+        token = new Sequence()
+        token.subtokens.push(new Character("a"))
+        token.subtokens.push(new Option(new Character("b")))
+        token.subtokens.push(new Character("b"))
+        @assertNextMatchSequence(token, state, [
+            0 # subtokens "a" and "b?" match, but "b" fails
+            0 # the subtoken "b" inside "b?" cannot backtrack, so that fails
+            3 # all subtokens match ("b?" matches by omitting its subtoken)
+            0 # subtoken "b" cannot backtrack, so subtoken fails 
+            0 # subtoken "b?" cannot backtrack, so subtoken fails
+            0 # subtoken "a" cannot backtrack, so subtoken fails  
+        ])
+    
+    "testEmptySequenceToken": () ->
+        state = @RegexEngine.setupInitialState("")
+        # Put together token for regex //
+        token = new Sequence()
+        @assertNextMatchSequence(token, state, [
+            1 # token matches but does not advance the cursor
+        ])
+        state = @RegexEngine.setupInitialState("a")
+        @assertNextMatchSequence(token, state, [
+            1 # token matches but does not advance the cursor
+        ])
+        state.currentPosition = 2
+        @assertNextMatchSequence(token, state, [
+            2 # token matches but does not advance the cursor
+        ])
+        
     "testOptionToken": () ->
         state = @RegexEngine.setupInitialState("ab")
         # Put together token for regex /a?/
@@ -195,86 +273,7 @@ TestCase("TokenTests",
             0 # first instance of subtoken "a?" cannot backtrack, so fails
             0 # first instance is discarded, but we need at least one repetition
         ])
-            
-        
-    "testAlternationToken": () ->
-        state = @RegexEngine.setupInitialState("abc")
-        # Put together token for regex /a|b|c/
-        token = new Alternation()
-        token.subtokens.push(new Character("a"))
-        token.subtokens.push(new Character("b"))
-        token.subtokens.push(new Character("c"))
-        @assertNextMatchSequence(token, state, [
-            2 # subtoken "a" matches
-            0 # subtoken "a" cannot backtrack, so subtoken fails
-            0 # subtoken "b" fails
-            0 # subtoken "c" fails
-        ])
-        state.currentPosition = 2 # advance to position before b
-        @assertNextMatchSequence(token, state, [
-            0
-            3
-            0
-            0
-        ])
-        state.currentPosition = 3 # advance to position before c
-        @assertNextMatchSequence(token, state, [
-            0
-            0
-            4
-            0
-        ])
-        state.currentPosition = 4 # advance to end of string
-        @assertNextMatchSequence(token, state, [
-            0
-            0
-            0
-        ])
-        
-    "testSequenceToken": () ->
-        state = @RegexEngine.setupInitialState("abc")
-        # Put together token for regex /abc/
-        token = new Sequence()
-        token.subtokens.push(new Character("a"))
-        token.subtokens.push(new Character("b"))
-        token.subtokens.push(new Character("c"))
-        @assertNextMatchSequence(token, state, [
-            4 # all subtokens match on first attempt
-            0 # subtoken "c" cannot backtrack, so subtoken fails
-            0 # subtoken "b" cannot backtrack, so subtoken fails
-            0 # subtoken "a" cannot backtrack, so subtoken fails
-        ])
-        
-        # Put together token for regex /ab?b/
-        token = new Sequence()
-        token.subtokens.push(new Character("a"))
-        token.subtokens.push(new Option(new Character("b")))
-        token.subtokens.push(new Character("b"))
-        @assertNextMatchSequence(token, state, [
-            0 # subtokens "a" and "b?" match, but "b" fails
-            0 # the subtoken "b" inside "b?" cannot backtrack, so that fails
-            3 # all subtokens match ("b?" matches by omitting its subtoken)
-            0 # subtoken "b" cannot backtrack, so subtoken fails 
-            0 # subtoken "b?" cannot backtrack, so subtoken fails
-            0 # subtoken "a" cannot backtrack, so subtoken fails  
-        ])
-    
-    "testEmptySequenceToken": () ->
-        state = @RegexEngine.setupInitialState("")
-        # Put together token for regex //
-        token = new Sequence()
-        @assertNextMatchSequence(token, state, [
-            1 # token matches but does not advance the cursor
-        ])
-        state = @RegexEngine.setupInitialState("a")
-        @assertNextMatchSequence(token, state, [
-            1 # token matches but does not advance the cursor
-        ])
-        state.currentPosition = 2
-        @assertNextMatchSequence(token, state, [
-            2 # token matches but does not advance the cursor
-        ])
-            
+
     # This function assumes that the sequence does not contain the ultimate "false"
     assertNextMatchSequence: (token, state, sequence) ->
         for i in [1..2] # run twice to make sure that token's state is reset after reporting "false"
