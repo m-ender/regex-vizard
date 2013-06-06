@@ -167,7 +167,57 @@ class root.Quantifier extends root.Token
         @reset()
 
     reset: () ->
-        @repetitions = []
+        @instances = [@clone(@subtokens[0])] # instances of the subtoken used for the individual repetitions
+        @pos = []                            # "current" positions that were used for successful matches
+        @result = false
+        
+    nextMatch: (state, report) ->
+        if @result and @instances.length >= @min
+            result = @result
+            @result = false
+            return result
+            
+        if @instances.length == 0
+            @reset()
+            return false
+            
+        if @instances.length > @max
+            @instances.pop()
+            result = state.currentPosition
+            if @pos.length > 0
+                state.currentPosition = @pos.pop()
+            return result
+            
+        instance = @instances.pop()
+        
+        result = instance.nextMatch(state, report)
+        switch result
+            when 0
+                @instances.push(instance)
+                return 0
+            when false
+                @result = state.currentPosition
+                if @pos.length > 0
+                    state.currentPosition = @pos.pop()
+                return 0
+            else
+                @instances.push(instance)
+                @instances.push(@clone(@subtokens[0]))
+                @pos.push(state.currentPosition)
+                state.currentPosition = result
+                return @nextMatch(state, report)
+
+    # Taken from http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning and slightly modified
+    clone: (obj) ->
+        if not obj? or typeof obj isnt 'object'
+            return obj
+
+        newInstance = new obj.constructor()
+
+        for key of obj
+            newInstance[key] = @clone(obj[key])
+
+        return newInstance
         
 class root.Option extends root.Quantifier
     constructor: (token) ->
@@ -193,3 +243,7 @@ class root.Option extends root.Quantifier
         
     reset: () ->
         @repetitions = 1
+        
+class root.RepeatZeroOrMore extends root.Quantifier
+    constructor: (token) ->
+        super(token, 0, Infinity)

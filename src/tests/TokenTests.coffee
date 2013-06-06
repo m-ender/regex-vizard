@@ -101,6 +101,48 @@ TestCase("TokenTests",
             assertEquals(0, token.nextMatch(state)) # subtoken "a" fails
             assertEquals(3, token.nextMatch(state)) # omitting the subtoken matches
             assertEquals(false, token.nextMatch(state))
+            
+    "testRepeatZeroOrMoreToken": () ->
+        state = @RegexEngine.setupInitialState("aaab")
+        # Put together token for regex /a*/
+        token = new RepeatZeroOrMore(new Character("a"))
+        for i in [1..2] # run twice to make sure that token's state is reset after reporting "false"
+            assertEquals(0, token.nextMatch(state)) # first three instances of subtoken "a" match, but fourth instance of subtoken "a" fails
+            assertEquals(4, token.nextMatch(state)) # fourth instance is discarded to give a match
+            assertEquals(0, token.nextMatch(state)) # third instance of subtoken "a" cannot backtrack, so subtoken fails 
+            assertEquals(3, token.nextMatch(state)) # third instance is discarded to give another match
+            assertEquals(0, token.nextMatch(state)) # second instance of subtoken "a" cannot backtrack, so subtoken fails 
+            assertEquals(2, token.nextMatch(state)) # second instance is discarded to give another match
+            assertEquals(0, token.nextMatch(state)) # first instance of subtoken "a" cannot backtrack, so subtoken fails 
+            assertEquals(1, token.nextMatch(state)) # first instance is discarded to give another match
+            assertEquals(false, token.nextMatch(state)) # no more variants to backtrack
+        state.currentPosition = 4 # advance to position before b
+        for i in [1..2] # run twice to make sure that token's state is reset after reporting "false"
+            assertEquals(0, token.nextMatch(state)) # first instance of subtoken "a" fails
+            assertEquals(4, token.nextMatch(state)) # first instance is discarded to give a match
+            assertEquals(false, token.nextMatch(state))
+        
+        
+        # Put together token for regex /(a|b)*/ omitting the Group() token as it only forwards nextMatch() calls
+        state = @RegexEngine.setupInitialState("ab")
+        alternation = new Alternation()
+        alternation.subtokens.push(new Character("a"))
+        alternation.subtokens.push(new Character("b"))
+        token = new RepeatZeroOrMore(alternation)
+        for i in [1..2] # run twice to make sure that token's state is reset after reporting "false"
+            assertEquals(0, token.nextMatch(state)) # first instance of subtoken "a|b" matches (with "a"), but second instance fails when trying "a" 
+            assertEquals(0, token.nextMatch(state)) # second instances of "a|b" backtracks and "b" matches, but third instance fails when trying "a"
+            assertEquals(0, token.nextMatch(state)) # third instance fails again when trying "b"
+            assertEquals(0, token.nextMatch(state)) # alternation in third instance reports overall failure
+            assertEquals(3, token.nextMatch(state)) # third instance is discarded to give a match
+            assertEquals(0, token.nextMatch(state)) # subtoken "b" of second instance of "a|b" cannot backtrack, so sub(sub)token fails 
+            assertEquals(0, token.nextMatch(state)) # alternation in second instance reports overall failure
+            assertEquals(2, token.nextMatch(state)) # second instance is discarded to give another match
+            assertEquals(0, token.nextMatch(state)) # subtoken "a" of first instance of "a|b" cannot backtrack, so sub(sub)token fails 
+            assertEquals(0, token.nextMatch(state)) # first instance fails again when trying "b"
+            assertEquals(0, token.nextMatch(state)) # alternation in first instance reports overall failure
+            assertEquals(1, token.nextMatch(state)) # first instance is discarded to give another match
+            assertEquals(false, token.nextMatch(state)) # no more variants to backtrack
         
     "testAlternationToken": () ->
         state = @RegexEngine.setupInitialState("abc")

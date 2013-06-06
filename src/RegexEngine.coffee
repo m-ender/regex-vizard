@@ -100,6 +100,23 @@ class root.RegexEngine
                         }
                     append(new Option(target)) # take the currently last token, stuff it into an Option token and append the option instead
                     ++i
+                when "*"
+                    st = current.subtokens
+                    if st[st.length-1].subtokens.length == 0
+                        throw {
+                            name: "NothingToRepeatException"
+                            message: "The is nothing to repeat for quantifier \"" + char + "\" at index " + i
+                            index: i
+                        }
+                    target = remove()
+                    unless (target instanceof Group) or (target instanceof Character) or (target instanceof Wildcard)
+                        throw {
+                            name: "NothingToRepeatException"
+                            message: "The is nothing to repeat for quantifier \"" + char + "\" at index " + i + ". Only groups, characters and wildcard may be quantified."
+                            index: i
+                        }
+                    append(new RepeatZeroOrMore(target)) # take the currently last token, stuff it into an RepeatZeroOrMore token and append the option instead
+                    ++i
                 else
                     append(new Character(char))
                     ++i

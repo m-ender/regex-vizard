@@ -108,6 +108,19 @@ TestCase("ParsingTests",
                 ]
             ]
         @assertSyntaxTree(expectedTree, regex)
+
+    "testRepeatZeroOrMore": () ->
+        regex = @RegexEngine.parsePattern("a*")
+        expectedTree =
+            type: RootToken
+            subtokens: [
+                type: RepeatZeroOrMore
+                subtokens: [
+                    type: Character
+                    subtokens: []
+                ]
+            ]
+        @assertSyntaxTree(expectedTree, regex)
         
     "testGroup": () ->
         regex = @RegexEngine.parsePattern("(a)")
@@ -187,6 +200,11 @@ TestCase("ParsingTests",
         assertParsingException("a|?", "NothingToRepeatException")
         assertParsingException("^?", "NothingToRepeatException")
         assertParsingException("$?", "NothingToRepeatException")
+        assertParsingException("*", "NothingToRepeatException")
+        assertParsingException("a(*)", "NothingToRepeatException")
+        assertParsingException("a|*", "NothingToRepeatException")
+        assertParsingException("^*", "NothingToRepeatException")
+        assertParsingException("$*", "NothingToRepeatException")
         
     assertSyntaxTree: (expectedTree, actualTree) ->
         assertTrue(actualTree.constructor is expectedTree.type)

@@ -1,4 +1,4 @@
-TestCase("Matching  Tests",
+TestCase("MatchingTests",
     setUp : () ->
         if typeof module != "undefined" && module.exports
             #On a server
@@ -155,5 +155,19 @@ TestCase("Matching  Tests",
         assertTrue(@RegexEngine.match("ab?c", "ac"))
         assertTrue(@RegexEngine.match("ab?b", "ab"))
         assertTrue(@RegexEngine.match("a(bc)?d", "abcd"))
+        assertTrue(@RegexEngine.match("a(bc)?d", "ad"))
+        
+    "testRepeatZeroOrMore": () ->
+        assertTrue(@RegexEngine.match("a*", ""))
+        assertTrue(@RegexEngine.match("a*", "a"))
+        assertTrue(@RegexEngine.match("a*", "aa"))
+        assertTrue(@RegexEngine.match("a*", "aaaaa"))
+        assertTrue(@RegexEngine.match("^a*$", ""))
+        assertTrue(@RegexEngine.match("^a*$", "a"))
+        assertTrue(@RegexEngine.match("^a*$", "aa"))
+        assertTrue(@RegexEngine.match("^a*$", "aaaaa"))
+        assertTrue(@RegexEngine.match("(ab)*", "ababab"))
+        assertTrue(@RegexEngine.match("a*ab", "aaaab"))
+        assertTrue(@RegexEngine.match("^(a|b)*$", "abababbaabab"))
         assertTrue(@RegexEngine.match("a(bc)?d", "ad"))
 )
