@@ -2,13 +2,13 @@ TestCase("ParsingTests",
     setUp : () ->
         if typeof module != "undefined" && module.exports
             #On a server
-            @RegexEngine = new require("RegexEngine").RegexEngine
+            @Parser = new require("Parser").Parser
         else
             #On a client
-            @RegexEngine = new window.RegexEngine
+            @Parser = new window.Parser
         
     "testCharacter": () ->
-        regex = @RegexEngine.parsePattern("a")
+        regex = @Parser.parsePattern("a")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -18,7 +18,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testEscapedCharacter": () ->
-        regex = @RegexEngine.parsePattern("\\?")
+        regex = @Parser.parsePattern("\\?")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -28,7 +28,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testWildcard": () ->
-        regex = @RegexEngine.parsePattern(".")
+        regex = @Parser.parsePattern(".")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -38,7 +38,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testStartAnchor": () ->
-        regex = @RegexEngine.parsePattern("^")
+        regex = @Parser.parsePattern("^")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -48,7 +48,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testEndAnchor": () ->
-        regex = @RegexEngine.parsePattern("$")
+        regex = @Parser.parsePattern("$")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -58,7 +58,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testSequence": () ->
-        regex = @RegexEngine.parsePattern("abc")
+        regex = @Parser.parsePattern("abc")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -77,7 +77,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testAlternation": () ->
-        regex = @RegexEngine.parsePattern("a|b|c")
+        regex = @Parser.parsePattern("a|b|c")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -96,7 +96,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testOption": () ->
-        regex = @RegexEngine.parsePattern("a?")
+        regex = @Parser.parsePattern("a?")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -109,7 +109,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testRepeatZeroOrMore": () ->
-        regex = @RegexEngine.parsePattern("a*")
+        regex = @Parser.parsePattern("a*")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -122,7 +122,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testGroup": () ->
-        regex = @RegexEngine.parsePattern("(a)")
+        regex = @Parser.parsePattern("(a)")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -135,7 +135,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
             
     "testComplexExpression": () ->
-        @RegexEngine.parsePattern("d.(ab?|c|)?$")
+        regex = @Parser.parsePattern("d.(ab?|c|)*$")
         expectedTree =
             type: RootToken
             subtokens: [
@@ -147,7 +147,7 @@ TestCase("ParsingTests",
                     type: Wildcard
                     subtokens: []
                    ,
-                    type: Option
+                    type: RepeatZeroOrMore
                     subtokens: [
                         type: Group
                         subtokens: [
@@ -178,13 +178,14 @@ TestCase("ParsingTests",
                     subtokens: []                    
                 ]
             ]
+        @assertSyntaxTree(expectedTree, regex)
     
     "testInvalidSyntax": () ->
         that = this
         
         assertParsingException = (pattern, exception) ->
             assertException(
-                () -> that.RegexEngine.parsePattern(pattern)
+                () -> that.Parser.parsePattern(pattern)
                 exception
             )
             
@@ -206,6 +207,7 @@ TestCase("ParsingTests",
         assertParsingException("$*", "NothingToRepeatException")
         
     assertSyntaxTree: (expectedTree, actualTree) ->
+        console.log(actualTree.constructor, expectedTree.type)
         assertTrue(actualTree.constructor is expectedTree.type)
         assertEquals(expectedTree.subtokens.length, actualTree.subtokens.length)
         i = 0
