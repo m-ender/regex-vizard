@@ -97,7 +97,6 @@ TestCase("ParsingTests",
 
     "testOption": () ->
         regex = @RegexEngine.parsePattern("a?")
-        console.log(regex)
         expectedTree =
             type: RootToken
             subtokens: [
