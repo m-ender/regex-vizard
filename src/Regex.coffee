@@ -1,12 +1,13 @@
 root = global ? window
 
-class root.RegexEngine
-    constructor: () ->      
-
-    test: (regexString, inputString, report = false) ->
+class root.Regex
+    constructor: (regexString, report = false) ->      
         console.log("Regex string:", regexString) if report
-        regex = new Parser().parsePattern(regexString)
-        console.log("Regex pattern:", regex) if report
+        @regex = new Parser().parsePattern(regexString)
+        console.log("Regex pattern:", @regex) if report
+
+    test: (inputString, report = false) ->
+        @regex.reset()
         
         # Build character array and surround it with -1 and 1 as guards for the
         # start and end of the input string
@@ -15,9 +16,9 @@ class root.RegexEngine
         console.log("Input:", state.input) if report
 
         while state.startingPosition < state.input.length
-            result = regex.nextMatch(state, report)
+            result = @regex.nextMatch(state, report)
             while result == 0
-                result = regex.nextMatch(state, report)
+                result = @regex.nextMatch(state, report)
             if result == false
                 state.currentPosition = ++state.startingPosition
             else
@@ -25,11 +26,9 @@ class root.RegexEngine
         
         return state.startingPosition < state.input.length
         
-    match: (regexString, inputString, report = false) ->
-        console.log("Regex string:", regexString) if report
-        regex = new Parser().parsePattern(regexString)
-        console.log("Regex pattern:", regex) if report
-        
+    match: (inputString, report = false) ->
+        @regex.reset()
+    
         # Build character array and surround it with -1 and 1 as guards for the
         # start and end of the input string
         console.log("Input string:", inputString) if report
@@ -37,9 +36,9 @@ class root.RegexEngine
         console.log("Input:", state.input) if report
 
         while state.startingPosition < state.input.length
-            result = regex.nextMatch(state, report)
+            result = @regex.nextMatch(state, report)
             while result == 0
-                result = regex.nextMatch(state, report)
+                result = @regex.nextMatch(state, report)
             if result == false
                 state.currentPosition = ++state.startingPosition
             else

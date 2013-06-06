@@ -18,11 +18,23 @@ class root.Token
     # report is a boolean flag
     nextMatch: (state, report) ->
         false
+        
+    reset: () ->
+        
     
 # The root of any pattern.
 class root.RootToken extends root.Token
     nextMatch: (state, report) ->
         return @subtokens[0].nextMatch(state,report)
+        
+    reset: () ->
+        # Resets all subtokens
+        traverse = (token) ->
+            for subtoken in token.subtokens
+                traverse(subtoken)
+            token.reset()
+        
+        traverse(@subtokens[0])
         
 # This represents a single literal character
 class root.Character extends root.Token
