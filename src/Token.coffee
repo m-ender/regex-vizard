@@ -142,36 +142,57 @@ class root.Sequence extends root.Token
         @i = 0 # the first subtoken to try upon calling nextMatch
         @pos = [] # "current" positions that were used by successful subtokens
         
-    nextMatch: (state, report) ->
+    nextMatch: (state, report) ->            
         if @i == -1
             @reset()
             return false
             
-        if @i == @subtokens.length
+        if @subtokens.length == 0
             --@i
-            result = state.currentPosition
-            if @pos.length > 0
-                state.currentPosition = @pos.pop()
-            return result
+            return state.currentPosition
 
         result = @subtokens[@i].nextMatch(state, report)
         switch result
-            when 0
-                return 0
             when false
                 --@i
                 if @pos.length > 0
                     state.currentPosition = @pos.pop()
                 return 0
+            when -1, 0
+                return result
             else
-                ++@i
-                @pos.push(state.currentPosition)
-                state.currentPosition = result
-                return @nextMatch(state, report)
+                if @i == @subtokens.length - 1
+                    return result
+                else
+                    ++@i
+                    @pos.push(state.currentPosition)
+                    state.currentPosition = result                    
+                    return -1
 
-class root.Group extends root.Token            
+class root.Group extends root.Token
+    constructor: (token) ->
+        super(token)
+        @reset()
+        
+    reset: () ->
+        @result = 0
+        
     nextMatch: (state, report) ->
-        return @subtokens[0].nextMatch(state, report)
+        if @result isnt 0
+            result = @result
+            @result = 0
+            return result
+            
+        result = @subtokens[0].nextMatch(state, report)
+        switch result
+            when 0, -1
+                return result
+            when false
+                @result = false
+                return 0
+            else
+                @result = result
+                return -1
         
 class root.Quantifier extends root.Token
     constructor: (token, @min, @max) ->
@@ -210,9 +231,9 @@ class root.Quantifier extends root.Token
         
         result = instance.nextMatch(state, report)
         switch result
-            when 0
+            when 0, -1
                 @instances.push(instance)
-                return 0
+                return result
             when false
                 @result = state.currentPosition
                 if @pos.length > 0
@@ -231,7 +252,7 @@ class root.Quantifier extends root.Token
                 @instances.push(@clone(@subtokens[0]))
                 @pos.push(state.currentPosition)
                 state.currentPosition = result
-                return @nextMatch(state, report)
+                return -1
 
     # Taken from http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning and slightly modified
     clone: (obj) ->
@@ -249,17 +270,26 @@ class root.Option extends root.Quantifier
     constructor: (token) ->
         super(token, 0, 1)
         @reset()
+        @result = false
         
     nextMatch: (state, report) ->
+        if @result
+            result = @result
+            @result = false
+            return result
+        
         switch @repetitions
             when 1
                 result = @subtokens[0].nextMatch(state, report)
                 
-                if result != false
-                    return result
-                else
+                if result == false
                     --@repetitions
                     return 0
+                else if result <= 0
+                    return result
+                else
+                    @result = result
+                    return -1
             when 0
                 --@repetitions
                 return state.currentPosition

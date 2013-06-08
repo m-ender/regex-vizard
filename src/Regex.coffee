@@ -17,7 +17,7 @@ class root.Regex
 
         while state.startingPosition < state.input.length
             result = @regex.nextMatch(state, report)
-            while result == 0
+            while result == 0 or result == -1
                 result = @regex.nextMatch(state, report)
             if result == false
                 state.currentPosition = ++state.startingPosition
@@ -37,7 +37,7 @@ class root.Regex
 
         while state.startingPosition < state.input.length
             result = @regex.nextMatch(state, report)
-            while result == 0
+            while result == 0 or result == -1
                 result = @regex.nextMatch(state, report)
             if result == false
                 state.currentPosition = ++state.startingPosition
