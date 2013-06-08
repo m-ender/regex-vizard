@@ -10,7 +10,7 @@ TestCase("ParsingTests",
     "testCharacter": () ->
         regex = @Parser.parsePattern("a")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: Character
                 subtokens: []
@@ -20,7 +20,7 @@ TestCase("ParsingTests",
     "testEscapedCharacter": () ->
         regex = @Parser.parsePattern("\\?")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: Character
                 subtokens: []
@@ -30,7 +30,7 @@ TestCase("ParsingTests",
     "testWildcard": () ->
         regex = @Parser.parsePattern(".")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: Wildcard
                 subtokens: []
@@ -40,7 +40,7 @@ TestCase("ParsingTests",
     "testStartAnchor": () ->
         regex = @Parser.parsePattern("^")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: StartAnchor
                 subtokens: []
@@ -50,7 +50,7 @@ TestCase("ParsingTests",
     "testEndAnchor": () ->
         regex = @Parser.parsePattern("$")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: EndAnchor
                 subtokens: []
@@ -60,7 +60,7 @@ TestCase("ParsingTests",
     "testSequence": () ->
         regex = @Parser.parsePattern("abc")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: Sequence
                 subtokens: [
@@ -79,7 +79,7 @@ TestCase("ParsingTests",
     "testAlternation": () ->
         regex = @Parser.parsePattern("a|b|c")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: Alternation
                 subtokens: [
@@ -98,7 +98,7 @@ TestCase("ParsingTests",
     "testOption": () ->
         regex = @Parser.parsePattern("a?")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: Option
                 subtokens: [
@@ -111,7 +111,7 @@ TestCase("ParsingTests",
     "testRepeatZeroOrMore": () ->
         regex = @Parser.parsePattern("a*")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: RepeatZeroOrMore
                 subtokens: [
@@ -124,7 +124,7 @@ TestCase("ParsingTests",
     "testRepeatOneOrMore": () ->
         regex = @Parser.parsePattern("a+")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: RepeatOneOrMore
                 subtokens: [
@@ -137,7 +137,7 @@ TestCase("ParsingTests",
     "testGroup": () ->
         regex = @Parser.parsePattern("(a)")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: Group
                 subtokens: [
@@ -150,7 +150,7 @@ TestCase("ParsingTests",
     "testComplexExpression": () ->
         regex = @Parser.parsePattern("d.(ab?|c|)*$")
         expectedTree =
-            type: RootToken
+            type: Group
             subtokens: [
                 type: Sequence
                 subtokens: [

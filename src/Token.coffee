@@ -9,6 +9,7 @@ class root.Token
         @subtokens = []
         if token and token instanceof Token
             @subtokens.push(token)
+        @reset()
     
     # this function will attempt one match at a time - that is one alternative of an alternation or a certain
     # number of repetitions
@@ -20,29 +21,17 @@ class root.Token
         false
         
     reset: () ->
-        
-    
-# The root of any pattern.
-class root.RootToken extends root.Token
-    nextMatch: (state, report) ->
-        return @subtokens[0].nextMatch(state,report)
-        
-    reset: () ->
-        # Resets all subtokens
-        traverse = (token) ->
-            for subtoken in token.subtokens
-                traverse(subtoken)
-            token.reset()
-        
-        traverse(@subtokens[0])
+        # Resets all subtokens recursively
+        for subtoken in @subtokens
+            subtoken.reset()
         
 # This represents a single literal character
 class root.Character extends root.Token
     constructor: (@character) ->
         super()
-        @reset()
         
     reset: () ->
+        super()
         @attempted = false
         
     nextMatch: (state, report) ->
@@ -58,9 +47,9 @@ class root.Character extends root.Token
 class root.Wildcard extends root.Token
     constructor: () ->
         super()
-        @reset()
         
     reset: () ->
+        super()
         @attempted = false
         
     nextMatch: (state, report) ->
@@ -76,9 +65,9 @@ class root.Wildcard extends root.Token
 class root.StartAnchor extends root.Token    
     constructor: () ->
         super()
-        @reset()
         
     reset: () ->
+        super()
         @attempted = false
         
     nextMatch: (state, report) ->
@@ -95,9 +84,9 @@ class root.StartAnchor extends root.Token
 class root.EndAnchor extends root.Token    
     constructor: () ->
         super()
-        @reset()
         
     reset: () ->
+        super()
         @attempted = false
         
     nextMatch: (state, report) ->
@@ -113,9 +102,9 @@ class root.EndAnchor extends root.Token
 class root.Alternation extends root.Token
     constructor: (token) ->
         super(token)
-        @reset()
         
     reset: () ->
+        super()
         @i = 0 # the first subtoken to try upon calling nextMatch
 
     nextMatch: (state, report) ->
@@ -136,9 +125,9 @@ class root.Alternation extends root.Token
 class root.Sequence extends root.Token
     constructor: () ->
         super()
-        @reset()
         
     reset: () ->
+        super()
         @i = 0 # the first subtoken to try upon calling nextMatch
         @pos = [] # "current" positions that were used by successful subtokens
         
@@ -172,9 +161,9 @@ class root.Sequence extends root.Token
 class root.Group extends root.Token
     constructor: (token) ->
         super(token)
-        @reset()
         
     reset: () ->
+        super()
         @result = 0
         
     nextMatch: (state, report) ->
@@ -197,9 +186,9 @@ class root.Group extends root.Token
 class root.Quantifier extends root.Token
     constructor: (token, @min, @max) ->
         super(token)
-        @reset()
-
+        
     reset: () ->
+        super()
         @instances = [@clone(@subtokens[0])] # instances of the subtoken used for the individual repetitions
         @pos = []                            # "current" positions that were used for successful matches
         @result = false
@@ -269,7 +258,9 @@ class root.Quantifier extends root.Token
 class root.Option extends root.Quantifier
     constructor: (token) ->
         super(token, 0, 1)
-        @reset()
+        
+    reset: () ->
+        super()
         @result = false
         
     nextMatch: (state, report) ->

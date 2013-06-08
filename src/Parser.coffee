@@ -7,7 +7,8 @@ class root.Parser
         # In order not to set up alternations after the first alternative has been read, we treat everything as an
         # alternation of sequences (possibly with only one alternative or only one token in the sequence).
         # Unnecessary alternations and sequences will be removed in the end.
-        regex = new RootToken()
+        # We also use a group as the root of the pattern, which will correspond to capturing group 0.
+        regex = new Group()
         nestingStack = []
         current = new Alternation(new Sequence())
         regex.subtokens.push(current)
