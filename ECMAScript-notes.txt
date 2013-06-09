@@ -1,5 +1,12 @@
 This file lists notes on how different browsers implemented edge cases in the ECMAScript regex specification:
 
+=======
+test262
+=======
+
+Chrome passes all tests in 15.10.
+Firefox fails S15.10.2.12_A[12]_T1
+
 =====================
 Quantified assertions
 =====================

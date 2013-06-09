@@ -101,7 +101,7 @@ TestCase("MatchingTests",
     # Note that every \\ becomes a single \ in the string, which then becomes the regex
     # i.e. matching a literal \ requires regex "\\\\", because the engine needs to
     # receive two backslashes, so that the first escapes the second one
-    "testEscapedCharacters": () ->
+    "testEscapedMetacharacters": () ->
         regex = new Regex("a\\^")
         assertTrue(regex.test("a^"))
         regex = new Regex("\\$a")
@@ -149,6 +149,38 @@ TestCase("MatchingTests",
         assertFalse(regex.test("aa"))
         regex = new Regex("\\^")
         assertSame("^", regex.match("^"))
+        
+    "testEscapeSequences": () ->
+        regex = new Regex("\n")
+        assertTrue(regex.test("\n"))
+        regex = new Regex("\\n")
+        assertFalse(regex.test("n"))
+        assertTrue(regex.test("\n"))
+        regex = new Regex("\r")
+        assertTrue(regex.test("\r"))
+        regex = new Regex("\\r")
+        assertFalse(regex.test("r"))
+        assertTrue(regex.test("\r"))
+        regex = new Regex("\t")
+        assertTrue(regex.test("\t"))
+        regex = new Regex("\\t")
+        assertFalse(regex.test("t"))
+        assertTrue(regex.test("\t"))
+        regex = new Regex("\f")
+        assertTrue(regex.test("\f"))
+        regex = new Regex("\\f")
+        assertFalse(regex.test("f"))
+        assertTrue(regex.test("\f"))
+        regex = new Regex("\v")
+        assertTrue(regex.test("\v"))
+        regex = new Regex("\\v")
+        assertFalse(regex.test("v"))
+        assertTrue(regex.test("\v"))
+        regex = new Regex("\0")
+        assertTrue(regex.test("\0"))
+        regex = new Regex("\\0")
+        assertFalse(regex.test("0"))
+        assertTrue(regex.test("\0"))
         
     "testAlternation": () ->
         regex = new Regex("a|b")

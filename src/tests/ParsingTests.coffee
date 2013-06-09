@@ -17,8 +17,18 @@ TestCase("ParsingTests",
             ]
         @assertSyntaxTree(expectedTree, regex)
         
-    "testEscapedCharacter": () ->
+    "testEscapedMetacharacter": () ->
         regex = @Parser.parsePattern("\\?")
+        expectedTree =
+            type: Group
+            subtokens: [
+                type: Character
+                subtokens: []
+            ]
+        @assertSyntaxTree(expectedTree, regex)
+        
+    "testEscapeSequence": () ->
+        regex = @Parser.parsePattern("\\n")
         expectedTree =
             type: Group
             subtokens: [

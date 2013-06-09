@@ -1,7 +1,7 @@
 root = global ? window
 
 class root.Parser
-    constructor: () ->    
+    constructor: () -> 
     
     parsePattern: (string) ->
         # In order not to set up alternations after the first alternative has been read, we treat everything as an
@@ -19,15 +19,7 @@ class root.Parser
             char = string.charAt(i)
             switch char
                 when "\\"
-                    if i == len - 1
-                        throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
-                            name: "NothingToEscapeException"
-                            message: "There is nothing to escape. Most likely, the pattern ends in a backslash \"\\\""
-                            index: i
-                        }
-                    actualChar = string.charAt(i+1)
-                    @append(current, new Character(actualChar))
-                    i += 2
+                    i = @parseEscapeSequence(string, current, i)
                 when "^"
                     @append(current, new StartAnchor())
                     ++i
@@ -77,6 +69,33 @@ class root.Parser
     
         traverse(regex)
         return regex
+        
+    parseEscapeSequence: (string, current, i) ->
+        if i == string.length - 1
+            throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
+                name: "NothingToEscapeException"
+                message: "There is nothing to escape. Most likely, the pattern ends in a backslash \"\\\""
+                index: i
+            }
+        ++i
+        char = string.charAt(i)
+        switch char
+            when "0"
+                @append(current, new Character("\0"))
+            when "f"
+                @append(current, new Character("\f"))
+            when "n"
+                @append(current, new Character("\n"))
+            when "r"
+                @append(current, new Character("\r"))
+            when "t"
+                @append(current, new Character("\t"))
+            when "v"
+                @append(current, new Character("\v"))
+            else
+                @append(current, new Character(char))
+        
+        return i + 1
         
     parseQuantifier: (current, char, i) ->
         st = current.subtokens
