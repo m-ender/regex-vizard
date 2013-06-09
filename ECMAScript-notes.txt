@@ -11,7 +11,7 @@ Firefox fails S15.10.2.12_A[12]_T1
 Quantified assertions
 =====================
 
-The grammar in section 15.10 (http://www.ecma-international.org/ecma-262/5.1/#sec-15.10) states explicitly
+The grammar in section 15.10.1 (http://www.ecma-international.org/ecma-262/5.1/#sec-15.10.1) states explicitly
 that quantifiers can only be applied to Atoms, which don't include Assertions (all forms of 0-width constructs).
 While at least Chrome and Firefox seem to adhere to this when it comes to ^, $ and \b, they do allow (at least)
 a ?-quantifier after a lookahead. Moreover, in that case they seem to optimise out the lookahead (as it cannot
@@ -34,6 +34,14 @@ Escaping c, x and u
 
 I am not quite sure how to interpret the standard here, but in any case the implementations are inconsistent.
 (More details to follow)
+
+=====================================
+Escape sequences in character classes
+=====================================
+
+The standard specifies in section 15.10.2.19, that backreferences and the \B espace sequence should raise an error
+inside a character class. However, browser seem to treat \B in a character class as B and backreference-like
+escape sequences as octal ones.
 
 ================
 Unmatched braces

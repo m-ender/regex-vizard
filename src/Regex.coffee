@@ -29,8 +29,6 @@ class root.Regex
     match: (inputString, report = false) ->
         @regex.reset()
     
-        # Build character array and surround it with -1 and 1 as guards for the
-        # start and end of the input string
         console.log("Input string:", inputString) if report
         state = @setupInitialState(inputString)        
         console.log("Input:", state.input) if report
@@ -46,9 +44,11 @@ class root.Regex
         
         return inputString[state.startingPosition-1...result-1]
         
+    # Build character array and surround it with special objects as guards for the
+    # start and end of the input string
     parseInput: (inputString) ->
-        input = [-1].concat(inputString.split(""))
-        input.push(1)
+        input = [StartGuard].concat(inputString.split(""))
+        input.push(EndGuard)
         return input
         
     setupInitialState: (str) ->

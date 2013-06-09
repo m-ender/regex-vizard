@@ -334,6 +334,23 @@ TestCase("TokenTests",
         @assertNextMatchSequence(token, state, [
             4 # "c" is part of the class
         ])
+        
+    "testNegatedCharacterClass": () ->
+        state = @Regex.setupInitialState("abc")
+        # Put together token for regex /[^ac]/
+        token = new CharacterClass(true)
+        token.addCharacter("a")
+        token.addCharacter("c")
+        
+        @assertNextMatchSequence(token, state, [])
+        
+        state.currentPosition = 2 # advance to position before b
+        @assertNextMatchSequence(token, state, [
+            3 # b is not part of the class
+        ])
+        
+        state.currentPosition = 3 # advance to position before c
+        @assertNextMatchSequence(token, state, [])
 
     # This function assumes that the sequence does not contain the ultimate "false"
     assertNextMatchSequence: (token, state, sequence) ->

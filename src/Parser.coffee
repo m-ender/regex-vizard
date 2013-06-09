@@ -98,7 +98,12 @@ class root.Parser
         return i + 1
         
     parseCharacterClass: (string, current, i) ->
-        token = new CharacterClass()
+        if i < string.length and string.charAt(i) == "^"
+            token = new CharacterClass(true)
+            ++i
+        else
+            token = new CharacterClass()
+        
         while i < string.length                
             char = string.charAt(i)
             switch char
@@ -152,7 +157,7 @@ class root.Parser
                 index: i
             }
         target = @remove(current)
-        unless (target instanceof Group) or (target instanceof Character) or (target instanceof Wildcard)
+        unless (target instanceof Group) or (target instanceof Character) or (target instanceof Wildcard) or (target instanceof CharacterClass)
             throw {
                 name: "NothingToRepeatException"
                 message: "The is nothing to repeat for quantifier \"" + char + "\" at index " + i + ". Only groups, characters and wildcard may be quantified."

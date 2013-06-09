@@ -165,10 +165,16 @@ TestCase("ParsingTests",
                 subtokens: []
             ]
             
+        regex = @Parser.parsePattern("[]")
+        @assertSyntaxTree(expectedTree, regex)
+            
         regex = @Parser.parsePattern("[a]")
         @assertSyntaxTree(expectedTree, regex)
         
         regex = @Parser.parsePattern("[abc]")
+        @assertSyntaxTree(expectedTree, regex)
+        
+        regex = @Parser.parsePattern("[^]")
         @assertSyntaxTree(expectedTree, regex)
         
         regex = @Parser.parsePattern("[^abc]")
@@ -181,13 +187,13 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
             
     "testComplexExpression": () ->
-        regex = @Parser.parsePattern("[de].(ab?|c|)*$")
+        regex = @Parser.parsePattern("d.(a[be]?|c|)*$")
         expectedTree =
             type: Group
             subtokens: [
                 type: Sequence
                 subtokens: [
-                    type: CharacterClass
+                    type: Character
                     subtokens: []
                    ,
                     type: Wildcard
@@ -206,7 +212,7 @@ TestCase("ParsingTests",
                                    ,
                                     type: Option
                                     subtokens: [
-                                        type: Character
+                                        type: CharacterClass
                                         subtokens: []
                                     ]
                                 ]
@@ -256,7 +262,9 @@ TestCase("ParsingTests",
         assertParsingException("a|+", "NothingToRepeatException")
         assertParsingException("^+", "NothingToRepeatException")
         assertParsingException("$+", "NothingToRepeatException")
+        assertParsingException("[", "UnterminatedCharacterClassException")
         assertParsingException("[a", "UnterminatedCharacterClassException")
+        assertParsingException("[^", "UnterminatedCharacterClassException")
         
     assertSyntaxTree: (expectedTree, actualTree) ->
         #console.log(actualTree, expectedTree.type)

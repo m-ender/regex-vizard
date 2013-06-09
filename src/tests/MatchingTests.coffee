@@ -343,4 +343,27 @@ TestCase("MatchingTests",
         assertFalse(regex.test("b"))
         assertTrue(regex.test("c"))
         assertSame("a", regex.match("ac"))
+        
+    "testEmptyCharacterClass": () ->
+        regex = new Regex("[]")
+        assertFalse(regex.test("a"))
+        assertFalse(regex.test(""))
+        regex = new Regex("[^]")
+        assertFalse(regex.test(""))
+        assertTrue(regex.test("a"))
+        assertTrue(regex.test("§"))
+        
+    "testNegatedCharacterClass": () ->
+        regex = new Regex("[^ac]")
+        assertFalse(regex.test(""))
+        assertFalse(regex.test("a"))
+        assertTrue(regex.test("b"))
+        assertFalse(regex.test("c"))
+        assertSame("b", regex.match("acbd"))
+        
+    "testQuantifyCharacterClass": () ->
+        regex = new Regex("[ac]+")
+        assertTrue(regex.test("aaccacac"))
+        assertFalse(regex.test("bde"))
+        assertSame("aca", regex.match("bacaba"))
 )

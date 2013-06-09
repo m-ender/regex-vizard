@@ -45,7 +45,8 @@ class root.Character extends root.Token
         return false
         
 class root.CharacterClass extends root.Token
-    constructor: () ->
+    # negated is a boolean
+    constructor: (@negated = false) ->
         super()
         @characters = []
         
@@ -60,8 +61,9 @@ class root.CharacterClass extends root.Token
         if @attempted
             @reset()
             return false
-            
-        if state.input[state.currentPosition] in @characters
+        
+        char = state.input[state.currentPosition]
+        if char isnt EndGuard and (char in @characters) isnt @negated
             @attempted = true
             return state.currentPosition + 1
             
@@ -80,7 +82,7 @@ class root.Wildcard extends root.Token
             @reset()
             return false
         
-        unless state.input[state.currentPosition] in ["\n", "\r", 1]
+        unless state.input[state.currentPosition] in ["\n", "\r", EndGuard]
             @attempted = true
             return state.currentPosition + 1
         return false
@@ -98,7 +100,7 @@ class root.StartAnchor extends root.Token
             @reset()
             return false
             
-        if state.input[state.currentPosition - 1] == -1
+        if state.input[state.currentPosition - 1] == StartGuard
             @attempted = true
             return state.currentPosition
         return false
@@ -117,7 +119,7 @@ class root.EndAnchor extends root.Token
             @reset()
             return false
             
-        if state.input[state.currentPosition] == 1
+        if state.input[state.currentPosition] == EndGuard
             @attempted = true
             return state.currentPosition
         return false
