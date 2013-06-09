@@ -315,6 +315,25 @@ TestCase("TokenTests",
             0 # first instance of subtoken "a?" cannot backtrack, so fails
             0 # first instance is discarded, but we need at least one repetition
         ])
+        
+    "testBasicCharacterClass": () ->
+        state = @Regex.setupInitialState("abc")
+        # Put together token for regex /[ac]/
+        token = new CharacterClass()
+        token.addCharacter("a")
+        token.addCharacter("c")
+        
+        @assertNextMatchSequence(token, state, [
+            2 # "a" is part of the class
+        ])
+        
+        state.currentPosition = 2 # advance to position before b
+        @assertNextMatchSequence(token, state, []) # b is not part of the class
+        
+        state.currentPosition = 3 # advance to position before c
+        @assertNextMatchSequence(token, state, [
+            4 # "c" is part of the class
+        ])
 
     # This function assumes that the sequence does not contain the ultimate "false"
     assertNextMatchSequence: (token, state, sequence) ->

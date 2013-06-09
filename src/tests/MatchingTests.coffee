@@ -336,4 +336,11 @@ TestCase("MatchingTests",
         assertSame("abc", regex.match("abcdc"))
         regex = new Regex("(a|bc|b|d)*c")
         assertSame("abcdc", regex.match("abcdc"))
+        
+    "testBasicCharacterClass": () ->
+        regex = new Regex("[ac]")
+        assertTrue(regex.test("a"))
+        assertFalse(regex.test("b"))
+        assertTrue(regex.test("c"))
+        assertSame("a", regex.match("ac"))
 )

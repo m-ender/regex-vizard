@@ -156,15 +156,38 @@ TestCase("ParsingTests",
                 ]
             ]
         @assertSyntaxTree(expectedTree, regex)
+        
+    "testCharacterClass": () ->
+        expectedTree =
+            type: Group
+            subtokens: [
+                type: CharacterClass
+                subtokens: []
+            ]
+            
+        regex = @Parser.parsePattern("[a]")
+        @assertSyntaxTree(expectedTree, regex)
+        
+        regex = @Parser.parsePattern("[abc]")
+        @assertSyntaxTree(expectedTree, regex)
+        
+        regex = @Parser.parsePattern("[^abc]")
+        @assertSyntaxTree(expectedTree, regex)
+        
+        regex = @Parser.parsePattern("[a-c]")
+        @assertSyntaxTree(expectedTree, regex)
+        
+        regex = @Parser.parsePattern("[a\\]c]")
+        @assertSyntaxTree(expectedTree, regex)
             
     "testComplexExpression": () ->
-        regex = @Parser.parsePattern("d.(ab?|c|)*$")
+        regex = @Parser.parsePattern("[de].(ab?|c|)*$")
         expectedTree =
             type: Group
             subtokens: [
                 type: Sequence
                 subtokens: [
-                    type: Character
+                    type: CharacterClass
                     subtokens: []
                    ,
                     type: Wildcard
@@ -202,7 +225,7 @@ TestCase("ParsingTests",
                 ]
             ]
         @assertSyntaxTree(expectedTree, regex)
-    
+            
     "testInvalidSyntax": () ->
         that = this
         
@@ -233,9 +256,10 @@ TestCase("ParsingTests",
         assertParsingException("a|+", "NothingToRepeatException")
         assertParsingException("^+", "NothingToRepeatException")
         assertParsingException("$+", "NothingToRepeatException")
+        assertParsingException("[a", "UnterminatedCharacterClassException")
         
     assertSyntaxTree: (expectedTree, actualTree) ->
-        console.log(actualTree.constructor, expectedTree.type)
+        #console.log(actualTree, expectedTree.type)
         assertTrue(actualTree.constructor is expectedTree.type)
         assertEquals(expectedTree.subtokens.length, actualTree.subtokens.length)
         i = 0

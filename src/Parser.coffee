@@ -13,13 +13,14 @@ class root.Parser
         current = new Disjunction(new Sequence())
         regex.subtokens.push(current)
         i = 0
-        len = string.length
 
-        while i < len
+        while i < string.length
             char = string.charAt(i)
             switch char
                 when "\\"
-                    i = @parseEscapeSequence(string, current, i)
+                    i = @parseEscapeSequence(string, current, i+1)
+                when "["
+                    i = @parseCharacterClass(string, current, i+1)
                 when "^"
                     @append(current, new StartAnchor())
                     ++i
@@ -71,13 +72,12 @@ class root.Parser
         return regex
         
     parseEscapeSequence: (string, current, i) ->
-        if i == string.length - 1
+        if i == string.length
             throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
                 name: "NothingToEscapeException"
                 message: "There is nothing to escape. Most likely, the pattern ends in a backslash \"\\\""
-                index: i
+                index: i-1
             }
-        ++i
         char = string.charAt(i)
         switch char
             when "0"
@@ -94,6 +94,52 @@ class root.Parser
                 @append(current, new Character("\v"))
             else
                 @append(current, new Character(char))
+        
+        return i + 1
+        
+    parseCharacterClass: (string, current, i) ->
+        token = new CharacterClass()
+        while i < string.length                
+            char = string.charAt(i)
+            switch char
+                when "]"
+                    @append(current, token)
+                    return i+1
+                when "\\"
+                    i = @parseCharacterClassEscapeSequence(string, token, i+1)
+                else
+                    token.addCharacter(char)
+                    ++i
+        
+        throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
+            name: "UnterminatedCharacterClassException"
+            message: "Missing closing bracket \"]\""
+            index: i
+        }
+        
+    parseCharacterClassEscapeSequence: (string, token, i) ->
+        if i == string.length
+            throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
+                name: "NothingToEscapeException"
+                message: "There is nothing to escape. Most likely, the pattern ends in a backslash \"\\\""
+                index: i-1
+            }
+        char = string.charAt(i)
+        switch char
+            when "0"
+                token.addCharacter("\0")
+            when "f"
+                token.addCharacter("\f")
+            when "n"
+                token.addCharacter("\n")
+            when "r"
+                token.addCharacter("\r")
+            when "t"
+                token.addCharacter("\t")
+            when "v"
+                token.addCharacter("\v")
+            else
+                token.addCharacter(char)
         
         return i + 1
         

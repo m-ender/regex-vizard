@@ -44,6 +44,29 @@ class root.Character extends root.Token
             return state.currentPosition + 1
         return false
         
+class root.CharacterClass extends root.Token
+    constructor: () ->
+        super()
+        @characters = []
+        
+    reset: () ->
+        super()
+        @attempted = false
+        
+    addCharacter: (character) ->
+        @characters.push(character)
+        
+    nextMatch: (state, report) ->
+        if @attempted
+            @reset()
+            return false
+            
+        if state.input[state.currentPosition] in @characters
+            @attempted = true
+            return state.currentPosition + 1
+            
+        return false
+        
 class root.Wildcard extends root.Token
     constructor: () ->
         super()
