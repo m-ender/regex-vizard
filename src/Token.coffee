@@ -3,7 +3,7 @@ root = global ? window
 class root.Token
     constructor: (token) ->    
         # list of sub-tokens
-        # Sequences and Alternations will use a list of arbitrary length
+        # Sequences and Disjunctions will use a list of arbitrary length
         # Quantifiers and Groups will use a single token in the list
         # Atomic tokens like characters and anchors will have this list empty
         @subtokens = []
@@ -11,7 +11,7 @@ class root.Token
             @subtokens.push(token)
         @reset()
     
-    # this function will attempt one match at a time - that is one alternative of an alternation or a certain
+    # this function will attempt one match at a time - that is one alternative of an disjunction or a certain
     # number of repetitions
     # returns 0 if match unsuccessful but there might be matches on further attempts
     # returns the position after the match if successful
@@ -99,7 +99,7 @@ class root.EndAnchor extends root.Token
             return state.currentPosition
         return false
 
-class root.Alternation extends root.Token
+class root.Disjunction extends root.Token
     constructor: (token) ->
         super(token)
         

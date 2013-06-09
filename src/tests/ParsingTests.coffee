@@ -86,12 +86,12 @@ TestCase("ParsingTests",
             ]
         @assertSyntaxTree(expectedTree, regex)
 
-    "testAlternation": () ->
+    "testDisjunction": () ->
         regex = @Parser.parsePattern("a|b|c")
         expectedTree =
             type: Group
             subtokens: [
-                type: Alternation
+                type: Disjunction
                 subtokens: [
                     type: Character
                     subtokens: []
@@ -174,7 +174,7 @@ TestCase("ParsingTests",
                     subtokens: [
                         type: Group
                         subtokens: [
-                            type: Alternation
+                            type: Disjunction
                             subtokens: [
                                 type: Sequence
                                 subtokens: [

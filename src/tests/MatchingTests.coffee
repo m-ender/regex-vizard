@@ -182,7 +182,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("0"))
         assertTrue(regex.test("\0"))
         
-    "testAlternation": () ->
+    "testDisjunction": () ->
         regex = new Regex("a|b")
         assertTrue(regex.test("a"))
         assertTrue(regex.test("b"))

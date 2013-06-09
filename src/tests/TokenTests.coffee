@@ -72,10 +72,10 @@ TestCase("TokenTests",
             3
         ])
         
-    "testAlternationToken": () ->
+    "testDisjunctionToken": () ->
         state = @Regex.setupInitialState("abc")
         # Put together token for regex /a|b|c/
-        token = new Alternation()
+        token = new Disjunction()
         token.subtokens.push(new Character("a"))
         token.subtokens.push(new Character("b"))
         token.subtokens.push(new Character("c"))
@@ -217,10 +217,10 @@ TestCase("TokenTests",
         
         # Put together token for regex /(a|b)*/
         state = @Regex.setupInitialState("ab")
-        alternation = new Alternation()
-        alternation.subtokens.push(new Character("a"))
-        alternation.subtokens.push(new Character("b"))
-        token = new RepeatZeroOrMore(new Group(alternation))
+        disjunction = new Disjunction()
+        disjunction.subtokens.push(new Character("a"))
+        disjunction.subtokens.push(new Character("b"))
+        token = new RepeatZeroOrMore(new Group(disjunction))
         @assertNextMatchSequence(token, state, [
            -1 # subsubtoken "a" matches
            -1 # therefore, first instance of subtoken "(a|b)" matches
@@ -229,16 +229,16 @@ TestCase("TokenTests",
            -1 # therefore, second instance of subtoken "(a|b)" matches
             0 # third instance fails when trying "a"
             0 # third instance fails again when trying "b"
-            0 # alternation in third instance reports overall failure
+            0 # disjunction in third instance reports overall failure
             0 # therefore, third instance of subtoken "(a|b)" fails
             3 # third instance is discarded to give a match
             0 # second instance fails when trying to backtrack "b"
-            0 # alternation in second instance reports overall failure
+            0 # disjunction in second instance reports overall failure
             0 # therefore, second instance of subtoken "(a|b)" fails
             2 # second instance is discarded to give another match
             0 # first instance fails when trying to backtrack "a"
             0 # first instance fails again when trying "b"
-            0 # alternation in first instance reports overall failure
+            0 # disjunction in first instance reports overall failure
             0 # therefore, first instance of subtoken "(a|b)" fails
             1 # first instance is discarded to give another match
         ])
@@ -268,10 +268,10 @@ TestCase("TokenTests",
         
         # Put together token for regex /(a|b)+/
         state = @Regex.setupInitialState("ab")
-        alternation = new Alternation()
-        alternation.subtokens.push(new Character("a"))
-        alternation.subtokens.push(new Character("b"))
-        token = new RepeatOneOrMore(new Group(alternation))
+        disjunction = new Disjunction()
+        disjunction.subtokens.push(new Character("a"))
+        disjunction.subtokens.push(new Character("b"))
+        token = new RepeatOneOrMore(new Group(disjunction))
         @assertNextMatchSequence(token, state, [
            -1 # subsubtoken "a" matches
            -1 # therefore, first instance of subtoken "(a|b)" matches
@@ -280,16 +280,16 @@ TestCase("TokenTests",
            -1 # therefore, second instance of subtoken "(a|b)" matches
             0 # third instance fails when trying "a"
             0 # third instance fails again when trying "b"
-            0 # alternation in third instance reports overall failure
+            0 # disjunction in third instance reports overall failure
             0 # therefore, third instance of subtoken "(a|b)" fails
             3 # third instance is discarded to give a match
             0 # second instance fails when trying to backtrack "b"
-            0 # alternation in second instance reports overall failure
+            0 # disjunction in second instance reports overall failure
             0 # therefore, second instance of subtoken "(a|b)" fails
             2 # second instance is discarded to give another match
             0 # first instance fails when trying to backtrack "a"
             0 # first instance fails again when trying "b"
-            0 # alternation in first instance reports overall failure
+            0 # disjunction in first instance reports overall failure
             0 # therefore, first instance of subtoken "(a|b)" fails
             0 # first instance is discarded, but we need at least one repetition
         ])

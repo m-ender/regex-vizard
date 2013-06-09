@@ -4,17 +4,17 @@ class root.Parser
     constructor: () -> 
     
     parsePattern: (string) ->
-        # In order not to set up alternations after the first alternative has been read, we treat everything as an
-        # alternation of sequences (possibly with only one alternative or only one token in the sequence).
-        # Unnecessary alternations and sequences will be removed in the end.
+        # In order not to patch in disjunctions once the first | has been read, we treat everything as an
+        # disjunction of sequences (possibly with only one alternative or only one token in the sequence).
+        # Unnecessary disjunctions and sequences will be removed at the end.
         # We also use a group as the root of the pattern, which will correspond to capturing group 0.
         regex = new Group()
         nestingStack = []
-        current = new Alternation(new Sequence())
+        current = new Disjunction(new Sequence())
         regex.subtokens.push(current)
         i = 0
         len = string.length
-            
+
         while i < len
             char = string.charAt(i)
             switch char
@@ -33,7 +33,7 @@ class root.Parser
                     current.subtokens.push(new Sequence())
                     ++i
                 when "("
-                    group = new Group(new Alternation(new Sequence()))
+                    group = new Group(new Disjunction(new Sequence()))
                     @append(current, group)
                     nestingStack.push(current)
                     current = group.subtokens[0]
@@ -57,12 +57,12 @@ class root.Parser
                 name: "MissingClosingParenthesisException"
                 message: "Missing closing parenthesis \")\""
             }
-        # Now traverse the token tree to remove unnecessary alternations and sequences
+        # Now traverse the token tree to remove unnecessary disjunctions and sequences
         traverse = (token) ->
             if token.subtokens.length > 0
                 for i in [0..token.subtokens.length-1]
                     subtoken = token.subtokens[i]
-                    while ((subtoken instanceof Alternation) or (subtoken instanceof Sequence)) and (subtoken.subtokens.length == 1)
+                    while ((subtoken instanceof Disjunction) or (subtoken instanceof Sequence)) and (subtoken.subtokens.length == 1)
                         token.subtokens[i] = subtoken.subtokens[0]
                         subtoken = token.subtokens[i]
                     traverse(subtoken)

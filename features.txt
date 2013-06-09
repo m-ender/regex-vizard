@@ -13,7 +13,7 @@ Visualisation elements:
 - character classes: shorthands and ranges are expanded and the corresponding character from the class is highlighted as in the literal case (same goes for lower/upper case variants when using the i-modifier)
 - capturing groups: at the closing parenthesis, (a copy of) the matched substring flies to the corresponding capture slot
 - backreferences: the corresponding captured substring appears and is matched literally
-- alternation: currently unused alternatives are greyed out
+- disjunction: currently unused alternatives are greyed out
 - lookarounds: are collapsed in the pattern after they have matched
 - modifiers light up when they are relevant
 -- i: when a letter is expanded into lower and upper case variant (also in character classes)
