@@ -104,19 +104,42 @@ class root.Parser
         else
             negated = false
             
+        lastCharacter = false
         characters = []
+        ranges = []
         
         while i < string.length                
             char = string.charAt(i)
             switch char
                 when "]"
-                    [singleCharacters, ranges] = @convertCharacterClassRanges(characters)
-                    @append(current, new CharacterClass(negated, singleCharacters, ranges))
+                    @append(current, new CharacterClass(negated, characters, ranges))
                     return i+1
                 when "\\"
-                    i = @parseCharacterClassEscapeSequence(string, characters, i+1)
+                    [i, lastCharacter] = @parseCharacterClassEscapeSequence(string, i+1)
+                    characters.push(lastCharacter)
+                when "-"
+                    if lastCharacter and i+1 < string.length and string.charAt(i+1) != "]"
+                        startC = lastCharacter.charCodeAt(0)
+                        endC = string.charAt(i+1).charCodeAt(0)
+                        if startC > endC
+                            throw  {
+                                name: "CharacterClassRangeOutOfOrderException"
+                                message: "The character class \"" + characters[i-1] + "-" + characters[i+1] + "\" is out of order."
+                            }
+                        characters.pop()
+                        lastCharacter = false
+                        ranges.push(
+                            start: startC
+                            end:   endC
+                        )
+                        i += 2
+                    else
+                        lastCharacter = char
+                        characters.push(lastCharacter)                        
+                        ++i
                 else
-                    characters.push(char)
+                    lastCharacter = char
+                    characters.push(lastCharacter)
                     ++i
         
         throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
@@ -125,7 +148,7 @@ class root.Parser
             index: i
         }
         
-    parseCharacterClassEscapeSequence: (string, characters, i) ->
+    parseCharacterClassEscapeSequence: (string, i) ->
         if i == string.length
             throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
                 name: "NothingToEscapeException"
@@ -135,54 +158,23 @@ class root.Parser
         char = string.charAt(i)
         switch char
             when "0"
-                characters.push("\0")
+                actualChar = "\0"
             when "f"
-                characters.push("\f")
+                actualChar = "\f"
             when "n"
-                characters.push("\n")
+                actualChar = "\n"
             when "r"
-                characters.push("\r")
+                actualChar = "\r"
             when "t"
-                characters.push("\t")
+                actualChar = "\t"
             when "v"
-                characters.push("\v")
+                actualChar = "\v"
+            when "b" # this one is special to character classes
+                actualChar = "\b"
             else
-                characters.push(char)
+                actualChar = char
         
-        return i + 1
-        
-    convertCharacterClassRanges: (characters) ->
-        i = 1 # skip the first character
-        singleCharacters = []
-        ranges = []
-        len = characters.length
-        while i < len - 1 # skip the last character
-            if characters[i] == "-"
-                startC = characters[i-1].charCodeAt(0)
-                endC = characters[i+1].charCodeAt(0)
-                if startC > endC
-                    throw  {
-                        name: "CharacterClassRangeOutOfOrderException"
-                        message: "The character class \"" + characters[i-1] + "-" + characters[i+1] + "\" is out of order."
-                    }
-                ranges.push(
-                    start: startC
-                    end:   endC
-                )
-                i += 3
-            else
-                singleCharacters.push(characters[i-1])
-                i++
-        
-        # if the class contains two characters, the first character is neither considered in the above loop
-        # nor in the following check for the last character. hence, we include this special case explicitly.
-        if len == 2 
-            singleCharacters.push(characters[0])
-        
-        if i >= len - 1
-            singleCharacters.push(characters[len-1])
-            
-        return [singleCharacters, ranges]
+        return [i + 1, actualChar]
         
     parseQuantifier: (current, char, i) ->
         st = current.subtokens
