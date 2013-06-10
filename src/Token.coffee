@@ -46,9 +46,10 @@ class root.Character extends root.Token
         
 class root.CharacterClass extends root.Token
     # negated is a boolean
-    constructor: (@negated = false) ->
+    constructor: (@negated = false, character, ranges) ->
         super()
-        @characters = []
+        @characters = character or []
+        @ranges = ranges or []
         
     reset: () ->
         super()
@@ -57,13 +58,32 @@ class root.CharacterClass extends root.Token
     addCharacter: (character) ->
         @characters.push(character)
         
+    addRange: (startCharacter, endCharacter) ->
+        @ranges.push(
+            start: startCharacter.charCodeAt(0)
+            end: endCharacter.charCodeAt(0)
+        )
+        
     nextMatch: (state, report) ->
         if @attempted
             @reset()
             return false
-        
+            
         char = state.input[state.currentPosition]
-        if char isnt EndGuard and (char in @characters) isnt @negated
+        
+        if char is EndGuard
+            return false
+        
+        inClass = false
+        if char in @characters
+            inClass = true
+        else
+            for range in @ranges
+                if range.start <= char.charCodeAt(0) <= range.end
+                    inClass = true
+                    break
+        
+        if inClass isnt @negated
             @attempted = true
             return state.currentPosition + 1
             
@@ -82,7 +102,7 @@ class root.Wildcard extends root.Token
             @reset()
             return false
         
-        unless state.input[state.currentPosition] in ["\n", "\r", EndGuard]
+        unless state.input[state.currentPosition] in ["\n", "\r", "\u2028", "\u2029", EndGuard]
             @attempted = true
             return state.currentPosition + 1
         return false
@@ -115,7 +135,7 @@ class root.EndAnchor extends root.Token
         @attempted = false
         
     nextMatch: (state, report) ->
-        if @attempted
+        if @attempted   
             @reset()
             return false
             

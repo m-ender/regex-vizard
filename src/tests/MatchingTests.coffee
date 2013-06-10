@@ -85,6 +85,10 @@ TestCase("MatchingTests",
         assertTrue(regex.test("a"))
         assertFalse(regex.test("\n"))
         assertFalse(regex.test("\r"))
+        assertFalse(regex.test("\u2028"))
+        assertFalse(regex.test("\u2029"))
+        assertTrue(regex.test("\v"))
+        assertTrue(regex.test("\f"))
         assertTrue(regex.test(" "))
         assertTrue(regex.test("\t"))
         assertSame("a", regex.match("a"))
@@ -360,6 +364,56 @@ TestCase("MatchingTests",
         assertTrue(regex.test("b"))
         assertFalse(regex.test("c"))
         assertSame("b", regex.match("acbd"))
+        
+    "testCharacterClassRange": () ->
+        regex = new Regex("[a-c]")
+        assertFalse(regex.test(""))
+        assertTrue(regex.test("a"))
+        assertTrue(regex.test("b"))
+        assertTrue(regex.test("c"))
+        assertFalse(regex.test("d"))
+        regex = new Regex("[A-z]")
+        assertFalse(regex.test(""))
+        assertTrue(regex.test("Q"))
+        assertTrue(regex.test("q"))
+        assertTrue(regex.test("[")) # code point lies between Z and a
+        assertTrue(regex.test("]")) # code point lies between Z and a
+        assertTrue(regex.test("_")) # code point lies between Z and a
+        assertFalse(regex.test("@"))
+        assertFalse(regex.test("{"))
+        regex = new Regex("[aA-Z0-9]")
+        assertFalse(regex.test(""))
+        assertTrue(regex.test("a"))
+        assertFalse(regex.test("b"))
+        assertTrue(regex.test("B"))
+        assertTrue(regex.test("Z"))
+        assertTrue(regex.test("5"))
+        assertFalse(regex.test("="))
+        
+    "testNegatedCharacterClassRange": () ->
+        regex = new Regex("[^a-c]")
+        assertFalse(regex.test(""))
+        assertFalse(regex.test("a"))
+        assertFalse(regex.test("b"))
+        assertFalse(regex.test("c"))
+        assertTrue(regex.test("d"))
+        regex = new Regex("[^A-z]")
+        assertFalse(regex.test(""))
+        assertFalse(regex.test("Q"))
+        assertFalse(regex.test("q"))
+        assertFalse(regex.test("[")) # code point lies between Z and a
+        assertFalse(regex.test("]")) # code point lies between Z and a
+        assertFalse(regex.test("_")) # code point lies between Z and a
+        assertTrue(regex.test("@"))
+        assertTrue(regex.test("{"))
+        regex = new Regex("[^aA-Z0-9]")
+        assertFalse(regex.test(""))
+        assertFalse(regex.test("a"))
+        assertTrue(regex.test("b"))
+        assertFalse(regex.test("B"))
+        assertFalse(regex.test("Z"))
+        assertFalse(regex.test("5"))
+        assertTrue(regex.test("="))
         
     "testQuantifyCharacterClass": () ->
         regex = new Regex("[ac]+")

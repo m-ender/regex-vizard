@@ -328,7 +328,7 @@ TestCase("TokenTests",
         ])
         
         state.currentPosition = 2 # advance to position before b
-        @assertNextMatchSequence(token, state, []) # b is not part of the class
+        @assertNextMatchSequence(token, state, []) # "b" is not part of the class
         
         state.currentPosition = 3 # advance to position before c
         @assertNextMatchSequence(token, state, [
@@ -346,11 +346,34 @@ TestCase("TokenTests",
         
         state.currentPosition = 2 # advance to position before b
         @assertNextMatchSequence(token, state, [
-            3 # b is not part of the class
+            3 # "b" is not part of the class
         ])
         
         state.currentPosition = 3 # advance to position before c
         @assertNextMatchSequence(token, state, [])
+        
+    "testCharacterClassRange": () ->
+        state = @Regex.setupInitialState("abcd")
+        # Put together token for regex /[a-c]/
+        token = new CharacterClass()
+        token.addRange("a","c")
+        
+        @assertNextMatchSequence(token, state, [
+            2 # "a" is part of the class
+        ])
+        
+        state.currentPosition = 2 # advance to position before b
+        @assertNextMatchSequence(token, state, [
+            3 # "b" is part of the class (as it's between "a" and "c")
+        ])
+        
+        state.currentPosition = 3 # advance to position before c
+        @assertNextMatchSequence(token, state, [
+            4 # "c" is part of the class
+        ])
+        
+        state.currentPosition = 4 # advance to position before d
+        @assertNextMatchSequence(token, state, [])       
 
     # This function assumes that the sequence does not contain the ultimate "false"
     assertNextMatchSequence: (token, state, sequence) ->

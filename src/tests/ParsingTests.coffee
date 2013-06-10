@@ -265,6 +265,7 @@ TestCase("ParsingTests",
         assertParsingException("[", "UnterminatedCharacterClassException")
         assertParsingException("[a", "UnterminatedCharacterClassException")
         assertParsingException("[^", "UnterminatedCharacterClassException")
+        assertParsingException("[b-a]", "CharacterClassRangeOutOfOrderException")
         
     assertSyntaxTree: (expectedTree, actualTree) ->
         #console.log(actualTree, expectedTree.type)

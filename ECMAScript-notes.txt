@@ -43,6 +43,12 @@ The standard specifies in section 15.10.2.19, that backreferences and the \B esp
 inside a character class. However, browser seem to treat \B in a character class as B and backreference-like
 escape sequences as octal ones.
 
+Test snippets:
+
+for(var i = 0; i < 1000; i++) if(/[\B]/.test(String.fromCharCode(i))) console.log(i, String.fromCharCode(i))
+for(var i = 0; i < 1000; i++) if(/[\1]/.test(String.fromCharCode(i))) console.log(i, String.fromCharCode(i))
+for(var i = 0; i < 1000; i++) if(/[\5]/.test(String.fromCharCode(i))) console.log(i, String.fromCharCode(i))
+
 ================
 Unmatched braces
 ================

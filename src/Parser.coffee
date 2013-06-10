@@ -99,21 +99,24 @@ class root.Parser
         
     parseCharacterClass: (string, current, i) ->
         if i < string.length and string.charAt(i) == "^"
-            token = new CharacterClass(true)
+            negated = true
             ++i
         else
-            token = new CharacterClass()
+            negated = false
+            
+        characters = []
         
         while i < string.length                
             char = string.charAt(i)
             switch char
                 when "]"
-                    @append(current, token)
+                    [singleCharacters, ranges] = @convertCharacterClassRanges(characters)
+                    @append(current, new CharacterClass(negated, singleCharacters, ranges))
                     return i+1
                 when "\\"
-                    i = @parseCharacterClassEscapeSequence(string, token, i+1)
+                    i = @parseCharacterClassEscapeSequence(string, characters, i+1)
                 else
-                    token.addCharacter(char)
+                    characters.push(char)
                     ++i
         
         throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
@@ -122,7 +125,7 @@ class root.Parser
             index: i
         }
         
-    parseCharacterClassEscapeSequence: (string, token, i) ->
+    parseCharacterClassEscapeSequence: (string, characters, i) ->
         if i == string.length
             throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
                 name: "NothingToEscapeException"
@@ -132,21 +135,54 @@ class root.Parser
         char = string.charAt(i)
         switch char
             when "0"
-                token.addCharacter("\0")
+                characters.push("\0")
             when "f"
-                token.addCharacter("\f")
+                characters.push("\f")
             when "n"
-                token.addCharacter("\n")
+                characters.push("\n")
             when "r"
-                token.addCharacter("\r")
+                characters.push("\r")
             when "t"
-                token.addCharacter("\t")
+                characters.push("\t")
             when "v"
-                token.addCharacter("\v")
+                characters.push("\v")
             else
-                token.addCharacter(char)
+                characters.push(char)
         
         return i + 1
+        
+    convertCharacterClassRanges: (characters) ->
+        i = 1 # skip the first character
+        singleCharacters = []
+        ranges = []
+        len = characters.length
+        while i < len - 1 # skip the last character
+            if characters[i] == "-"
+                startC = characters[i-1].charCodeAt(0)
+                endC = characters[i+1].charCodeAt(0)
+                if startC > endC
+                    throw  {
+                        name: "CharacterClassRangeOutOfOrderException"
+                        message: "The character class \"" + characters[i-1] + "-" + characters[i+1] + "\" is out of order."
+                    }
+                ranges.push(
+                    start: startC
+                    end:   endC
+                )
+                i += 3
+            else
+                singleCharacters.push(characters[i-1])
+                i++
+        
+        # if the class contains two characters, the first character is neither considered in the above loop
+        # nor in the following check for the last character. hence, we include this special case explicitly.
+        if len == 2 
+            singleCharacters.push(characters[0])
+        
+        if i >= len - 1
+            singleCharacters.push(characters[len-1])
+            
+        return [singleCharacters, ranges]
         
     parseQuantifier: (current, char, i) ->
         st = current.subtokens
