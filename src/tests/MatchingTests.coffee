@@ -455,4 +455,44 @@ TestCase("MatchingTests",
         assertTrue(regex.test("aaccacac"))
         assertFalse(regex.test("bde"))
         assertSame("aca", regex.match("bacaba"))
+        
+    "testBuiltInCharacterClasses": () ->
+        regex = new Regex("^\\w$")
+        for i in [0..47]
+            assertFalse(regex.test(String.fromCharCode(i)))
+        for i in [48..57] # digits 0 to 9
+            assertTrue(regex.test(String.fromCharCode(i)))
+        for i in [58..64]
+            assertFalse(regex.test(String.fromCharCode(i)))
+        for i in [65..90] # letters A to Z
+            assertTrue(regex.test(String.fromCharCode(i)))
+        for i in [91..94]
+            assertFalse(regex.test(String.fromCharCode(i)))
+        assertTrue(regex.test("_"))
+        assertFalse(regex.test("`"))
+        for i in [97..122] # letters a to z
+            assertTrue(regex.test(String.fromCharCode(i)))
+        for i in [123..0xFFFF] 
+            char = String.fromCharCode(i)
+            assertFalse("\\w erroneously matched character " + i + ": " + char, regex.test(char))
+        regex = new Regex("^\\W$")
+        assertFalse(regex.test(""))
+        for i in [0..47]
+            assertTrue(regex.test(String.fromCharCode(i)))
+        for i in [48..57] # digits 0 to 9
+            assertFalse(regex.test(String.fromCharCode(i)))
+        for i in [58..64]
+            assertTrue(regex.test(String.fromCharCode(i)))
+        for i in [65..90] # letters A to Z
+            assertFalse(regex.test(String.fromCharCode(i)))
+        for i in [91..94]
+            assertTrue(regex.test(String.fromCharCode(i)))
+        assertFalse(regex.test("_"))
+        assertTrue(regex.test("`"))
+        for i in [97..122] # letters a to z
+            assertFalse(regex.test(String.fromCharCode(i)))
+        for i in [123..0xFFFF] 
+            char = String.fromCharCode(i)
+            assertTrue("\\w erroneously matched character " + i + ": " + char, regex.test(char))
+        
 )

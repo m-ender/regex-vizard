@@ -80,6 +80,7 @@ class root.Parser
             }
         char = string.charAt(i)
         switch char
+            # special characters
             when "0"
                 @append(current, new Character("\0"))
             when "f"
@@ -92,6 +93,20 @@ class root.Parser
                 @append(current, new Character("\t"))
             when "v"
                 @append(current, new Character("\v"))
+                
+            # built-in character classes
+            when "w", "W"
+                negated = char is "W"
+                @append(current, new CharacterClass(negated, ["_"], [
+                    start: "A".charCodeAt(0)
+                    end:   "Z".charCodeAt(0)
+                   ,
+                    start: "a".charCodeAt(0)
+                    end:   "z".charCodeAt(0)
+                   ,
+                    start: "0".charCodeAt(0)
+                    end:   "9".charCodeAt(0)
+                ]))
             else
                 @append(current, new Character(char))
         
