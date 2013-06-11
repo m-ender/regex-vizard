@@ -97,42 +97,13 @@ class root.Parser
             # built-in character classes
             when "d", "D"
                 negated = char is "D"
-                @append(current, new CharacterClass(negated, [], [
-                    start: "0".charCodeAt(0)
-                    end:   "9".charCodeAt(0)
-                ]))
+                @append(current, new DigitClass(negated))
             when "w", "W"
                 negated = char is "W"
-                @append(current, new CharacterClass(negated, ["_"], [
-                    start: "A".charCodeAt(0)
-                    end:   "Z".charCodeAt(0)
-                   ,
-                    start: "a".charCodeAt(0)
-                    end:   "z".charCodeAt(0)
-                   ,
-                    start: "0".charCodeAt(0)
-                    end:   "9".charCodeAt(0)
-                ]))
+                @append(current, new WordClass(negated))
             when "s", "S"
                 negated = char is "S"
-                @append(current, new CharacterClass(negated, [
-                    "\u0020" # space
-                    "\u00a0" # no-break space
-                    "\u1680" # ogham space mark
-                    "\u180e" # mongolian vowel separator
-                    "\u2028" # Unicode line separator
-                    "\u2029" # Unicode paragraph separator
-                    "\u202f" # narrow no-break space
-                    "\u205f" # medium mathematical space
-                    "\u3000" # ideographic space
-                    "\ufeff" # zero-width no-break space
-                ], [
-                    start: 0x9    # horizontal tab, line feed, vertical tab, form feed, carriage return
-                    end:   0xd
-                   ,
-                    start: 0x2000 # various punctuation and typesetting related characters 
-                    end:   0x200a
-                ]))
+                @append(current, new WhitespaceClass(negated))
                 
             # all other characters are treated literally
             else
@@ -235,42 +206,13 @@ class root.Parser
             # built-in character classes
             when "d", "D"
                 negated = char is "D"
-                element = new CharacterClass(negated, [], [
-                    start: "0".charCodeAt(0)
-                    end:   "9".charCodeAt(0)
-                ])
+                element = new DigitClass(negated)
             when "w", "W"
                 negated = char is "W"
-                element = new CharacterClass(negated, ["_"], [
-                    start: "A".charCodeAt(0)
-                    end:   "Z".charCodeAt(0)
-                   ,
-                    start: "a".charCodeAt(0)
-                    end:   "z".charCodeAt(0)
-                   ,
-                    start: "0".charCodeAt(0)
-                    end:   "9".charCodeAt(0)
-                ])
+                element = new WordClass(negated)
             when "s", "S"
                 negated = char is "S"
-                element = new CharacterClass(negated, [
-                    "\u0020" # space
-                    "\u00a0" # no-break space
-                    "\u1680" # ogham space mark
-                    "\u180e" # mongolian vowel separator
-                    "\u2028" # Unicode line separator
-                    "\u2029" # Unicode paragraph separator
-                    "\u202f" # narrow no-break space
-                    "\u205f" # medium mathematical space
-                    "\u3000" # ideographic space
-                    "\ufeff" # zero-width no-break space
-                ], [
-                    start: 0x9    # horizontal tab, line feed, vertical tab, form feed, carriage return
-                    end:   0xd
-                   ,
-                    start: 0x2000 # various punctuation and typesetting related characters 
-                    end:   0x200a
-                ])
+                element = new WhitespaceClass(negated)
                 
             # all other characters are treated literally
             else

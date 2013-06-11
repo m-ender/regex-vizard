@@ -97,7 +97,51 @@ class root.CharacterClass extends root.Token
             return state.currentPosition + 1
             
         return false
-        
+
+# For built-in \d and \D        
+class root.DigitClass extends root.CharacterClass
+    constructor: (negated = false) ->
+        super(negated, [], [
+            start: "0".charCodeAt(0)
+            end:   "9".charCodeAt(0)
+        ])
+
+# For built-in \w and \W        
+class root.WordClass extends root.CharacterClass
+    constructor: (negated = false) ->
+        super(negated, ["_"], [
+            start: "A".charCodeAt(0)
+            end:   "Z".charCodeAt(0)
+           ,
+            start: "a".charCodeAt(0)
+            end:   "z".charCodeAt(0)
+           ,
+            start: "0".charCodeAt(0)
+            end:   "9".charCodeAt(0)
+        ])
+
+# For built-in \s and \S        
+class root.WhitespaceClass extends root.CharacterClass
+    constructor: (negated = false) ->
+        super(negated, [
+            "\u0020" # space
+            "\u00a0" # no-break space
+            "\u1680" # ogham space mark
+            "\u180e" # mongolian vowel separator
+            "\u2028" # Unicode line separator
+            "\u2029" # Unicode paragraph separator
+            "\u202f" # narrow no-break space
+            "\u205f" # medium mathematical space
+            "\u3000" # ideographic space
+            "\ufeff" # zero-width no-break space
+        ], [
+            start: 0x9    # horizontal tab, line feed, vertical tab, form feed, carriage return
+            end:   0xd
+           ,
+            start: 0x2000 # various punctuation and typesetting related characters 
+            end:   0x200a
+        ])
+    
 class root.Wildcard extends root.Token
     constructor: () ->
         super()

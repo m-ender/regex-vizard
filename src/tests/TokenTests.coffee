@@ -378,10 +378,7 @@ TestCase("TokenTests",
     "testNestedCharacterClass": () ->
         state = @Regex.setupInitialState("0")
         # Put together token for regex /[\d]/
-        token = new CharacterClass(false, [], [], [new CharacterClass(false, [], [
-            start: "0".charCodeAt(0)
-            end:   "9".charCodeAt(0)
-        ])])
+        token = new CharacterClass(false, [], [], [new DigitClass()])
         
         @assertNextMatchSequence(token, state, [
             2 # "1" is part of the class
