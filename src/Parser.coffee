@@ -105,6 +105,11 @@ class root.Parser
                 negated = char is "S"
                 @append(current, new WhitespaceClass(negated))
                 
+            # word boundaries
+            when "b", "B"
+                negated = char is "B"
+                @append(current, new WordBoundary(negated))
+                
             # all other characters are treated literally
             else
                 @append(current, new Character(char))

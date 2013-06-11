@@ -185,6 +185,20 @@ TestCase("ParsingTests",
         
         regex = @Parser.parsePattern("[a\\]c]")
         @assertSyntaxTree(expectedTree, regex)
+        
+    "testWordBoundary": () ->
+        regex = @Parser.parsePattern("\\b")
+        expectedTree =
+            type: Group
+            subtokens: [
+                type: WordBoundary
+                subtokens: []
+            ]
+        
+        @assertSyntaxTree(expectedTree, regex)
+        
+        regex = @Parser.parsePattern("\\B")
+        @assertSyntaxTree(expectedTree, regex)
             
     "testComplexExpression": () ->
         regex = @Parser.parsePattern("d.(a[be]?|c|)*$")

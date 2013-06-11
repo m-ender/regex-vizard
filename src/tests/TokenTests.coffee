@@ -383,6 +383,84 @@ TestCase("TokenTests",
         @assertNextMatchSequence(token, state, [
             2 # "1" is part of the class
         ])
+        
+    "testWordBoundary": () ->
+        state = @Regex.setupInitialState("a_0-b")
+        # Put together token for regex /\b/
+        token = new WordBoundary()
+        
+        @assertNextMatchSequence(token, state, [
+            1
+        ])
+        
+        state.currentPosition = 2 # advance to position before _
+        @assertNextMatchSequence(token, state, [])
+        
+        state.currentPosition = 3 # advance to position before 0
+        @assertNextMatchSequence(token, state, [])
+        
+        state.currentPosition = 4 # advance to position before -
+        @assertNextMatchSequence(token, state, [
+            4
+        ])
+        
+        state.currentPosition = 5 # advance to position before b
+        @assertNextMatchSequence(token, state, [
+            5
+        ])
+        
+        state.currentPosition = 6 # advance to position at end of string
+        @assertNextMatchSequence(token, state, [
+            6
+        ])
+        
+        state = @Regex.setupInitialState("")
+        @assertNextMatchSequence(token, state, [])
+        
+        state = @Regex.setupInitialState("-")
+        @assertNextMatchSequence(token, state, [])
+        state.currentPosition = 2 # advance to position at end of string
+        @assertNextMatchSequence(token, state, [])
+        
+        
+        state = @Regex.setupInitialState("a_0-b")
+        # Put together token for regex /\B/
+        token = new WordBoundary(true)
+        
+        @assertNextMatchSequence(token, state, [])
+        
+        state.currentPosition = 2 # advance to position before _
+        @assertNextMatchSequence(token, state, [
+            2
+        ])
+        
+        state.currentPosition = 3 # advance to position before 0
+        @assertNextMatchSequence(token, state, [
+            3
+        ])
+        
+        state.currentPosition = 4 # advance to position before -
+        @assertNextMatchSequence(token, state, [])
+        
+        state.currentPosition = 5 # advance to position before b
+        @assertNextMatchSequence(token, state, [])
+        
+        state.currentPosition = 6 # advance to position at end of string
+        @assertNextMatchSequence(token, state, [])
+        
+        state = @Regex.setupInitialState("")
+        @assertNextMatchSequence(token, state, [
+            1
+        ])
+        
+        state = @Regex.setupInitialState("-")
+        @assertNextMatchSequence(token, state, [
+            1
+        ])
+        state.currentPosition = 2 # advance to position at end of string
+        @assertNextMatchSequence(token, state, [
+            2
+        ])
 
     # This function assumes that the sequence does not contain the ultimate "false"
     assertNextMatchSequence: (token, state, sequence) ->

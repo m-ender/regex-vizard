@@ -47,16 +47,14 @@ class root.Character extends root.Token
 class root.CharacterClass extends root.Token
     # negated is a boolean
     constructor: (@negated = false, character, ranges, subclasses) ->
+        super()
         @characters = character or []
         @ranges = ranges or []
         @subclasses = subclasses or []
-        super()
         
     reset: () ->
         super()
         @attempted = false
-        for subclass in @subclasses
-            subclass.reset()
         
     addCharacter: (character) ->
         @characters.push(character)
@@ -73,30 +71,35 @@ class root.CharacterClass extends root.Token
             return false
             
         char = state.input[state.currentPosition]
-        
-        if char is EndGuard
-            return false
-        
-        inClass = false
-        if char in @characters
-            inClass = true
-        else
-            for range in @ranges
-                if range.start <= char.charCodeAt(0) <= range.end
-                    inClass = true
-                    break
-                    
-        unless inClass
-            for subclass in @subclasses
-                if subclass.nextMatch(state, report)
-                    inClass = true
-                    break
-        
-        if inClass isnt @negated
+                
+        if @isInClass(char)
             @attempted = true
             return state.currentPosition + 1
             
         return false
+        
+    # This can be used to query whether a character is inside the class without changing the token's
+    # internal state. This is useful for nested character classes and word boundaries.
+    isInClass: (char) ->
+        if char in [StartGuard, EndGuard] # the StartGuard is only included for use in word boundaries
+            return false
+            
+        inSet = false
+        if char in @characters
+            inSet = true
+        else
+            for range in @ranges
+                if range.start <= char.charCodeAt(0) <= range.end
+                    inSet = true
+                    break
+                    
+        unless inSet
+            for subclass in @subclasses
+                if subclass.isInClass(char)
+                    inSet = true
+                    break
+                    
+        return inSet isnt @negated
 
 # For built-in \d and \D        
 class root.DigitClass extends root.CharacterClass
@@ -196,7 +199,27 @@ class root.EndAnchor extends root.Token
             @attempted = true
             return state.currentPosition
         return false
-
+        
+class root.WordBoundary extends root.Token
+    constructor: (@negated = false) ->
+        super()
+        @wordClass = new WordClass()
+        
+    reset: () ->
+        super()
+        @attempted = false
+        
+    nextMatch: (state, report) ->
+        if @attempted
+            @reset()
+            return false
+        leftChar = state.input[state.currentPosition-1]
+        rightChar = state.input[state.currentPosition]
+        if (@wordClass.isInClass(leftChar) isnt @wordClass.isInClass(rightChar)) isnt @negated
+            @attempted = true
+            return state.currentPosition
+        return false           
+        
 class root.Disjunction extends root.Token
     constructor: (token) ->
         super(token)
