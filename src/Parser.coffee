@@ -159,13 +159,18 @@ class root.Parser
                     [i, lastCharacter] = @parseCharacterClassEscapeSequence(string, i+1)
                     characters.push(lastCharacter)
                 when "-"
-                    if lastCharacter and i+1 < string.length and string.charAt(i+1) != "]"
+                    if lastCharacter and i+1 < string.length and (nextCharacter = string.charAt(i+1)) != "]"
                         startC = lastCharacter.charCodeAt(0)
-                        endC = string.charAt(i+1).charCodeAt(0)
+                        
+                        newI = i + 2
+                        if nextCharacter == "\\"
+                            [newI, nextCharacter] = @parseCharacterClassEscapeSequence(string, i+2)
+                        endC = nextCharacter.charCodeAt(0)
+                        
                         if startC > endC
                             throw  {
                                 name: "CharacterClassRangeOutOfOrderException"
-                                message: "The character class \"" + characters[i-1] + "-" + characters[i+1] + "\" is out of order."
+                                message: "The character class \"#{lastCharacter}\" to \"#{nextCharacter}\" is out of order."
                             }
                         characters.pop()
                         lastCharacter = false
@@ -173,7 +178,7 @@ class root.Parser
                             start: startC
                             end:   endC
                         )
-                        i += 2
+                        i = newI
                     else
                         lastCharacter = char
                         characters.push(lastCharacter)                        

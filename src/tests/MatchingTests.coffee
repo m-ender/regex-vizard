@@ -389,6 +389,11 @@ TestCase("MatchingTests",
         assertTrue(regex.test("Z"))
         assertTrue(regex.test("5"))
         assertFalse(regex.test("="))
+        regex = new Regex("^[[-\\]]$")
+        assertTrue(regex.test("["))
+        assertTrue(regex.test("\\"))
+        assertTrue(regex.test("]"))
+        assertFalse(regex.test("-"))
         
     "testNegatedCharacterClassRange": () ->
         regex = new Regex("[^a-c]")

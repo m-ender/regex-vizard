@@ -51,6 +51,39 @@ for(var i = 0; i < 0xFFFF; i++) if(/[\B]/.test(String.fromCharCode(i))) console.
 for(var i = 0; i < 0xFFFF; i++) if(/[\1]/.test(String.fromCharCode(i))) console.log(i, i.toString(16), String.fromCharCode(i))
 for(var i = 0; i < 0xFFFF; i++) if(/[\5]/.test(String.fromCharCode(i))) console.log(i, i.toString(16), String.fromCharCode(i))
 
+===================================
+Nested character classes and ranges
+===================================
+
+Putting a built-in character class inside a normal character class next to a hyphen is generally undefined behavior.
+Accordingly, browsers handle this quite differently.
+
+Chrome:
+Hyphens next to built-in character classes are treated as literal hyphens. There is one odd case, where consecutive
+hyphens *after* a character class are all literal ones. So:
+[\0--\d] matches everything from \0 to - and digits
+[\0-\d] matches only \0, - and digits
+[--\d] matches - and digits
+[-\d] matches - and digits
+[\d-] matches - and digits
+[\d--] matches - and digits
+[\d-0] matches - and digits (as 0 is already included in \d)
+[\d---] matches - and digits
+[\d---0] matches - and digits (as 0 is already included in \d)
+These last cases show that Chrome does not start reading ranges again, although a second or third hyphen (after the
+first one that's literal) could theoretically be treated as range.
+
+Firefox:
+Hyphens in front of built-in character classes raise an error (unless the hyphen is a literal one for other reasons).
+Hyphens after a built-in character class are treated literally. Oddly enough, it seems that the first two hyphens are
+treated literally AND cannot be included in a range, so that only the fourth one starts creating ranges again. Hence
+[\d-0]
+[\d--0] and
+[\d---0] match only - and 0
+while
+[\d----0] (as well as any greater even number of hyphens) match . and / (from the - to 0 range) as well.
+
+
 ================
 Unmatched braces
 ================
