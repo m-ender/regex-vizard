@@ -457,42 +457,97 @@ TestCase("MatchingTests",
         assertSame("aca", regex.match("bacaba"))
         
     "testBuiltInCharacterClasses": () ->
+        assertCharCodeTrue = (cl, charCodeRange) ->
+            for i in charCodeRange
+                char = String.fromCharCode(i)
+                assertTrue("#{cl} failed to match character #{i} (0x#{i.toString(16)}): #{char}", regex.test(char))
+            
+        assertCharCodeFalse = (cl, charCodeRange) ->
+            for i in charCodeRange
+                char = String.fromCharCode(i)
+                assertFalse("#{cl} erroneously match character #{i} (0x#{i.toString(16)}): #{char}", regex.test(char))
+            
+        regex = new Regex("^\\d$")
+        assertCharCodeFalse("\\d", [0..47])
+        assertCharCodeTrue("\\d", [48..57]) # digits 0 to 9
+        assertCharCodeFalse("\\d", [58..0xffff])
+        
+        regex = new Regex("^\\D$")
+        assertFalse(regex.test(""))
+        assertCharCodeTrue("\\D", [0..47])
+        assertCharCodeFalse("\\D", [48..57]) # digits 0 to 9
+        assertCharCodeTrue("\\D", [58..0xffff])
+            
         regex = new Regex("^\\w$")
-        for i in [0..47]
-            assertFalse(regex.test(String.fromCharCode(i)))
-        for i in [48..57] # digits 0 to 9
-            assertTrue(regex.test(String.fromCharCode(i)))
-        for i in [58..64]
-            assertFalse(regex.test(String.fromCharCode(i)))
-        for i in [65..90] # letters A to Z
-            assertTrue(regex.test(String.fromCharCode(i)))
-        for i in [91..94]
-            assertFalse(regex.test(String.fromCharCode(i)))
-        assertTrue(regex.test("_"))
-        assertFalse(regex.test("`"))
-        for i in [97..122] # letters a to z
-            assertTrue(regex.test(String.fromCharCode(i)))
-        for i in [123..0xFFFF] 
-            char = String.fromCharCode(i)
-            assertFalse("\\w erroneously matched character " + i + ": " + char, regex.test(char))
+        assertCharCodeFalse("\\w", [0..47])
+        assertCharCodeTrue("\\w", [48..57]) # digits 0 to 9
+        assertCharCodeFalse("\\w", [58..64])
+        assertCharCodeTrue("\\w", [65..90]) # letters A to Z
+        assertCharCodeFalse("\\w", [91..94])
+        assertCharCodeTrue("\\w", [95]) # "_"
+        assertCharCodeFalse("\\w", [96]) # "`"
+        assertCharCodeTrue("\\w", [97..122]) # letters a to z
+        assertCharCodeFalse("\\w", [123..0xffff])
+        
         regex = new Regex("^\\W$")
         assertFalse(regex.test(""))
-        for i in [0..47]
-            assertTrue(regex.test(String.fromCharCode(i)))
-        for i in [48..57] # digits 0 to 9
-            assertFalse(regex.test(String.fromCharCode(i)))
-        for i in [58..64]
-            assertTrue(regex.test(String.fromCharCode(i)))
-        for i in [65..90] # letters A to Z
-            assertFalse(regex.test(String.fromCharCode(i)))
-        for i in [91..94]
-            assertTrue(regex.test(String.fromCharCode(i)))
-        assertFalse(regex.test("_"))
-        assertTrue(regex.test("`"))
-        for i in [97..122] # letters a to z
-            assertFalse(regex.test(String.fromCharCode(i)))
-        for i in [123..0xFFFF] 
-            char = String.fromCharCode(i)
-            assertTrue("\\w erroneously matched character " + i + ": " + char, regex.test(char))
+        assertCharCodeTrue("\\W", [0..47])
+        assertCharCodeFalse("\\W", [48..57]) # digits 0 to 9
+        assertCharCodeTrue("\\W", [58..64])
+        assertCharCodeFalse("\\W", [65..90]) # letters A to Z
+        assertCharCodeTrue("\\W", [91..94])
+        assertCharCodeFalse("\\W", [95]) # "_"
+        assertCharCodeTrue("\\W", [96]) # "`"
+        assertCharCodeFalse("\\W", [97..122]) # letters a to z
+        assertCharCodeTrue("\\W", [123..0xffff])
         
+        regex = new Regex("^\\s$")
+        assertCharCodeFalse("\\s", [0x0..0x8])
+        assertCharCodeTrue("\\s", [0x9..0xd]) # horizontal tab, line feed, vertical tab, form feed, carriage return
+        assertCharCodeFalse("\\s", [0xe..0x1f])
+        assertCharCodeTrue("\\s", [0x20]) # space
+        assertCharCodeFalse("\\s", [0x21..0x9f])
+        assertCharCodeTrue("\\s", [0xa0]) # no-break space
+        assertCharCodeFalse("\\s", [0xa1..0x167f])
+        assertCharCodeTrue("\\s", [0x1680]) # ogham space mark
+        assertCharCodeFalse("\\s", [0x1681..0x180d])
+        assertCharCodeTrue("\\s", [0x180e]) # mongolian vowel separator
+        assertCharCodeFalse("\\s", [0x180f..0x1fff])
+        assertCharCodeTrue("\\s", [0x2000..0x200a]) # several punctuation and typesetting related spaces
+        assertCharCodeFalse("\\s", [0x200b..0x2027])
+        assertCharCodeTrue("\\s", [0x2028..0x2029]) # Unicode line separator and paragraph separator
+        assertCharCodeFalse("\\s", [0x202a..0x202e])
+        assertCharCodeTrue("\\s", [0x202f]) # Narrow no-break space
+        assertCharCodeFalse("\\s", [0x2030..0x205e])
+        assertCharCodeTrue("\\s", [0x205f]) # Medium mathematical space
+        assertCharCodeFalse("\\s", [0x2060..0x2fff])
+        assertCharCodeTrue("\\s", [0x3000]) # Ideographic space
+        assertCharCodeFalse("\\s", [0x3001..0xfefe])
+        assertCharCodeTrue("\\s", [0xfeff]) # Zero-width no-break space
+        assertCharCodeFalse("\\s", [0xff00..0xffff])
+        
+        regex = new Regex("^\\S$")
+        assertCharCodeTrue("\\S", [0x0..0x8])
+        assertCharCodeFalse("\\S", [0x9..0xd]) # horizontal tab, line feed, vertical tab, form feed, carriage return
+        assertCharCodeTrue("\S", [0xe..0x1f])
+        assertCharCodeFalse("\\S", [0x20]) # space
+        assertCharCodeTrue("\S", [0x21..0x9f])
+        assertCharCodeFalse("\\S", [0xa0]) # no-break space
+        assertCharCodeTrue("\\S", [0xa1..0x167f])
+        assertCharCodeFalse("\\S", [0x1680]) # ogham space mark
+        assertCharCodeTrue("\\S", [0x1681..0x180d])
+        assertCharCodeFalse("\\S", [0x180e]) # mongolian vowel separator
+        assertCharCodeTrue("\\S", [0x180f..0x1fff])
+        assertCharCodeFalse("\\S", [0x2000..0x200a]) # several punctuation and typesetting related spaces
+        assertCharCodeTrue("\\S", [0x200b..0x2027])
+        assertCharCodeFalse("\\S", [0x2028..0x2029]) # Unicode line separator and paragraph separator
+        assertCharCodeTrue("\\S", [0x202a..0x202e])
+        assertCharCodeFalse("\\S", [0x202f]) # Narrow no-break space
+        assertCharCodeTrue("\\S", [0x2030..0x205e])
+        assertCharCodeFalse("\\S", [0x205f]) # Medium mathematical space
+        assertCharCodeTrue("\\S", [0x2060..0x2fff])
+        assertCharCodeFalse("\\S", [0x3000]) # Ideographic space
+        assertCharCodeTrue("\\S", [0x3001..0xfefe])
+        assertCharCodeFalse("\\S", [0xfeff]) # Zero-width no-break space
+        assertCharCodeTrue("\\S", [0xff00..0xffff])
 )

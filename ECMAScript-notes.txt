@@ -5,7 +5,9 @@ test262
 =======
 
 Chrome passes all tests in 15.10.
+
 Firefox fails S15.10.2.12_A[12]_T1
+In particular \s does not include the zero-width no-break space character with character code 0xfeff.
 
 =====================
 Quantified assertions
@@ -45,9 +47,9 @@ escape sequences as octal ones.
 
 Test snippets:
 
-for(var i = 0; i < 1000; i++) if(/[\B]/.test(String.fromCharCode(i))) console.log(i, String.fromCharCode(i))
-for(var i = 0; i < 1000; i++) if(/[\1]/.test(String.fromCharCode(i))) console.log(i, String.fromCharCode(i))
-for(var i = 0; i < 1000; i++) if(/[\5]/.test(String.fromCharCode(i))) console.log(i, String.fromCharCode(i))
+for(var i = 0; i < 0xFFFF; i++) if(/[\B]/.test(String.fromCharCode(i))) console.log(i, i.toString(16), String.fromCharCode(i))
+for(var i = 0; i < 0xFFFF; i++) if(/[\1]/.test(String.fromCharCode(i))) console.log(i, i.toString(16), String.fromCharCode(i))
+for(var i = 0; i < 0xFFFF; i++) if(/[\5]/.test(String.fromCharCode(i))) console.log(i, i.toString(16), String.fromCharCode(i))
 
 ================
 Unmatched braces

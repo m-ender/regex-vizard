@@ -95,6 +95,12 @@ class root.Parser
                 @append(current, new Character("\v"))
                 
             # built-in character classes
+            when "d", "D"
+                negated = char is "D"
+                @append(current, new CharacterClass(negated, [], [
+                    start: "0".charCodeAt(0)
+                    end:   "9".charCodeAt(0)
+                ]))
             when "w", "W"
                 negated = char is "W"
                 @append(current, new CharacterClass(negated, ["_"], [
@@ -106,6 +112,26 @@ class root.Parser
                    ,
                     start: "0".charCodeAt(0)
                     end:   "9".charCodeAt(0)
+                ]))
+            when "s", "S"
+                negated = char is "S"
+                @append(current, new CharacterClass(negated, [
+                    "\u0020" # space
+                    "\u00a0" # no-break space
+                    "\u1680" # ogham space mark
+                    "\u180e" # mongolian vowel separator
+                    "\u2028" # Unicode line separator
+                    "\u2029" # Unicode paragraph separator
+                    "\u202f" # narrow no-break space
+                    "\u205f" # medium mathematical space
+                    "\u3000" # ideographic space
+                    "\ufeff" # zero-width no-break space
+                ], [
+                    start: 0x9    # horizontal tab, line feed, vertical tab, form feed, carriage return
+                    end:   0xd
+                   ,
+                    start: 0x2000 # various punctuation and typesetting related characters 
+                    end:   0x200a
                 ]))
             else
                 @append(current, new Character(char))

@@ -373,7 +373,7 @@ TestCase("TokenTests",
         ])
         
         state.currentPosition = 4 # advance to position before d
-        @assertNextMatchSequence(token, state, [])       
+        @assertNextMatchSequence(token, state, [])     
 
     # This function assumes that the sequence does not contain the ultimate "false"
     assertNextMatchSequence: (token, state, sequence) ->
