@@ -242,6 +242,7 @@ TestCase("ParsingTests",
             )
             
         assertParsingException("\\", "NothingToEscapeException")
+        assertParsingException("[\\", "NothingToEscapeException")
         assertParsingException(")", "UnmatchedClosingParenthesisException")
         assertParsingException("())", "UnmatchedClosingParenthesisException")
         assertParsingException("(", "MissingClosingParenthesisException")
@@ -264,8 +265,11 @@ TestCase("ParsingTests",
         assertParsingException("$+", "NothingToRepeatException")
         assertParsingException("[", "UnterminatedCharacterClassException")
         assertParsingException("[a", "UnterminatedCharacterClassException")
+        assertParsingException("[\\]", "UnterminatedCharacterClassException")
         assertParsingException("[^", "UnterminatedCharacterClassException")
         assertParsingException("[b-a]", "CharacterClassRangeOutOfOrderException")
+        assertParsingException("[\\d-a]", "CharacterClassInRangeException")
+        assertParsingException("[a-\\d]", "CharacterClassInRangeException")
         
     assertSyntaxTree: (expectedTree, actualTree) ->
         #console.log(actualTree, expectedTree.type)

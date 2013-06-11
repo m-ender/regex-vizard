@@ -46,14 +46,17 @@ class root.Character extends root.Token
         
 class root.CharacterClass extends root.Token
     # negated is a boolean
-    constructor: (@negated = false, character, ranges) ->
-        super()
+    constructor: (@negated = false, character, ranges, subclasses) ->
         @characters = character or []
         @ranges = ranges or []
+        @subclasses = subclasses or []
+        super()
         
     reset: () ->
         super()
         @attempted = false
+        for subclass in @subclasses
+            subclass.reset()
         
     addCharacter: (character) ->
         @characters.push(character)
@@ -80,6 +83,12 @@ class root.CharacterClass extends root.Token
         else
             for range in @ranges
                 if range.start <= char.charCodeAt(0) <= range.end
+                    inClass = true
+                    break
+                    
+        unless inClass
+            for subclass in @subclasses
+                if subclass.nextMatch(state, report)
                     inClass = true
                     break
         

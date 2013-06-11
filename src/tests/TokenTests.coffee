@@ -373,7 +373,19 @@ TestCase("TokenTests",
         ])
         
         state.currentPosition = 4 # advance to position before d
-        @assertNextMatchSequence(token, state, [])     
+        @assertNextMatchSequence(token, state, [])
+
+    "testNestedCharacterClass": () ->
+        state = @Regex.setupInitialState("0")
+        # Put together token for regex /[\d]/
+        token = new CharacterClass(false, [], [], [new CharacterClass(false, [], [
+            start: "0".charCodeAt(0)
+            end:   "9".charCodeAt(0)
+        ])])
+        
+        @assertNextMatchSequence(token, state, [
+            2 # "1" is part of the class
+        ])
 
     # This function assumes that the sequence does not contain the ultimate "false"
     assertNextMatchSequence: (token, state, sequence) ->

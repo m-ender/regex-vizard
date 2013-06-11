@@ -133,6 +133,8 @@ class root.Parser
                     start: 0x2000 # various punctuation and typesetting related characters 
                     end:   0x200a
                 ]))
+                
+            # all other characters are treated literally
             else
                 @append(current, new Character(char))
         
@@ -145,47 +147,58 @@ class root.Parser
         else
             negated = false
             
-        lastCharacter = false
+        lastElement = false
         characters = []
         ranges = []
+        subclasses = []
         
         while i < string.length                
             char = string.charAt(i)
             switch char
                 when "]"
-                    @append(current, new CharacterClass(negated, characters, ranges))
+                    @append(current, new CharacterClass(negated, characters, ranges, subclasses))
                     return i+1
                 when "\\"
-                    [i, lastCharacter] = @parseCharacterClassEscapeSequence(string, i+1)
-                    characters.push(lastCharacter)
+                    [i, lastElement] = @parseCharacterClassEscapeSequence(string, i+1)
+                    if lastElement instanceof CharacterClass
+                        subclasses.push(lastElement)
+                    else
+                        characters.push(lastElement)
                 when "-"
-                    if lastCharacter and i+1 < string.length and (nextCharacter = string.charAt(i+1)) != "]"
-                        startC = lastCharacter.charCodeAt(0)
+                    if lastElement and i+1 < string.length and (nextElement = string.charAt(i+1)) != "]"
                         
                         newI = i + 2
-                        if nextCharacter == "\\"
-                            [newI, nextCharacter] = @parseCharacterClassEscapeSequence(string, i+2)
-                        endC = nextCharacter.charCodeAt(0)
+                        if nextElement == "\\"
+                            [newI, nextElement] = @parseCharacterClassEscapeSequence(string, i+2)
                         
+                        if lastElement instanceof CharacterClass or nextElement instanceof CharacterClass
+                            throw {
+                                name: "CharacterClassInRangeException"
+                                message: "Built-in character classes cannot be used in ranges"
+                            }
+                        
+                        startC = lastElement.charCodeAt(0)
+                        endC = nextElement.charCodeAt(0)
+                                                
                         if startC > endC
-                            throw  {
+                            throw {
                                 name: "CharacterClassRangeOutOfOrderException"
-                                message: "The character class \"#{lastCharacter}\" to \"#{nextCharacter}\" is out of order."
+                                message: "The character class \"#{lastElement}\" to \"#{nextElement}\" is out of order."
                             }
                         characters.pop()
-                        lastCharacter = false
+                        lastElement = false
                         ranges.push(
                             start: startC
                             end:   endC
                         )
                         i = newI
                     else
-                        lastCharacter = char
-                        characters.push(lastCharacter)                        
+                        lastElement = char
+                        characters.push(lastElement)                        
                         ++i
                 else
-                    lastCharacter = char
-                    characters.push(lastCharacter)
+                    lastElement = char
+                    characters.push(lastElement)
                     ++i
         
         throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
@@ -203,24 +216,67 @@ class root.Parser
             }
         char = string.charAt(i)
         switch char
+            # special characters
             when "0"
-                actualChar = "\0"
+                element = "\0"
             when "f"
-                actualChar = "\f"
+                element = "\f"
             when "n"
-                actualChar = "\n"
+                element = "\n"
             when "r"
-                actualChar = "\r"
+                element = "\r"
             when "t"
-                actualChar = "\t"
+                element = "\t"
             when "v"
-                actualChar = "\v"
+                element = "\v"
             when "b" # this one is special to character classes
-                actualChar = "\b"
+                element = "\b"
+                
+            # built-in character classes
+            when "d", "D"
+                negated = char is "D"
+                element = new CharacterClass(negated, [], [
+                    start: "0".charCodeAt(0)
+                    end:   "9".charCodeAt(0)
+                ])
+            when "w", "W"
+                negated = char is "W"
+                element = new CharacterClass(negated, ["_"], [
+                    start: "A".charCodeAt(0)
+                    end:   "Z".charCodeAt(0)
+                   ,
+                    start: "a".charCodeAt(0)
+                    end:   "z".charCodeAt(0)
+                   ,
+                    start: "0".charCodeAt(0)
+                    end:   "9".charCodeAt(0)
+                ])
+            when "s", "S"
+                negated = char is "S"
+                element = new CharacterClass(negated, [
+                    "\u0020" # space
+                    "\u00a0" # no-break space
+                    "\u1680" # ogham space mark
+                    "\u180e" # mongolian vowel separator
+                    "\u2028" # Unicode line separator
+                    "\u2029" # Unicode paragraph separator
+                    "\u202f" # narrow no-break space
+                    "\u205f" # medium mathematical space
+                    "\u3000" # ideographic space
+                    "\ufeff" # zero-width no-break space
+                ], [
+                    start: 0x9    # horizontal tab, line feed, vertical tab, form feed, carriage return
+                    end:   0xd
+                   ,
+                    start: 0x2000 # various punctuation and typesetting related characters 
+                    end:   0x200a
+                ])
+                
+            # all other characters are treated literally
             else
-                actualChar = char
+                element = char
         
-        return [i + 1, actualChar]
+        return [i + 1, element]
         
     parseQuantifier: (current, char, i) ->
         st = current.subtokens

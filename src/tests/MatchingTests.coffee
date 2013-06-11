@@ -555,4 +555,46 @@ TestCase("MatchingTests",
         assertCharCodeTrue("\\S", [0x3001..0xfefe])
         assertCharCodeFalse("\\S", [0xfeff]) # Zero-width no-break space
         assertCharCodeTrue("\\S", [0xff00..0xffff])
+        
+    "testNestedCharacterClass": () ->
+        assertCharCodeTrue = (cl, charCodeRange) ->
+            for i in charCodeRange
+                char = String.fromCharCode(i)
+                assertTrue("#{cl} failed to match character #{i} (0x#{i.toString(16)}): #{char}", regex.test(char))
+            
+        assertCharCodeFalse = (cl, charCodeRange) ->
+            for i in charCodeRange
+                char = String.fromCharCode(i)
+                assertFalse("#{cl} erroneously match character #{i} (0x#{i.toString(16)}): #{char}", regex.test(char))
+            
+        regex = new Regex("^[\\d]$")
+        assertCharCodeFalse("[\\d]", [0..47])
+        assertCharCodeTrue("[\\d]", [48..57]) # digits 0 to 9
+        assertCharCodeFalse("[\\d]", [58..0xffff])
+        
+        regex = new Regex("^[\\D]$")
+        assertFalse(regex.test(""))
+        assertCharCodeTrue("[\\D]", [0..47])
+        assertCharCodeFalse("[\\D]", [48..57]) # digits 0 to 9
+        assertCharCodeTrue("[\\D]", [58..0xffff])
+            
+        regex = new Regex("^[^\\D]$")
+        assertCharCodeFalse("[^\\D]", [0..47])
+        assertCharCodeTrue("[^\\D]", [48..57]) # digits 0 to 9
+        assertCharCodeFalse("[^\\D]", [58..0xffff])
+        
+        regex = new Regex("^[^\\d]$")
+        assertFalse(regex.test(""))
+        assertCharCodeTrue("[^\\d]", [0..47])
+        assertCharCodeFalse("[^\\d]", [48..57]) # digits 0 to 9
+        assertCharCodeTrue("[^\\d]", [58..0xffff])
+        
+        regex = new Regex("^[\\s\\S]$")
+        assertFalse(regex.test(""))
+        assertCharCodeTrue("[\\s\\S]", [0..0xffff])
+        
+        regex = new Regex("^[^\\s\\S]$")
+        assertFalse(regex.test(""))
+        assertCharCodeFalse("[^\\s\\S]", [0..0xffff])
+        
 )
