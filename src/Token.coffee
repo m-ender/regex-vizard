@@ -280,18 +280,25 @@ class root.Sequence extends root.Token
                     return -1
 
 class root.Group extends root.Token
-    constructor: (token) ->
+    constructor: (token, @index) ->
         super(token)
         
     reset: () ->
         super()
         @result = 0
+        @firstPosition = false
         
     nextMatch: (state, report) ->
         if @result isnt 0
             result = @result
-            @result = 0
+            if result is false
+                @reset()
+            else
+                @result = 0
             return result
+            
+        if @firstPosition is false
+            @firstPosition = state.currentPosition
             
         result = @subtokens[0].nextMatch(state, report)
         switch result
@@ -299,21 +306,32 @@ class root.Group extends root.Token
                 return result
             when false
                 @result = false
+                state.captures[@index] = undefined
                 return 0
             else
+                state.captures[@index] = state.input[@firstPosition...result].join("")
                 @result = result
                 return -1
         
 class root.Quantifier extends root.Token
     constructor: (token, @min, @max) ->
         super(token)
+        @minGroup = -1
+        @nGroups = 0
+        @clearer = []
         
     reset: () ->
         super()
         @instances = [@clone(@subtokens[0])] # instances of the subtoken used for the individual repetitions
         @pos = []                            # "current" positions that were used for successful matches
         @result = false
-        @emptyInstances = 0
+        @captureStack = []                   # remembers the captures of hidden instances on the above stack
+        
+    # @minGroup is the smallest group number contained in the subtokens of this quantifier
+    # @nGroups is the number of groups contained in the subtokens of this quantifier
+    setGroupRange: (@minGroup, @nGroups) ->
+        for i in [0...@nGroups]
+            @clearer[i] = undefined
         
     nextMatch: (state, report) ->
         if @result
@@ -332,9 +350,10 @@ class root.Quantifier extends root.Token
             @instances.pop()
             result = state.currentPosition
             if @pos.length > 0
-                state.currentPosition = @pos.pop()            
-            if result == state.currentPosition
-                --@emptyInstances
+                state.currentPosition = @pos.pop()
+                            
+            if @captureStack.length > 0
+                state.captures[@minGroup...@minGroup+@nGroups] = @captureStack.pop()
             return result
             
         instance = @instances.pop()
@@ -348,16 +367,18 @@ class root.Quantifier extends root.Token
                 @result = state.currentPosition
                 if @pos.length > 0
                     state.currentPosition = @pos.pop()
-                    if @result == state.currentPosition
-                        --@emptyInstances
+                if @captureStack.length > 0
+                    state.captures[@minGroup...@minGroup+@nGroups] = @captureStack.pop()
+                
                 return 0
             else
                 @instances.push(instance)
-                if result == state.currentPosition and @emptyInstances >= @min
+                # only the first @min instances are allowed to match empty, to avoid infinite loops
+                if result == state.currentPosition and @instances.length > @min
                     return @nextMatch(state, report)
-                
-                if result == state.currentPosition
-                    ++@emptyInstances
+
+                @captureStack.push(state.captures[@minGroup...@minGroup+@nGroups])
+                state.captures[@minGroup...@minGroup+@nGroups] = @clearer
                 
                 @instances.push(@clone(@subtokens[0]))
                 @pos.push(state.currentPosition)
@@ -379,38 +400,6 @@ class root.Quantifier extends root.Token
 class root.Option extends root.Quantifier
     constructor: (token) ->
         super(token, 0, 1)
-        
-    reset: () ->
-        super()
-        @result = false
-        
-    nextMatch: (state, report) ->
-        if @result
-            result = @result
-            @result = false
-            return result
-        
-        switch @repetitions
-            when 1
-                result = @subtokens[0].nextMatch(state, report)
-                
-                if result == false
-                    --@repetitions
-                    return 0
-                else if result <= 0
-                    return result
-                else
-                    @result = result
-                    return -1
-            when 0
-                --@repetitions
-                return state.currentPosition
-            when -1
-                @reset()
-                return false
-        
-    reset: () ->
-        @repetitions = 1
         
 class root.RepeatZeroOrMore extends root.Quantifier
     constructor: (token) ->

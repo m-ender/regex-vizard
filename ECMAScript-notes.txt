@@ -108,3 +108,7 @@ Test snippets:
 /a{2,a}/.exec("a{2,a}")
 /a{2,()}/.exec("a{2}")
 /a{a}/.exec("a{a}")
+
+This includes missing minimum values:
+
+/a{,2}/.exec("a{,2}") // matches the entire input string

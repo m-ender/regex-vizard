@@ -8,11 +8,12 @@ class root.Parser
         # disjunction of sequences (possibly with only one alternative or only one token in the sequence).
         # Unnecessary disjunctions and sequences will be removed at the end.
         # We also use a group as the root of the pattern, which will correspond to capturing group 0.
-        regex = new Group()
+        regex = new Group(new Disjunction(new Sequence()), 0)
         nestingStack = []
-        current = new Disjunction(new Sequence())
-        regex.subtokens.push(current)
+        current = regex.subtokens[0]
         i = 0
+        
+        lastCaptureIndex = 0
 
         while i < string.length
             char = string.charAt(i)
@@ -34,7 +35,7 @@ class root.Parser
                     current.subtokens.push(new Sequence())
                     ++i
                 when "("
-                    group = new Group(new Disjunction(new Sequence()))
+                    group = new Group(new Disjunction(new Sequence()), ++lastCaptureIndex)
                     @append(current, group)
                     nestingStack.push(current)
                     current = group.subtokens[0]
@@ -59,16 +60,39 @@ class root.Parser
                 message: "Missing closing parenthesis \")\""
             }
         # Now traverse the token tree to remove unnecessary disjunctions and sequences
-        traverse = (token) ->
+        squash = (token) ->
             if token.subtokens.length > 0
                 for i in [0..token.subtokens.length-1]
                     subtoken = token.subtokens[i]
                     while ((subtoken instanceof Disjunction) or (subtoken instanceof Sequence)) and (subtoken.subtokens.length == 1)
                         token.subtokens[i] = subtoken.subtokens[0]
                         subtoken = token.subtokens[i]
-                    traverse(subtoken)
-    
-        traverse(regex)
+                    squash(subtoken)
+        
+        squash(regex)
+        
+        # Now traverse token tree again to tell quantifiers which groups they contain
+        fillGroupRanges = (token) ->
+            if token instanceof Group
+                min = token.index
+                max = token.index
+            else
+                min = Infinity
+                max = -Infinity
+                
+            if token.subtokens.length > 0
+                for subtoken in token.subtokens
+                    [subMin, subMax] = fillGroupRanges(subtoken)
+                    min = Math.min(min, subMin)
+                    max = Math.max(max, subMax)
+                    
+            if token instanceof Quantifier and min < Infinity and max > -Infinity
+                    token.setGroupRange(min, max-min+1)
+                    
+            return [min, max]
+        
+        [_, regex.maxGroup] = fillGroupRanges(regex)
+        
         return regex
         
     parseEscapeSequence: (string, current, i) ->
