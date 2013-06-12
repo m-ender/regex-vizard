@@ -19,7 +19,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("bra"))
         assertTrue(regex.test("abra"))
         assertFalse(regex.test("b"))
-        assertSame("a", regex.match("bar"))
+        assertEquals(["a"], regex.match("bar"))
 
     "testMultipleCharacters": () ->
         regex = new Regex("aa")
@@ -38,15 +38,15 @@ TestCase("MatchingTests",
         assertFalse(regex.test("a"))
         assertTrue(regex.test("aba"))
         assertFalse(regex.test("bb"))
-        assertSame("ab", regex.match("aabar"))
+        assertEquals(["ab"], regex.match("aabar"))
         
     "testAnchors": () ->
         regex = new Regex("^")
         assertTrue(regex.test("a"))
-        assertSame("", regex.match("a"))
+        assertEquals([""], regex.match("a"))
         regex = new Regex("$")
         assertTrue(regex.test("a"))
-        assertSame("", regex.match("a"))
+        assertEquals([""], regex.match("a"))
         regex = new Regex("^$")
         assertTrue(regex.test(""))
         assertFalse(regex.test("a"))
@@ -65,7 +65,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("ab"))
         assertFalse(regex.test("ba"))
         assertFalse(regex.test("bar"))
-        assertSame("a", regex.match("a"))
+        assertEquals(["a"], regex.match("a"))
         regex = new Regex("^bar")
         assertTrue(regex.test("bara"))
         assertFalse(regex.test("abar"))
@@ -91,11 +91,11 @@ TestCase("MatchingTests",
         assertTrue(regex.test("\f"))
         assertTrue(regex.test(" "))
         assertTrue(regex.test("\t"))
-        assertSame("a", regex.match("a"))
+        assertEquals(["a"], regex.match("a"))
         regex = new Regex("..")
         assertTrue(regex.test("ab"))
         assertTrue(regex.test("cc"))
-        assertSame("ab", regex.match("ab"))
+        assertEquals(["ab"], regex.match("ab"))
         regex = new Regex(".a.")
         assertTrue(regex.test("bar"))
         assertFalse(regex.test("a"))
@@ -152,7 +152,7 @@ TestCase("MatchingTests",
         regex = new Regex("a\\{2\\}")
         assertFalse(regex.test("aa"))
         regex = new Regex("\\^")
-        assertSame("^", regex.match("^"))
+        assertEquals(["^"], regex.match("^"))
         
     "testEscapeSequences": () ->
         regex = new Regex("\n")
@@ -206,11 +206,11 @@ TestCase("MatchingTests",
         assertTrue(regex.test("cab"))
         assertFalse(regex.test("cabc"))
         regex = new Regex("a|b|ab")
-        assertSame("a", regex.match("ab"))
+        assertEquals(["a"], regex.match("ab"))
         regex = new Regex("b|ab|a")
-        assertSame("ab", regex.match("ab"))
+        assertEquals(["ab"], regex.match("ab"))
         regex = new Regex("b|a|ab")
-        assertSame("a", regex.match("ab"))
+        assertEquals(["a"], regex.match("ab"))
         
     "testGrouping": () ->
         regex = new Regex("(a)")
@@ -249,7 +249,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("ac"))
         assertFalse(regex.test("ad"))
         assertFalse(regex.test("ae"))
-        assertSame("ab", regex.match("ab"))
+        assertEquals(["ab", "b", undefined], regex.match("ab"))
         regex = new Regex("^a(b|c(d|e))$")
         assertFalse(regex.test("abd"))
         assertFalse(regex.test("abe"))
@@ -259,7 +259,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("ad"))
         assertTrue(regex.test("abd"))
         assertTrue(regex.test("abcd"))
-        assertSame("abcd", regex.match("abcd"))
+        assertEquals(["abcd", "abc"], regex.match("abcd"))
         
     "testOption": () ->
         regex = new Regex("ab?c")
@@ -270,7 +270,7 @@ TestCase("MatchingTests",
         regex = new Regex("a(bc)?d")
         assertTrue(regex.test("abcd"))
         assertTrue(regex.test("ad"))
-        assertSame("abcd", regex.match("abcd"))
+        assertEquals(["abcd", "bc"], regex.match("abcd"))
         
     "testRepeatZeroOrMore": () ->
         regex = new Regex("a*")
@@ -289,7 +289,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("aaaab"))
         regex = new Regex("^(a|b)*$")
         assertTrue(regex.test("abababbaabab"))
-        assertSame("abababbaabab", regex.match("abababbaabab"))
+        assertEquals(["abababbaabab", "b"], regex.match("abababbaabab"))
         
     "testRepeatOneOrMore": () ->
         regex = new Regex("a+")
@@ -308,7 +308,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("aaaab"))
         regex = new Regex("^(a|b)+$")
         assertTrue(regex.test("abababbaabab"))
-        assertSame("abababbaabab", regex.match("abababbaabab"))
+        assertEquals(["abababbaabab", "b"], regex.match("abababbaabab"))
         
     "testInfiniteLoop": () ->
         regex = new Regex("^(a*)*$")
@@ -317,36 +317,38 @@ TestCase("MatchingTests",
         assertFalse(regex.test("b"))
         regex = new Regex("^(a|b|)*$")
         assertFalse(regex.test("abc"))
+        regex = new Regex("(\b)*a")
+        assertFalse(regex.test("b"))
         
     "testLeftMostMatch": () ->
         regex = new Regex("(a|b)")
-        assertSame("a", regex.match("ab"))
-        assertSame("b", regex.match("ba"))
+        assertEquals(["a", "a"], regex.match("ab"))
+        assertEquals(["b", "b"], regex.match("ba"))
         regex = new Regex("a*")
-        assertSame("aa", regex.match("aabaaa"))
+        assertEquals(["aa"], regex.match("aabaaa"))
         
     "testGreediness": () ->
         regex = new Regex("a?")
-        assertSame("a", regex.match("a"))
-        assertSame("", regex.match("b"))
-        assertSame("", regex.match("ba")) # due to left-most matching
+        assertEquals(["a"], regex.match("a"))
+        assertEquals([""], regex.match("b"))
+        assertEquals([""], regex.match("ba")) # due to left-most matching
         regex = new Regex("a*")
-        assertSame("aaaaa", regex.match("aaaaa"))
-        assertSame("", regex.match("baaaaa"))
+        assertEquals(["aaaaa"], regex.match("aaaaa"))
+        assertEquals([""], regex.match("baaaaa"))
         regex = new Regex("a+")
-        assertSame("aaaaa", regex.match("aaaaa"))
-        assertSame("aaaaa", regex.match("baaaaa"))
+        assertEquals(["aaaaa"], regex.match("aaaaa"))
+        assertEquals(["aaaaa"], regex.match("baaaaa"))
         regex = new Regex("(a|b|bc|d)*c")
-        assertSame("abc", regex.match("abcdc"))
+        assertEquals(["abc", "b"], regex.match("abcdc"))
         regex = new Regex("(a|bc|b|d)*c")
-        assertSame("abcdc", regex.match("abcdc"))
+        assertEquals(["abcdc", "d"], regex.match("abcdc"))
         
     "testBasicCharacterClass": () ->
         regex = new Regex("[ac]")
         assertTrue(regex.test("a"))
         assertFalse(regex.test("b"))
         assertTrue(regex.test("c"))
-        assertSame("a", regex.match("ac"))
+        assertEquals(["a"], regex.match("ac"))
         
     "testEmptyCharacterClass": () ->
         regex = new Regex("[]")
@@ -363,7 +365,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("a"))
         assertTrue(regex.test("b"))
         assertFalse(regex.test("c"))
-        assertSame("b", regex.match("acbd"))
+        assertEquals(["b"], regex.match("acbd"))
         
     "testCharacterClassRange": () ->
         regex = new Regex("[a-c]")
@@ -459,7 +461,7 @@ TestCase("MatchingTests",
         regex = new Regex("[ac]+")
         assertTrue(regex.test("aaccacac"))
         assertFalse(regex.test("bde"))
-        assertSame("aca", regex.match("bacaba"))
+        assertEquals(["aca"], regex.match("bacaba"))
         
     "testBuiltInCharacterClasses": () ->
         assertCharCodeTrue = (cl, charCodeRange) ->
@@ -643,4 +645,14 @@ TestCase("MatchingTests",
         assertFalse(regex.test("0foo"))
         assertFalse(regex.test("foo0"))
         assertTrue(regex.test("0foo0"))         
+        
+    "testCapturing": () ->
+        # The following three test cases are taken straight from the ECMAScript standard's notes on capturing
+        # and backtracking.
+        regex = new Regex("((a)|(ab))((c)|(bc))")
+        assertEquals(["abc", "a", "a", undefined, "bc", undefined, "bc"], regex.match("abc"))
+        regex = new Regex("(z)((a+)?(b+)?(c))*")
+        assertEquals(["zaacbbbcac", "z", "ac", "a", undefined, "c"], regex.match("zaacbbbcac"))
+        regex = new Regex("(aa|aabaac|ba|b|c)*")
+        assertEquals(["aaba", "ba"], regex.match("aabaac"))
 )

@@ -9,10 +9,12 @@ class root.Regex
     test: (inputString, report = false) ->
         @regex.reset()
         
+        console.log(@regex) if report
+        
         # Build character array and surround it with -1 and 1 as guards for the
         # start and end of the input string
         console.log("Input string:", inputString) if report
-        state = @setupInitialState(inputString)        
+        state = @setupInitialState(inputString, @regex.maxGroup)        
         console.log("Input:", state.input) if report
 
         while state.startingPosition < state.input.length
@@ -24,13 +26,17 @@ class root.Regex
             else
                 break
         
+        i = 0
+        console.log(state.captures) if report
         return state.startingPosition < state.input.length
         
     match: (inputString, report = false) ->
         @regex.reset()
     
+        console.log(@regex) if report
+        
         console.log("Input string:", inputString) if report
-        state = @setupInitialState(inputString)        
+        state = @setupInitialState(inputString, @regex.maxGroup)        
         console.log("Input:", state.input) if report
 
         while state.startingPosition < state.input.length
@@ -42,7 +48,8 @@ class root.Regex
             else
                 break
         
-        return inputString[state.startingPosition-1...result-1]
+        i = 0
+        return state.captures
         
     # Build character array and surround it with special objects as guards for the
     # start and end of the input string
@@ -51,12 +58,17 @@ class root.Regex
         input.push(EndGuard)
         return input
         
-    setupInitialState: (str) ->
-        return {
+    setupInitialState: (str, maxGroup = 0) ->
+        state =
             inputString: str
             input: @parseInput(str)
             startingPosition: 1
             currentPosition: 1
+            captures: []
             report: () ->
                 console.log("Current match: " + @inputString[@startingPosition-1...@currentPosition-1])
-        }
+        
+        for i in [0..maxGroup]
+            state.captures[i] = undefined
+        
+        return state
