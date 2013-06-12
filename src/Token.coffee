@@ -24,7 +24,7 @@ class root.Token
         # Resets all subtokens recursively
         for subtoken in @subtokens
             subtoken.reset()
-        
+
 # This represents a single literal character
 class root.Character extends root.Token
     constructor: (@character) ->

@@ -19,7 +19,8 @@ class root.Parser
             char = string.charAt(i)
             switch char
                 when "\\"
-                    i = @parseEscapeSequence(string, current, i+1)
+                    [i, element] = @parseEscapeSequence(false, string, i+1)
+                    @append(current, element)
                 when "["
                     i = @parseCharacterClass(string, current, i+1)
                 when "^"
@@ -95,51 +96,6 @@ class root.Parser
         
         return regex
         
-    parseEscapeSequence: (string, current, i) ->
-        if i == string.length
-            throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
-                name: "NothingToEscapeException"
-                message: "There is nothing to escape. Most likely, the pattern ends in a backslash \"\\\""
-                index: i-1
-            }
-        char = string.charAt(i)
-        switch char
-            # special characters
-            when "0"
-                @append(current, new Character("\0"))
-            when "f"
-                @append(current, new Character("\f"))
-            when "n"
-                @append(current, new Character("\n"))
-            when "r"
-                @append(current, new Character("\r"))
-            when "t"
-                @append(current, new Character("\t"))
-            when "v"
-                @append(current, new Character("\v"))
-                
-            # built-in character classes
-            when "d", "D"
-                negated = char is "D"
-                @append(current, new DigitClass(negated))
-            when "w", "W"
-                negated = char is "W"
-                @append(current, new WordClass(negated))
-            when "s", "S"
-                negated = char is "S"
-                @append(current, new WhitespaceClass(negated))
-                
-            # word boundaries
-            when "b", "B"
-                negated = char is "B"
-                @append(current, new WordBoundary(negated))
-                
-            # all other characters are treated literally
-            else
-                @append(current, new Character(char))
-        
-        return i + 1
-        
     parseCharacterClass: (string, current, i) ->
         if i < string.length and string.charAt(i) == "^"
             negated = true
@@ -159,7 +115,7 @@ class root.Parser
                     @append(current, new CharacterClass(negated, characters, ranges, subclasses))
                     return i+1
                 when "\\"
-                    [i, lastElement] = @parseCharacterClassEscapeSequence(string, i+1)
+                    [i, lastElement] = @parseEscapeSequence(true, string, i+1)
                     if lastElement instanceof CharacterClass
                         subclasses.push(lastElement)
                     else
@@ -169,7 +125,7 @@ class root.Parser
                         
                         newI = i + 2
                         if nextElement == "\\"
-                            [newI, nextElement] = @parseCharacterClassEscapeSequence(string, i+2)
+                            [newI, nextElement] = @parseEscapeSequence(true, string, i+2)
                         
                         if lastElement instanceof CharacterClass or nextElement instanceof CharacterClass
                             throw {
@@ -207,7 +163,8 @@ class root.Parser
             index: i
         }
         
-    parseCharacterClassEscapeSequence: (string, i) ->
+    # inCharacterClass is a boolean that indicates where the current sequence was found
+    parseEscapeSequence: (inCharacterClass, string, i) ->
         if i == string.length
             throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
                 name: "NothingToEscapeException"
@@ -229,8 +186,6 @@ class root.Parser
                 element = "\t"
             when "v"
                 element = "\v"
-            when "b" # this one is special to character classes
-                element = "\b"
                 
             # built-in character classes
             when "d", "D"
@@ -243,9 +198,18 @@ class root.Parser
                 negated = char is "S"
                 element = new WhitespaceClass(negated)
                 
+            # treat b correctly
+            when "b"
+                element = if inCharacterClass then "\b" else new WordBoundary(false)
+            when "B"
+                element = if inCharacterClass then "B" else new WordBoundary(true)
+                
             # all other characters are treated literally
             else
                 element = char
+        
+        if typeof element is "string" and not inCharacterClass
+            element = new Character(element)
         
         return [i + 1, element]
         
