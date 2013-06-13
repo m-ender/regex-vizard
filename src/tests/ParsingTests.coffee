@@ -202,6 +202,7 @@ TestCase("ParsingTests",
             
     "testComplexExpression": () ->
         regex = @Parser.parsePattern("d.(a[be]?|c|)*$")
+        console.log(regex)
         expectedTree =
             type: Group
             subtokens: [

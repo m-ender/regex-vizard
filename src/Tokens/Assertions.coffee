@@ -1,8 +1,8 @@
 root = global ? window
 
 class root.StartAnchor extends root.Token    
-    constructor: () ->
-        super()
+    constructor: (debug) ->
+        super(debug)
         
     reset: () ->
         super()
@@ -19,8 +19,8 @@ class root.StartAnchor extends root.Token
         return false
         
 class root.EndAnchor extends root.Token    
-    constructor: () ->
-        super()
+    constructor: (debug) ->
+        super(debug)
         
     reset: () ->
         super()
@@ -37,8 +37,8 @@ class root.EndAnchor extends root.Token
         return false
         
 class root.WordBoundary extends root.Token
-    constructor: (@negated = false) ->
-        super()
+    constructor: (debug, @negated = false) ->
+        super(debug)
         @wordClass = new WordClass()
         
     reset: () ->

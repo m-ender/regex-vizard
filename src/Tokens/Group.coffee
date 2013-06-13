@@ -1,8 +1,8 @@
 root = global ? window
 
 class root.Group extends root.Token
-    constructor: (token, @index) ->
-        super(token)
+    constructor: (debug, token, @index) ->
+        super(debug, token)
         
     reset: () ->
         super()

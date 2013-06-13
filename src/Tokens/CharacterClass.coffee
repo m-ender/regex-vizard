@@ -2,8 +2,8 @@ root = global ? window
 
 class root.CharacterClass extends root.Token
     # negated is a boolean
-    constructor: (@negated = false, character, ranges, subclasses) ->
-        super()
+    constructor: (debug, @negated = false, character, ranges, subclasses) ->
+        super(debug)
         @characters = character or []
         @ranges = ranges or []
         @subclasses = subclasses or []
@@ -59,16 +59,16 @@ class root.CharacterClass extends root.Token
 
 # For built-in \d and \D        
 class root.DigitClass extends root.CharacterClass
-    constructor: (negated = false) ->
-        super(negated, [], [
+    constructor: (debug, negated = false) ->
+        super(debug, negated, [], [
             start: "0".charCodeAt(0)
             end:   "9".charCodeAt(0)
         ])
 
 # For built-in \w and \W        
 class root.WordClass extends root.CharacterClass
-    constructor: (negated = false) ->
-        super(negated, ["_"], [
+    constructor: (debug, negated = false) ->
+        super(debug, negated, ["_"], [
             start: "A".charCodeAt(0)
             end:   "Z".charCodeAt(0)
            ,
@@ -81,8 +81,8 @@ class root.WordClass extends root.CharacterClass
 
 # For built-in \s and \S        
 class root.WhitespaceClass extends root.CharacterClass
-    constructor: (negated = false) ->
-        super(negated, [
+    constructor: (debug, negated = false) ->
+        super(debug, negated, [
             "\u0020" # space
             "\u00a0" # no-break space
             "\u1680" # ogham space mark
@@ -102,8 +102,8 @@ class root.WhitespaceClass extends root.CharacterClass
         ])
     
 class root.Wildcard extends root.Token
-    constructor: () ->
-        super()
+    constructor: (debug) ->
+        super(debug)
         
     reset: () ->
         super()

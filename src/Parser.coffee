@@ -8,35 +8,56 @@ class root.Parser
         # disjunction of sequences (possibly with only one alternative or only one token in the sequence).
         # Unnecessary disjunctions and sequences will be removed at the end.
         # We also use a group as the root of the pattern, which will correspond to capturing group 0.
-        regex = new Group(new Disjunction(new Sequence()), 0)
+        debug =
+            sourceOpenLength: 0
+            sourceCloseLength: 0
+            id: 0
+        regex = new Group(debug, new Disjunction(null, new Sequence()), 0)
         nestingStack = []
         current = regex.subtokens[0]
         i = 0
         
         lastCaptureIndex = 0
-
+        lastId = 0
         while i < string.length
             char = string.charAt(i)
             switch char
                 when "\\"
+                    start = i
                     [i, element] = @parseEscapeSequence(false, string, i+1)
+                    element.debug =
+                        sourceLength: i - start
+                        id: ++lastId
                     @append(current, element)
                 when "["
-                    i = @parseCharacterClass(string, current, i+1)
+                    i = @parseCharacterClass(string, current, i+1, ++lastId)
                 when "^"
-                    @append(current, new StartAnchor())
+                    debug =
+                        sourceLength: 1
+                        id: ++lastId
+                    @append(current, new StartAnchor(debug))
                     ++i
                 when "$"
-                    @append(current, new EndAnchor())
+                    debug =
+                        sourceLength: 1
+                        id: ++lastId
+                    @append(current, new EndAnchor(debug))
                     ++i
                 when "."
-                    @append(current, new Wildcard())
+                    debug =
+                        sourceLength: 1
+                        id: ++lastId
+                    @append(current, new Wildcard(debug))
                     ++i
                 when "|"
                     current.subtokens.push(new Sequence())
                     ++i
                 when "("
-                    group = new Group(new Disjunction(new Sequence()), ++lastCaptureIndex)
+                    debug =
+                        sourceOpenLength: 1
+                        sourceCloseLength: 1
+                        id: ++lastId
+                    group = new Group(debug, new Disjunction(null, new Sequence()), ++lastCaptureIndex)
                     @append(current, group)
                     nestingStack.push(current)
                     current = group.subtokens[0]
@@ -48,12 +69,16 @@ class root.Parser
                             message: "Unmatched closing parenthesis \")\" at index " + i
                             index: i
                         }
+                    
                     current = nestingStack.pop()
                     ++i
                 when "?", "*", "+"
-                    i = @parseQuantifier(current, char, i)
+                    i = @parseQuantifier(current, char, i, ++lastId)
                 else
-                    @append(current, new Character(char))
+                    debug =
+                        sourceLength: 1
+                        id: ++lastId
+                    @append(current, new Character(debug, char))
                     ++i
         if nestingStack.length != 0
             throw {
@@ -96,7 +121,7 @@ class root.Parser
         
         return regex
         
-    parseCharacterClass: (string, current, i) ->
+    parseCharacterClass: (string, current, i, id) ->
         if i < string.length and string.charAt(i) == "^"
             negated = true
             ++i
@@ -112,7 +137,11 @@ class root.Parser
             char = string.charAt(i)
             switch char
                 when "]"
-                    @append(current, new CharacterClass(negated, characters, ranges, subclasses))
+                    debug =
+                        sourceOpenLength: if negated then 2 else 1
+                        sourceCloseLength: 1
+                        id: id
+                    @append(current, new CharacterClass(debug, negated, characters, ranges, subclasses))
                     return i+1
                 when "\\"
                     [i, lastElement] = @parseEscapeSequence(true, string, i+1)
@@ -171,6 +200,7 @@ class root.Parser
                 message: "There is nothing to escape. Most likely, the pattern ends in a backslash \"\\\""
                 index: i-1
             }
+            
         char = string.charAt(i)
         switch char
             # special characters
@@ -190,30 +220,30 @@ class root.Parser
             # built-in character classes
             when "d", "D"
                 negated = char is "D"
-                element = new DigitClass(negated)
+                element = new DigitClass(null, negated)
             when "w", "W"
                 negated = char is "W"
-                element = new WordClass(negated)
+                element = new WordClass(null, negated)
             when "s", "S"
                 negated = char is "S"
-                element = new WhitespaceClass(negated)
+                element = new WhitespaceClass(null, negated)
                 
             # treat b correctly
             when "b"
-                element = if inCharacterClass then "\b" else new WordBoundary(false)
+                element = if inCharacterClass then "\b" else new WordBoundary(null, false)
             when "B"
-                element = if inCharacterClass then "B" else new WordBoundary(true)
+                element = if inCharacterClass then "B" else new WordBoundary(null, true)
                 
             # all other characters are treated literally
             else
                 element = char
         
         if typeof element is "string" and not inCharacterClass
-            element = new Character(element)
+            element = new Character(null, element)
         
         return [i + 1, element]
         
-    parseQuantifier: (current, char, i) ->
+    parseQuantifier: (current, char, i, id) ->
         st = current.subtokens
         if st[st.length-1].subtokens.length == 0
             throw {
@@ -229,12 +259,16 @@ class root.Parser
                 index: i
             }
         
+        debug =
+            sourceLength: 1
+            id: id
+        
         quantifierClass =
             "*": RepeatZeroOrMore
             "+": RepeatOneOrMore
             "?": Option
             
-        @append(current, new (quantifierClass[char])(target)) # take the currently last token, stuff it into an appropriate quantifier token and append the option instead
+        @append(current, new (quantifierClass[char])(debug, target)) # take the currently last token, stuff it into an appropriate quantifier token and append the option instead
         return i+1
         
     append: (current, token) ->

@@ -1,8 +1,8 @@
 root = global ? window
 
 class root.Disjunction extends root.Token
-    constructor: (token) ->
-        super(token)
+    constructor: (debug, token) ->
+        super(debug, token)
         
     reset: () ->
         super()

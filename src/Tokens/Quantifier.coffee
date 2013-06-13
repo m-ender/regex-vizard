@@ -1,8 +1,8 @@
 root = global ? window
         
 class root.Quantifier extends root.Token
-    constructor: (token, @min, @max) ->
-        super(token)
+    constructor: (debug, token, @min, @max) ->
+        super(debug, token)
         @minGroup = -1
         @nGroups = 0
         @clearer = []
@@ -85,13 +85,13 @@ class root.Quantifier extends root.Token
         return newInstance
         
 class root.Option extends root.Quantifier
-    constructor: (token) ->
-        super(token, 0, 1)
+    constructor: (debug, token) ->
+        super(debug, token, 0, 1)
         
 class root.RepeatZeroOrMore extends root.Quantifier
-    constructor: (token) ->
-        super(token, 0, Infinity)
+    constructor: (debug, token) ->
+        super(debug, token, 0, Infinity)
         
 class root.RepeatOneOrMore extends root.Quantifier
-    constructor: (token) ->
-        super(token, 1, Infinity)
+    constructor: (debug, token) ->
+        super(debug, token, 1, Infinity)

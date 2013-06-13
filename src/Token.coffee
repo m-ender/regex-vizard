@@ -1,7 +1,7 @@
 root = global ? window
 
 class root.Token
-    constructor: (token) ->    
+    constructor: (@debug, token) ->    
         # list of sub-tokens
         # Sequences and Disjunctions will use a list of arbitrary length
         # Quantifiers and Groups will use a single token in the list

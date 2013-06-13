@@ -2,8 +2,8 @@ root = global ? window
 
 # This represents a single literal character
 class root.Character extends root.Token
-    constructor: (@character) ->
-        super()
+    constructor: (debug, @character) ->
+        super(debug)
         
     reset: () ->
         super()
