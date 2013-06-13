@@ -128,10 +128,7 @@ class root.Parser
         else
             negated = false
             
-        lastElement = false
-        characters = []
-        ranges = []
-        subclasses = []
+        elements = []
         
         while i < string.length                
             char = string.charAt(i)
@@ -141,22 +138,24 @@ class root.Parser
                         sourceOpenLength: if negated then 2 else 1
                         sourceCloseLength: 1
                         id: id
-                    @append(current, new CharacterClass(debug, negated, characters, ranges, subclasses))
+                    @append(current, new CharacterClass(debug, negated, elements))
                     return i+1
                 when "\\"
-                    [i, lastElement] = @parseEscapeSequence(true, string, i+1)
-                    if lastElement instanceof CharacterClass
-                        subclasses.push(lastElement)
-                    else
-                        characters.push(lastElement)
+                    [i, element] = @parseEscapeSequence(true, string, i+1)
+                    elements.push(element)
                 when "-"
-                    if lastElement and i+1 < string.length and (nextElement = string.charAt(i+1)) != "]"
-                        
+                    lastElement = elements[elements.length-1]
+                    if lastElement instanceof CharacterClass
+                        throw {
+                            name: "CharacterClassInRangeException"
+                            message: "Built-in character classes cannot be used in ranges"
+                        }
+                    if typeof lastElement is "string" and i+1 < string.length and (nextElement = string.charAt(i+1)) != "]"
                         newI = i + 2
                         if nextElement == "\\"
                             [newI, nextElement] = @parseEscapeSequence(true, string, i+2)
                         
-                        if lastElement instanceof CharacterClass or nextElement instanceof CharacterClass
+                        if nextElement instanceof CharacterClass
                             throw {
                                 name: "CharacterClassInRangeException"
                                 message: "Built-in character classes cannot be used in ranges"
@@ -170,20 +169,17 @@ class root.Parser
                                 name: "CharacterClassRangeOutOfOrderException"
                                 message: "The character class \"#{lastElement}\" to \"#{nextElement}\" is out of order."
                             }
-                        characters.pop()
-                        lastElement = false
-                        ranges.push(
+                        elements.pop()
+                        elements.push(
                             start: startC
                             end:   endC
                         )
                         i = newI
                     else
-                        lastElement = char
-                        characters.push(lastElement)                        
+                        elements.push(char)                        
                         ++i
                 else
-                    lastElement = char
-                    characters.push(lastElement)
+                    elements.push(char)
                     ++i
         
         throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise

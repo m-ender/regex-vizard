@@ -319,7 +319,7 @@ TestCase("TokenTests",
     "testBasicCharacterClass": () ->
         state = @Regex.setupInitialState("abc")
         # Put together token for regex /[ac]/
-        token = new CharacterClass(null, )
+        token = new CharacterClass(null)
         token.addCharacter("a")
         token.addCharacter("c")
         
@@ -355,7 +355,7 @@ TestCase("TokenTests",
     "testCharacterClassRange": () ->
         state = @Regex.setupInitialState("abcd")
         # Put together token for regex /[a-c]/
-        token = new CharacterClass(null, )
+        token = new CharacterClass(null)
         token.addRange("a","c")
         
         @assertNextMatchSequence(token, state, [
@@ -378,7 +378,7 @@ TestCase("TokenTests",
     "testNestedCharacterClass": () ->
         state = @Regex.setupInitialState("0")
         # Put together token for regex /[\d]/
-        token = new CharacterClass(null, false, [], [], [new DigitClass(null, )])
+        token = new CharacterClass(null, false, [new DigitClass(null)])
         
         @assertNextMatchSequence(token, state, [
             2 # "1" is part of the class
@@ -387,7 +387,7 @@ TestCase("TokenTests",
     "testWordBoundary": () ->
         state = @Regex.setupInitialState("a_0-b")
         # Put together token for regex /\b/
-        token = new WordBoundary(null, )
+        token = new WordBoundary(null)
         
         @assertNextMatchSequence(token, state, [
             1

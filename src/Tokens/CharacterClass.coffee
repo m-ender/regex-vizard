@@ -2,21 +2,19 @@ root = global ? window
 
 class root.CharacterClass extends root.Token
     # negated is a boolean
-    constructor: (debug, @negated = false, character, ranges, subclasses) ->
+    # elements is an array of (string) characters, anonymous range objects and other CharacterClass tokens
+    constructor: (debug, @negated = false, @elements = []) ->
         super(debug)
-        @characters = character or []
-        @ranges = ranges or []
-        @subclasses = subclasses or []
         
     reset: () ->
         super()
         @attempted = false
         
     addCharacter: (character) ->
-        @characters.push(character)
+        @elements.push(character)
         
     addRange: (startCharacter, endCharacter) ->
-        @ranges.push(
+        @elements.push(
             start: startCharacter.charCodeAt(0)
             end: endCharacter.charCodeAt(0)
         )
@@ -41,26 +39,19 @@ class root.CharacterClass extends root.Token
             return false
             
         inSet = false
-        if char in @characters
-            inSet = true
-        else
-            for range in @ranges
-                if range.start <= char.charCodeAt(0) <= range.end
-                    inSet = true
-                    break
-                    
-        unless inSet
-            for subclass in @subclasses
-                if subclass.isInClass(char)
-                    inSet = true
-                    break
-                    
+        for element in @elements
+            if (typeof element is "string" and char is element or
+                element instanceof CharacterClass and element.isInClass(char) or
+                element.start <= char.charCodeAt(0) <= element.end)
+              inSet = true
+              break
+               
         return inSet isnt @negated
 
 # For built-in \d and \D        
 class root.DigitClass extends root.CharacterClass
     constructor: (debug, negated = false) ->
-        super(debug, negated, [], [
+        super(debug, negated, [
             start: "0".charCodeAt(0)
             end:   "9".charCodeAt(0)
         ])
@@ -68,7 +59,7 @@ class root.DigitClass extends root.CharacterClass
 # For built-in \w and \W        
 class root.WordClass extends root.CharacterClass
     constructor: (debug, negated = false) ->
-        super(debug, negated, ["_"], [
+        super(debug, negated, [
             start: "A".charCodeAt(0)
             end:   "Z".charCodeAt(0)
            ,
@@ -77,28 +68,31 @@ class root.WordClass extends root.CharacterClass
            ,
             start: "0".charCodeAt(0)
             end:   "9".charCodeAt(0)
+           ,
+            "_"
         ])
 
 # For built-in \s and \S        
 class root.WhitespaceClass extends root.CharacterClass
     constructor: (debug, negated = false) ->
         super(debug, negated, [
+            start: 0x9    # horizontal tab, line feed, vertical tab, form feed, carriage return
+            end:   0xd
+           ,
             "\u0020" # space
             "\u00a0" # no-break space
             "\u1680" # ogham space mark
             "\u180e" # mongolian vowel separator
+           ,
+            start: 0x2000 # various punctuation and typesetting related characters 
+            end:   0x200a
+           ,
             "\u2028" # Unicode line separator
             "\u2029" # Unicode paragraph separator
             "\u202f" # narrow no-break space
             "\u205f" # medium mathematical space
             "\u3000" # ideographic space
             "\ufeff" # zero-width no-break space
-        ], [
-            start: 0x9    # horizontal tab, line feed, vertical tab, form feed, carriage return
-            end:   0xd
-           ,
-            start: 0x2000 # various punctuation and typesetting related characters 
-            end:   0x200a
         ])
     
 class root.Wildcard extends root.Token
