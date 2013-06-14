@@ -33,15 +33,19 @@ option '-e', '--environment [ENVIRONMENT_NAME]', 'Set the target environment for
 task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
     switch options.environment or 'release'
         when 'debug'
+            
             if options.watch
                 watch = '-w'
                 console.log 'Watching lib/ for changes to keep "debug" build up-to-date...'
             else
                 watch = ''
                 console.log 'Starting debug build to lib/...'
-            # need to use .cmd for now, because spawn() does not regard PATHEXT
-            # this is unfortunately not portable
-            coffee = spawn 'coffee.cmd', ['-c', watch, '-o', 'lib', 'src']
+            # workaround because spawn does not read PATHEXT
+            if /^Windows/i.test require('os').type() 
+                ext = '.cmd'
+            else
+                ext = ''
+            coffee = spawn "coffee#{ext}", ['-c', watch, '-o', 'lib', 'src']
             captureOutput(coffee)
                 
         when 'release'
