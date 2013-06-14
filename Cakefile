@@ -89,3 +89,13 @@ task 'test', 'Run tests with jsTestDriver', (options) ->
     console.log 'Running tests...'
     test = spawn 'java', ['-jar', "#{process.env.JSTESTDRIVER_DIR}\\JsTestDriver-1.3.5.jar", '--tests', options.tests, '--captureConsole'], {cwd: undefined, env: process.env}
     captureOutput(test)
+    
+option '-b', '--browsers', 'Open and capture all browsers after starting jsTestDriver.'
+    
+task 'driver', 'Starts up jsTestDriver', (options) ->
+    port = options.port or '4224'
+    browserOption = if options.browsers then '--browser' else ''
+    browserArgument = if options.browsers then 'C:\\Users\\martin\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe,C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe,C:\\Program Files (x86)\\Safari\\Safari.exe,C:\\Program Files (x86)\\Opera\\opera.exe,C:\\Program Files\\Internet Explorer\\iexplore.exe' else ''
+    console.log 'Starting up jsTestDriver...'
+    driver = spawn 'java', ['-jar', "#{process.env.JSTESTDRIVER_DIR}\\JsTestDriver-1.3.5.jar", '--port', port, browserOption, browserArgument]
+    captureOutput(driver)
