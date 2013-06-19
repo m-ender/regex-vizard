@@ -14,7 +14,7 @@ captureOutput = (prog) ->
             console.log 'Done.'
 
 appFiles = [
-    'Token'
+    'Tokens/Token'
     'Tokens/Assertion'
     'Tokens/Character'
     'Tokens/CharacterClass'
