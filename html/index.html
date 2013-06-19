@@ -9,6 +9,17 @@
 	<!--[if IE]>
 		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
+<script language="javascript">
+window.onload = init;
+function init()
+{
+    messageBox = document.getElementById("output-message");    
+    messageBox.style.visibility = "visible";
+    regex = new Regex("(z)((a+)?(b+)?(c))*");
+    messageBox.innerHTML = regex.match("zaacbbbcac")[0];
+    console.log(regex);
+}
+</script>
 </head>
 <body>
 	<h1>Regex Vizard</h1>
