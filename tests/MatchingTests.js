@@ -2,13 +2,6 @@
 (function() {
 
   TestCase("MatchingTests", {
-    setUp: function() {
-      if (typeof module !== "undefined" && module.exports) {
-
-      } else {
-
-      }
-    },
     "testEmptyPattern": function() {
       var regex;
       regex = new Regex("");

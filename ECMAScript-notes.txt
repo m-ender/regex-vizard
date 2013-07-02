@@ -73,7 +73,7 @@ hyphens *after* a character class are all literal ones. So:
 These last cases show that Chrome does not start reading ranges again, although a second or third hyphen (after the
 first one that's literal) could theoretically be treated as range.
 
-At lest the cases like [--\d] are technically in breach with the standard as it specifies that an exception is to be
+At least the cases like [--\d] are technically in breach with the standard as it specifies that an exception is to be
 thrown if either end of the range is a group (15.10.2.15, third enumeration, point 1).
 
 Firefox:

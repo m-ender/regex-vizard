@@ -71,7 +71,7 @@ task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
         when 'tests'
             if options.watch
                 watch = " -w"
-                console.log 'Watching tests/ for changes to keep "tests" build up-to-date...'
+                console.log 'Watching tests/src/ for changes to keep "tests" build up-to-date...'
             else
                 watch = ""
                 console.log 'Building tests...'
@@ -87,7 +87,7 @@ option '-t', '--tests [TEST_SELECTOR]', 'Regular expression to select tests to b
 task 'test', 'Run tests with jsTestDriver', (options) ->
     options.tests = options.tests or 'all'
     console.log 'Running tests...'
-    test = spawn 'java', ['-jar', "#{process.env.JSTESTDRIVER_DIR}\\JsTestDriver-1.3.5.jar", '--tests', options.tests, '--captureConsole'], {cwd: undefined, env: process.env}
+    test = spawn 'java', ['-jar', ".\\tools\\jsTestDriver\\JsTestDriver-1.3.5.jar", '--tests', options.tests, '--captureConsole'], {cwd: undefined, env: process.env}
     captureOutput(test)
     
 option '-b', '--browsers', 'Open and capture all browsers after starting jsTestDriver.'
@@ -97,5 +97,5 @@ task 'driver', 'Starts up jsTestDriver', (options) ->
     browserOption = if options.browsers then '--browser' else ''
     browserArgument = if options.browsers then 'C:\\Users\\martin\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe,C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe,C:\\Program Files (x86)\\Safari\\Safari.exe,C:\\Program Files (x86)\\Opera\\opera.exe,C:\\Program Files\\Internet Explorer\\iexplore.exe' else ''
     console.log 'Starting up jsTestDriver...'
-    driver = spawn 'java', ['-jar', "#{process.env.JSTESTDRIVER_DIR}\\JsTestDriver-1.3.5.jar", '--port', port, browserOption, browserArgument]
+    driver = spawn 'java', ['-jar', ".\\tools\\jsTestDriver\\JsTestDriver-1.3.5.jar", '--port', port, browserOption, browserArgument]
     captureOutput(driver)

@@ -264,7 +264,6 @@
     "testComplexExpression": function() {
       var expectedTree, regex;
       regex = this.Parser.parsePattern("d.(a[be]?|c|)*$");
-      console.log(regex);
       expectedTree = {
         type: Group,
         subtokens: [

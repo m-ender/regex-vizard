@@ -1,12 +1,4 @@
-TestCase("MatchingTests",
-    setUp : () ->
-        if typeof module != "undefined" && module.exports
-            #On a server
-            #regex = new require("RegexEngine").RegexEngine
-        else
-            #On a client
-            #regex = new window.RegexEngine
-            
+TestCase("MatchingTests",            
     "testEmptyPattern": () ->
         regex = new Regex("")
         assertTrue(regex.test(""))
