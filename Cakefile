@@ -2,6 +2,12 @@ fs            = require 'fs'
 {print}       = require 'sys'
 {spawn, exec} = require 'child_process'
 
+# workaround because spawn does not read PATHEXT
+if /^Windows/i.test require('os').type() 
+    coffee = 'coffee.cmd'
+else
+    coffee = 'coffee'
+
 captureOutput = (prog) ->
     prog.stderr.on 'data', (data) ->
         console.log data.toString()
@@ -40,16 +46,11 @@ task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
             else
                 watch = ''
                 console.log 'Starting debug build to lib/...'
-            # workaround because spawn does not read PATHEXT
-            if /^Windows/i.test require('os').type() 
-                ext = '.cmd'
-            else
-                ext = ''
-            coffee = spawn "coffee#{ext}", ['-c', watch, '-o', 'lib', 'src']
+            coffee = spawn coffee, ['-c', watch, '-o', 'lib', 'src']
             captureOutput(coffee)
                 
         when 'release'
-            console.log 'Starting release build to html/js/...'
+            console.log 'Starting release build to public/js/...'
             console.log 'Concatenating source files...'
             appContents = new Array remaining = appFiles.length
             for file, index in appFiles then do (file, index) ->
@@ -58,13 +59,13 @@ task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
                     appContents[index] = fileContents
                     compile() if --remaining is 0
             compile = ->
-                fs.writeFile 'html/js/vizard.coffee', appContents.join('\n\n'), 'utf8', (err) ->
+                fs.writeFile 'public/js/vizard.coffee', appContents.join('\n\n'), 'utf8', (err) ->
                     throw err if err
                     console.log 'Compiling...'
-                    exec 'coffee -c html/js/vizard.coffee', (err, stdout, stderr) ->
+                    exec 'coffee -c public/js/vizard.coffee', (err, stdout, stderr) ->
                         throw err if err
                         console.log stdout + stderr
-                        fs.unlink 'html/js/vizard.coffee', (err) ->
+                        fs.unlink 'public/js/vizard.coffee', (err) ->
                             throw err if err
                             console.log 'Done.'
                             
@@ -82,6 +83,10 @@ task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
         else
             console.log 'Unknown environment. Use "debug", "release" or "tests".'
             
+task 'server', 'Start up HTTP server (on port 1618)', (options) ->
+    server = spawn coffee, ['./server.coffee'], {cwd: undefined, env: process.env}
+    captureOutput(server)
+            
 option '-t', '--tests [TEST_SELECTOR]', 'Regular expression to select tests to be run. Use "all" to run everything.'
             
 task 'test', 'Run tests with jsTestDriver', (options) ->
@@ -91,7 +96,7 @@ task 'test', 'Run tests with jsTestDriver', (options) ->
     captureOutput(test)
     
 option '-b', '--browsers', 'Open and capture all browsers after starting jsTestDriver.'
-    
+
 task 'driver', 'Starts up jsTestDriver', (options) ->
     port = options.port or '4224'
     browserOption = if options.browsers then '--browser' else ''
