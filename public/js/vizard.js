@@ -1052,4 +1052,42 @@
 
   })();
 
+  root = typeof global !== "undefined" && global !== null ? global : window;
+
+  root.JQueryHelper = (function() {
+
+    function JQueryHelper() {}
+
+    JQueryHelper.addJQueryPlugins = function() {
+      jQuery.fn.visible = function() {
+        return this.css('visibility', 'visible');
+      };
+      jQuery.fn.invisible = function() {
+        return this.css('visibility', 'hidden');
+      };
+      return jQuery.fn.toggleInvisibility = function() {
+        return this.css('visibility', function(i, visibility) {
+          if (visibility === 'visible') {
+            return 'hidden';
+          } else {
+            return 'visible';
+          }
+        });
+      };
+    };
+
+    return JQueryHelper;
+
+  })();
+
+  $(document).ready(function() {
+    var messageBox, regex;
+    JQueryHelper.addJQueryPlugins();
+    messageBox = $('#output-message');
+    messageBox.visible();
+    regex = new Regex('(z)((a+)?(b+)?(c))*');
+    messageBox.html(regex.match('zaacbbbcac')[0]);
+    return console.log(regex);
+  });
+
 }).call(this);

@@ -31,10 +31,13 @@ appFiles = [
     'Guards'
     'Parser'
     'Regex'
+    
+    'Frontend/jQueryPlugins'
+    'Frontend/frontend'
 ]
 
 option '-w', '--watch', 'Set up the compiler to watch for changes in the source. Does not work for "release" build.'
-option '-e', '--environment [ENVIRONMENT_NAME]', 'Set the target environment for "build" task. Possible values: "debug", "release", or "tests"'
+option '-e', '--environment [ENVIRONMENT_NAME]', 'Set the target environment for "build" task. Possible values: "debug", "release" (default), or "tests"'
 
 task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
     switch options.environment or 'release'
@@ -71,15 +74,13 @@ task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
                             
         when 'tests'
             if options.watch
-                watch = " -w"
+                watch = '-w'
                 console.log 'Watching tests/src/ for changes to keep "tests" build up-to-date...'
             else
-                watch = ""
+                watch = ''
                 console.log 'Building tests...'
-            exec "coffee -c#{watch} -o tests tests/src", (err, stdout, stderr) ->
-                throw err if err
-                console.log stdout + stderr
-                console.log 'Done.'
+            coffee = spawn coffee, ['-c', watch, '-o', 'tests', 'tests/src']
+            captureOutput(coffee)
         else
             console.log 'Unknown environment. Use "debug", "release" or "tests".'
             
