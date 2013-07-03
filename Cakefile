@@ -5,8 +5,10 @@ fs            = require 'fs'
 # workaround because spawn does not read PATHEXT
 if /^Windows/i.test require('os').type() 
     coffee = 'coffee.cmd'
+    stylus = 'stylus.cmd'
 else
     coffee = 'coffee'
+    stylus = 'stylus'
 
 captureOutput = (prog) ->
     prog.stderr.on 'data', (data) ->
@@ -37,7 +39,7 @@ appFiles = [
 ]
 
 option '-w', '--watch', 'Set up the compiler to watch for changes in the source. Does not work for "release" build.'
-option '-e', '--environment [ENVIRONMENT_NAME]', 'Set the target environment for "build" task. Possible values: "debug", "release" (default), or "tests"'
+option '-e', '--environment [ENVIRONMENT_NAME]', 'Set the target environment for "build" task. Possible values: "release" (default), "debug", "tests" or "css"'
 
 task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
     switch options.environment or 'release'
@@ -49,8 +51,8 @@ task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
             else
                 watch = ''
                 console.log 'Starting debug build to lib/...'
-            coffee = spawn coffee, ['-c', watch, '-o', 'lib', 'src']
-            captureOutput(coffee)
+            coffeeProc = spawn coffee, ['-c', watch, '-o', 'lib', 'src']
+            captureOutput(coffeeProc)
                 
         when 'release'
             console.log 'Starting release build to public/js/...'
@@ -71,6 +73,7 @@ task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
                         fs.unlink 'public/js/vizard.coffee', (err) ->
                             throw err if err
                             console.log 'Done.'
+                            console.log 'CSS has not been built! Use "cake -e css build" if necessary.'
                             
         when 'tests'
             if options.watch
@@ -79,8 +82,19 @@ task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
             else
                 watch = ''
                 console.log 'Building tests...'
-            coffee = spawn coffee, ['-c', watch, '-o', 'tests', 'tests/src']
-            captureOutput(coffee)
+            coffeeProc = spawn coffee, ['-c', watch, '-o', 'tests', 'tests/src']
+            captureOutput(coffeeProc)
+            
+        when 'css'
+            if options.watch
+                watch = '-w'
+                console.log 'Watching styles/ for changes to keep "css" build up-to-date...'
+            else
+                watch = ''
+                console.log 'Compiling css...'
+            stylusProc = spawn stylus, [watch, '-o', 'public/css/', 'styles/']
+            captureOutput(stylusProc)
+            
         else
             console.log 'Unknown environment. Use "debug", "release" or "tests".'
             

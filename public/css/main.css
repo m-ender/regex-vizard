@@ -1,69 +1,60 @@
 body {
-    background: #282828;
-    font-family: Consolas, "Courier New", Courier, monospace;
-    color: #FFF;
+  background: #282828;
+  font-family: Consolas, "Courier New", Courier, monospace;
+  color: #fff;
 }
-
 h1 {
-    font-size:36pt;
-    text-align: center;
+  font-size: 36pt;
+  text-align: center;
 }
-
 div#input {
-    width:900px;
-    margin:auto;
+  width: 900px;
+  margin: auto;
 }
-
 input.input-text {
-    background: #282828;
-    border: 1px solid white;
-    color: #FFF;
-    font-family: Consolas, "Courier New", Courier, monospace;
-    font-size: 16pt;
-    width: 900px;
+  background: #282828;
+  border: 1px solid #fff;
+  color: #fff;
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 16pt;
+  width: 900px;
 }
-
 input.input-button {
-    background: #282828;
-    border: 1px solid #FFF;
-    color: #FFF;
-    font-family: Consolas, "Courier New", Courier, monospace;
-    width:250px;
-    font-size: 16pt;
-    font-weight: bold;
+  background: #282828;
+  border: 1px solid #fff;
+  color: #fff;
+  font-family: Consolas, "Courier New", Courier, monospace;
+  width: 250px;
+  font-size: 16pt;
+  font-weight: bold;
 }
-
-div#buttons {
-    text-align:center;
-}
-
-input#step-fw {
-    visibility: hidden;
-}
-
 input.input-button:hover {
-    color: #57FF62;
-    border-color: #57FF62;
+  color: #57ff62;
+  border-color: #57ff62;
 }
 input.input-button:active {
-    color: #40BD48;
-    border-color: #40BD48;
+  color: #40bd48;
+  border-color: #40bd48;
 }
-
+div#buttons {
+  text-align: center;
+}
+input#step-fw {
+  visibility: hidden;
+}
 div#output-message {
-    background-color: #572222;
-    border: 1px solid #B54747;
-    padding: 5px;
-    margin-bottom: 20px;
-    visibility: hidden;
+  background-color: #572222;
+  border: 1px solid #b54747;
+  padding: 5px;
+  margin-bottom: 20px;
+  visibility: hidden;
 }
-
 div#output {
-    width:900px;
-    margin: auto;
+  width: 900px;
+  margin: auto;
 }
-
-div#output-subject, div#output-pattern {
-    margin-bottom: 50px;
-    font-size: 24pt;
+div#output-subject,
+div#output-pattern {
+  margin-bottom: 50px;
+  font-size: 24pt;
 }
