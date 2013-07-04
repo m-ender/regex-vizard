@@ -1020,7 +1020,11 @@
       if (result === false) {
         return null;
       } else {
-        return state.captures;
+        if (report) {
+          return state;
+        } else {
+          return state.captures;
+        }
       }
     };
 

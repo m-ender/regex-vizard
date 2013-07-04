@@ -1,4 +1,5 @@
-bgcolor = #282828
+bgcolor      = #282828
+successcolor = #57FF62
 
 body 
     background: bgcolor
@@ -31,10 +32,10 @@ input.input-button
     font-weight: bold
     
     &:hover
-        color: #57FF62
+        color: successcolor
         border-color: @color
     &:active
-        color: #40BD48
+        color: successcolor - 25%
         border-color: @color
         
 div#buttons
@@ -58,3 +59,9 @@ div#output-subject
 div#output-pattern
     margin-bottom: 50px
     font-size: 24pt
+    
+div#output-subject
+    .match
+        color: successcolor
+    .nomatch
+        color: #572222 + 25%

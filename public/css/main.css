@@ -33,8 +33,8 @@ input.input-button:hover {
   border-color: #57ff62;
 }
 input.input-button:active {
-  color: #40bd48;
-  border-color: #40bd48;
+  color: #01ff12;
+  border-color: #01ff12;
 }
 div#buttons {
   text-align: center;
@@ -57,4 +57,10 @@ div#output-subject,
 div#output-pattern {
   margin-bottom: 50px;
   font-size: 24pt;
+}
+div#output-subject .match {
+  color: #57ff62;
+}
+div#output-subject .nomatch {
+  color: #9d3d3d;
 }

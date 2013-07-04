@@ -45,13 +45,19 @@
   };
 
   stepForward = function() {
-    var result;
-    result = regex.match(subjectString);
-    $('#output-message').visible();
+    var highlight, length, result, s, startPos;
+    result = regex.match(subjectString, true);
     if (result) {
-      return $('#output-message').html("Match found: " + result[0]);
+      startPos = result.startingPosition - 1;
+      length = result.captures[0].length;
+      s = $('#output-subject').html();
+      console.log(s.slice(0, startPos));
+      console.log(s.slice(startPos, startPos + length));
+      console.log(s.slice(startPos + length));
+      highlight = "" + (s.slice(0, startPos)) + "<span class='match'>" + (s.slice(startPos, startPos + length)) + "</span>" + (s.slice(startPos + length));
+      return $('#output-subject').html(highlight);
     } else {
-      return $('#output-message').html("No match! :-(");
+      return $('#output-subject').html("<span class='nomatch'>" + s + "</span>");
     }
   };
 

@@ -11,14 +11,19 @@ setupEngine = () ->
     $('#button-step-fw').visible()
 
 stepForward = () ->
-    result = regex.match subjectString
-    
-    $('#output-message').visible()
-    
+    result = regex.match subjectString, true
+        
     if result
-        $('#output-message').html "Match found: #{result[0]}"
+        startPos = result.startingPosition - 1
+        length = result.captures[0].length
+        s = $('#output-subject').html()
+        console.log s.slice 0, startPos
+        console.log s.slice startPos, startPos + length
+        console.log s.slice (startPos + length)
+        highlight = "#{s.slice 0, startPos}<span class='match'>#{s.slice startPos, startPos + length}</span>#{s.slice (startPos + length)}"
+        $('#output-subject').html highlight
     else
-        $('#output-message').html "No match! :-("
+        $('#output-subject').html "<span class='nomatch'>#{s}</span>"
     
 $(document).ready () ->
     JQueryHelper.addJQueryPlugins()

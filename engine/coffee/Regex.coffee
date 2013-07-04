@@ -52,7 +52,7 @@ class root.Regex
         if result is false
             return null
         else
-            return state.captures
+            return if report then state else state.captures
         
     # Build character array and surround it with special objects as guards for the
     # start and end of the input string
