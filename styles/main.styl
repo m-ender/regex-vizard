@@ -1,5 +1,7 @@
+bgcolor = #282828
+
 body 
-    background: #282828
+    background: bgcolor
     font-family: Consolas, "Courier New", Courier, monospace
     color: #FFF
 
@@ -12,7 +14,7 @@ div#input
     margin: auto
 
 input.input-text
-    background: #282828
+    background: bgcolor
     border: 1px solid white
     color: #FFF
     font-family: Consolas, "Courier New", Courier, monospace
@@ -20,7 +22,7 @@ input.input-text
     width: 900px
 
 input.input-button
-    background: #282828
+    background: bgcolor
     border: 1px solid #FFF
     color: #FFF
     font-family: Consolas, "Courier New", Courier, monospace
@@ -30,20 +32,20 @@ input.input-button
     
     &:hover
         color: #57FF62
-        border-color: #57FF62
+        border-color: @color
     &:active
         color: #40BD48
-        border-color: #40BD48
+        border-color: @color
         
 div#buttons
     text-align:center
 
-input#step-fw
+input#button-step-fw
     visibility: hidden
 
 div#output-message
     background-color: #572222
-    border: 1px solid #B54747
+    border: 1px solid (@background-color + 25%)
     padding: 5px
     margin-bottom: 20px
     visibility: hidden

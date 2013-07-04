@@ -49,7 +49,10 @@ class root.Regex
                 break
         
         i = 0
-        return state.captures
+        if result is false
+            return null
+        else
+            return state.captures
         
     # Build character array and surround it with special objects as guards for the
     # start and end of the input string

@@ -11,6 +11,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("bra"))
         assertTrue(regex.test("abra"))
         assertFalse(regex.test("b"))
+        assertEquals(null, regex.match("b"))
         assertEquals(["a"], regex.match("bar"))
 
     "testMultipleCharacters": () ->

@@ -39,12 +39,12 @@ input.input-button:active {
 div#buttons {
   text-align: center;
 }
-input#step-fw {
+input#button-step-fw {
   visibility: hidden;
 }
 div#output-message {
   background-color: #572222;
-  border: 1px solid #b54747;
+  border: 1px solid #9d3d3d;
   padding: 5px;
   margin-bottom: 20px;
   visibility: hidden;

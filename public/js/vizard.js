@@ -6,6 +6,12 @@
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
+  root.StartGuard = {};
+
+  root.EndGuard = {};
+
+  root = typeof global !== "undefined" && global !== null ? global : window;
+
   root.Token = (function() {
 
     function Token(debug, token) {
@@ -606,12 +612,6 @@
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
-  root.StartGuard = {};
-
-  root.EndGuard = {};
-
-  root = typeof global !== "undefined" && global !== null ? global : window;
-
   root.Parser = (function() {
 
     function Parser() {}
@@ -1017,7 +1017,11 @@
         }
       }
       i = 0;
-      return state.captures;
+      if (result === false) {
+        return null;
+      } else {
+        return state.captures;
+      }
     };
 
     Regex.prototype.parseInput = function(inputString) {
@@ -1051,43 +1055,5 @@
     return Regex;
 
   })();
-
-  root = typeof global !== "undefined" && global !== null ? global : window;
-
-  root.JQueryHelper = (function() {
-
-    function JQueryHelper() {}
-
-    JQueryHelper.addJQueryPlugins = function() {
-      jQuery.fn.visible = function() {
-        return this.css('visibility', 'visible');
-      };
-      jQuery.fn.invisible = function() {
-        return this.css('visibility', 'hidden');
-      };
-      return jQuery.fn.toggleInvisibility = function() {
-        return this.css('visibility', function(i, visibility) {
-          if (visibility === 'visible') {
-            return 'hidden';
-          } else {
-            return 'visible';
-          }
-        });
-      };
-    };
-
-    return JQueryHelper;
-
-  })();
-
-  $(document).ready(function() {
-    var messageBox, regex;
-    JQueryHelper.addJQueryPlugins();
-    messageBox = $('#output-message');
-    messageBox.visible();
-    regex = new Regex('(z)((a+)?(b+)?(c))*');
-    messageBox.html(regex.match('zaacbbbcac')[0]);
-    return console.log(regex);
-  });
 
 }).call(this);

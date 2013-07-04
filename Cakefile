@@ -21,82 +21,116 @@ captureOutput = (prog) ->
         else
             console.log 'Done.'
 
-appFiles = [
-    'Tokens/Token'
-    'Tokens/Assertion'
-    'Tokens/Character'
-    'Tokens/CharacterClass'
-    'Tokens/Disjunction'
-    'Tokens/Group'
-    'Tokens/Quantifier'
-    'Tokens/Sequence'
-    'Guards'
-    'Parser'
-    'Regex'
+option '-w', '--watch', 'Set up the compiler to watch for changes in the source. Works for "engine", "css" and "tests".'
     
-    'Frontend/jQueryPlugins'
-    'Frontend/frontend'
-]
-
-option '-w', '--watch', 'Set up the compiler to watch for changes in the source. Does not work for "release" build.'
-option '-e', '--environment [ENVIRONMENT_NAME]', 'Set the target environment for "build" task. Possible values: "release" (default), "debug", "tests" or "css"'
-
-task 'build', 'Compile CoffeeScript to JavaScript', (options) ->
-    switch options.environment or 'release'
-        when 'debug'
-            
-            if options.watch
-                watch = '-w'
-                console.log 'Watching lib/ for changes to keep "debug" build up-to-date...'
-            else
-                watch = ''
-                console.log 'Starting debug build to lib/...'
-            coffeeProc = spawn coffee, ['-c', watch, '-o', 'lib', 'src']
-            captureOutput(coffeeProc)
-                
-        when 'release'
-            console.log 'Starting release build to public/js/...'
-            console.log 'Concatenating source files...'
-            appContents = new Array remaining = appFiles.length
-            for file, index in appFiles then do (file, index) ->
-                fs.readFile "src/#{file}.coffee", 'utf8', (err, fileContents) ->
+task 'build', 'Alias for "build:release"', (options) ->
+    invoke 'build:release'
+    
+task 'build:release', 'Bundles all tasks necessary for a full release build.', (options) ->
+    invoke 'build:assets'
+    invoke 'build:css'
+    invoke 'build:frontend'
+    invoke 'build:backend'
+                    
+task 'build:assets', 'Copy assets to public folder.', () ->
+    console.log 'Copying files from assets/ to public/...'
+    
+    assets = [
+        'index.html'
+        'js/jquery-1.10.1.js'
+    ]
+    
+    for file in assets
+        fs.createReadStream("assets/#{file}").pipe fs.createWriteStream "public/#{file}"
+        
+    console.log "Done."
+    
+task 'build:css', 'Compile Stylus files to CSS and deploy.', (options) ->
+    if options.watch
+        watch = '-w'
+        console.log 'Watching styles/ for changes to keep public/css/ up-to-date...'
+    else
+        watch = ''
+        console.log 'Compiling Stylus from styles/ to public/css/...'
+    stylusProc = spawn stylus, [watch, '-o', 'public/css/', 'styles/']
+    captureOutput(stylusProc)
+    
+task 'build:frontend', 'Compile frontend code to JavaScript.', (options) ->
+    appFiles = [
+        'jQueryPlugins'
+        'frontend'
+    ]
+    console.log 'Starting build from client/ to public/js/frontend.js...'
+    console.log 'Concatenating source files...'
+    appContents = new Array(remaining = appFiles.length)
+    for file, index in appFiles then do (file, index) ->
+        fs.readFile "client/#{file}.coffee", 'utf8', (err, fileContents) ->
+            throw err if err
+            appContents[index] = fileContents
+            compile() if --remaining is 0
+    compile = ->
+        fs.writeFile 'public/js/frontend.coffee', appContents.join('\n\n'), 'utf8', (err) ->
+            throw err if err
+            console.log 'Compiling...'
+            exec 'coffee -c public/js/frontend.coffee', (err, stdout, stderr) ->
+                throw err if err
+                console.log stdout + stderr
+                fs.unlink 'public/js/frontend.coffee', (err) ->
                     throw err if err
-                    appContents[index] = fileContents
-                    compile() if --remaining is 0
-            compile = ->
-                fs.writeFile 'public/js/vizard.coffee', appContents.join('\n\n'), 'utf8', (err) ->
+                    console.log 'Done.'
+
+task 'build:backend', 'Compile regex engine to JavaScript for client.', (options) ->
+    appFiles = [
+        'Guards'
+        'Tokens/Token'
+        'Tokens/Assertion'
+        'Tokens/Character'
+        'Tokens/CharacterClass'
+        'Tokens/Disjunction'
+        'Tokens/Group'
+        'Tokens/Quantifier'
+        'Tokens/Sequence'
+        'Parser'
+        'Regex'
+    ]
+    console.log 'Starting build from engine/coffee/ to public/js/vizard.js...'
+    console.log 'Concatenating source files...'
+    appContents = new Array remaining = appFiles.length
+    for file, index in appFiles then do (file, index) ->
+        fs.readFile "engine/coffee/#{file}.coffee", 'utf8', (err, fileContents) ->
+            throw err if err
+            appContents[index] = fileContents
+            compile() if --remaining is 0
+    compile = () ->
+        fs.writeFile 'public/js/vizard.coffee', appContents.join('\n\n'), 'utf8', (err) ->
+            throw err if err
+            console.log 'Compiling...'
+            exec 'coffee -c public/js/vizard.coffee', (err, stdout, stderr) ->
+                throw err if err
+                console.log stdout + stderr
+                fs.unlink 'public/js/vizard.coffee', (err) ->
                     throw err if err
-                    console.log 'Compiling...'
-                    exec 'coffee -c public/js/vizard.coffee', (err, stdout, stderr) ->
-                        throw err if err
-                        console.log stdout + stderr
-                        fs.unlink 'public/js/vizard.coffee', (err) ->
-                            throw err if err
-                            console.log 'Done.'
-                            console.log 'CSS has not been built! Use "cake -e css build" if necessary.'
-                            
-        when 'tests'
-            if options.watch
-                watch = '-w'
-                console.log 'Watching tests/src/ for changes to keep "tests" build up-to-date...'
-            else
-                watch = ''
-                console.log 'Building tests...'
-            coffeeProc = spawn coffee, ['-c', watch, '-o', 'tests', 'tests/src']
-            captureOutput(coffeeProc)
-            
-        when 'css'
-            if options.watch
-                watch = '-w'
-                console.log 'Watching styles/ for changes to keep "css" build up-to-date...'
-            else
-                watch = ''
-                console.log 'Compiling css...'
-            stylusProc = spawn stylus, [watch, '-o', 'public/css/', 'styles/']
-            captureOutput(stylusProc)
-            
-        else
-            console.log 'Unknown environment. Use "debug", "release" or "tests".'
+                    console.log 'Done.'
+
+task 'build:engine', 'Compile regex engine to JavaScript for testing.', (options) ->
+    if options.watch
+        watch = '-w'
+        console.log 'Watching engine/coffee/ for changes to keep engine/gen-js/ up-to-date...'
+    else
+        watch = ''
+        console.log 'Compiling CoffeeScript from engine/coffee/ to engine/gen-js/...'
+    coffeeProc = spawn coffee, ['-c', watch, '-o', 'engine/gen-js/', 'engine/coffee/']
+    captureOutput(coffeeProc)
+    
+task 'build:tests', 'Compile test suite to JavaScript.', (options) ->
+    if options.watch
+        watch = '-w'
+        console.log 'Watching tests/coffee/ for changes to keep tests/gen-js/ up-to-date...'
+    else
+        watch = ''
+        console.log 'Compiling CoffeeScript from tests/coffee/ to tests/gen-js/...'
+    coffeeProc = spawn coffee, ['-c', watch, '-o', 'tests/gen-js/', 'tests/coffee/']
+    captureOutput(coffeeProc)
             
 task 'server', 'Start up HTTP server (on port 1618)', (options) ->
     server = spawn coffee, ['./server.coffee'], {cwd: undefined, env: process.env}

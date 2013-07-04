@@ -16,6 +16,7 @@
       assertTrue(regex.test("bra"));
       assertTrue(regex.test("abra"));
       assertFalse(regex.test("b"));
+      assertEquals(null, regex.match("b"));
       return assertEquals(["a"], regex.match("bar"));
     },
     "testMultipleCharacters": function() {
