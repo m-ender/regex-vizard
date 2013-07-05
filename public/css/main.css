@@ -54,7 +54,8 @@ div#output {
   margin: auto;
 }
 div#output-subject,
-div#output-pattern {
+div#output-pattern,
+div#output-colortest {
   margin-bottom: 50px;
   font-size: 24pt;
 }

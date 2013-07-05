@@ -38,6 +38,7 @@ task 'build:assets', 'Copy assets to public folder.', () ->
     assets = [
         'index.html'
         'js/jquery-1.10.1.js'
+        'js/jquery.color-2.1.2.js'
     ]
     
     for file in assets
@@ -58,6 +59,7 @@ task 'build:css', 'Compile Stylus files to CSS and deploy.', (options) ->
 task 'build:frontend', 'Compile frontend code to JavaScript.', (options) ->
     appFiles = [
         'jQueryPlugins'
+        'ColorGenerator'
         'frontend'
     ]
     console.log 'Starting build from client/ to public/js/frontend.js...'

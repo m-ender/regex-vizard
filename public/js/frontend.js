@@ -30,6 +30,28 @@
 
   })();
 
+  root = typeof global !== "undefined" && global !== null ? global : window;
+
+  root.ColorGenerator = (function() {
+
+    function ColorGenerator(baseColor) {
+      if (baseColor == null) {
+        baseColor = '#74DDF2';
+      }
+      this.baseColor = jQuery.Color(baseColor);
+      this.i = 0;
+    }
+
+    ColorGenerator.prototype.nextColor = function() {
+      return this.baseColor.hue("+=" + (this.phi * this.i++));
+    };
+
+    ColorGenerator.prototype.phi = 0.61803398874989484820 * 360;
+
+    return ColorGenerator;
+
+  })();
+
   regex = null;
 
   subjectString = '';
@@ -62,9 +84,22 @@
   };
 
   $(document).ready(function() {
+    var colGen, color, i, _i, _results;
     JQueryHelper.addJQueryPlugins();
     $('#button-start').on('click', setupEngine);
-    return $('#button-step-fw').on('click', stepForward);
+    $('#button-step-fw').on('click', stepForward);
+    colGen = new ColorGenerator({
+      hue: 180,
+      saturation: 1,
+      lightness: 0.7,
+      alpha: 1
+    });
+    _results = [];
+    for (i = _i = 1; _i <= 50; i = ++_i) {
+      color = colGen.nextColor().toHexString();
+      _results.push($('#output-colortest').append("<span style='color:" + color + ";'>!</span>"));
+    }
+    return _results;
   });
 
 }).call(this);

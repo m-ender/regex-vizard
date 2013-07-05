@@ -31,3 +31,13 @@ $(document).ready () ->
     $('#button-start').on 'click', setupEngine
     $('#button-step-fw').on 'click', stepForward
     
+    colGen = new ColorGenerator(
+        hue: 180
+        saturation: 1
+        lightness: 0.7
+        alpha: 1
+    )
+    for i in [1..50]
+        color = colGen.nextColor().toHexString()
+        $('#output-colortest').append "<span style='color:#{color};'>!</span>"
+    
