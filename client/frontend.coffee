@@ -31,6 +31,27 @@ $(document).ready () ->
     $('#button-start').on 'click', setupEngine
     $('#button-step-fw').on 'click', stepForward
     
+    colors = [
+        "aqua"
+        "black"
+        "blue"
+        "fuchsia"
+        "gray"
+        "green"
+        "lime"
+        "maroon"
+        "navy"
+        "olive"
+        "purple"
+        "red"
+        "silver"
+        "teal"
+        "white"
+        "yellow"
+    ]    
+        
+        
+    
     colGen = new ColorGenerator(
         hue: 180
         saturation: 1
@@ -39,5 +60,15 @@ $(document).ready () ->
     )
     for i in [1..50]
         color = colGen.nextColor().toHexString()
-        $('#output-colortest').append "<span style='color:#{color};'>!</span>"
+        $('#output-colortest').append "<span style='color:#{color};'>#{colors[Math.floor(Math.random()*colors.length)]}</span><wbr />"
+    $('#output-colortest').append "<br /><br />"
+    colGen = new ColorGenerator(
+        hue: 180
+        saturation: 1
+        lightness: 0.7
+        alpha: 1
+    )
+    for i in [1..50]
+        color = colGen.nextColor(false).toHexString()
+        $('#output-colortest').append "<span style='color:#{color};'>#{colors[Math.floor(Math.random()*colors.length)]}</span><wbr />"
     

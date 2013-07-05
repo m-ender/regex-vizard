@@ -42,11 +42,38 @@
       this.i = 0;
     }
 
-    ColorGenerator.prototype.nextColor = function() {
-      return this.baseColor.hue("+=" + (this.phi * this.i++));
+    ColorGenerator.prototype.nextColor = function(correctHue) {
+      if (correctHue == null) {
+        correctHue = true;
+      }
+      if (correctHue) {
+        return this.baseColor.hue(this.correctHue(this.baseColor.hue() + this.phi * this.i++));
+      } else {
+        return this.baseColor.hue(this.baseColor.hue() + this.phi * this.i++);
+      }
     };
 
     ColorGenerator.prototype.phi = 0.61803398874989484820 * 360;
+
+    ColorGenerator.prototype.hueCorrection = [[5, 10], [45, 30], [70, 50], [94, 70], [100, 110], [115, 125], [148, 145], [177, 160], [179, 182], [185, 188], [225, 210], [255, 250]];
+
+    ColorGenerator.prototype.correctHue = function(hue) {
+      var lx, ly, newHue, pair, _i, _len, _ref;
+      hue = hue * (256 / 360) % 255;
+      lx = ly = 0;
+      _ref = this.hueCorrection;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        pair = _ref[_i];
+        if (hue === pair[0]) {
+          return pair[1];
+        } else if (hue < pair[0]) {
+          newHue = ly + (pair[1] - ly) / (pair[0] - lx) * (hue - lx);
+          return Math.floor(newHue * 360 / 256);
+        }
+        lx = pair[0];
+        ly = pair[1];
+      }
+    };
 
     return ColorGenerator;
 
@@ -84,10 +111,22 @@
   };
 
   $(document).ready(function() {
-    var colGen, color, i, _i, _results;
+    var colGen, color, colors, i, _i, _j, _results;
     JQueryHelper.addJQueryPlugins();
     $('#button-start').on('click', setupEngine);
     $('#button-step-fw').on('click', stepForward);
+    colors = ["aqua", "black", "blue", "fuchsia", "gray", "green", "lime", "maroon", "navy", "olive", "purple", "red", "silver", "teal", "white", "yellow"];
+    colGen = new ColorGenerator({
+      hue: 180,
+      saturation: 1,
+      lightness: 0.7,
+      alpha: 1
+    });
+    for (i = _i = 1; _i <= 50; i = ++_i) {
+      color = colGen.nextColor().toHexString();
+      $('#output-colortest').append("<span style='color:" + color + ";'>" + colors[Math.floor(Math.random() * colors.length)] + "</span><wbr />");
+    }
+    $('#output-colortest').append("<br /><br />");
     colGen = new ColorGenerator({
       hue: 180,
       saturation: 1,
@@ -95,9 +134,9 @@
       alpha: 1
     });
     _results = [];
-    for (i = _i = 1; _i <= 50; i = ++_i) {
-      color = colGen.nextColor().toHexString();
-      _results.push($('#output-colortest').append("<span style='color:" + color + ";'>!</span>"));
+    for (i = _j = 1; _j <= 50; i = ++_j) {
+      color = colGen.nextColor(false).toHexString();
+      _results.push($('#output-colortest').append("<span style='color:" + color + ";'>" + colors[Math.floor(Math.random() * colors.length)] + "</span><wbr />"));
     }
     return _results;
   });
