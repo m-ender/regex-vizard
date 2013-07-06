@@ -9,10 +9,10 @@ class root.Quantifier extends root.Token
         
     reset: () ->
         super()
-        @instances = [@clone(@subtokens[0])] # instances of the subtoken used for the individual repetitions
-        @pos = []                            # "current" positions that were used for successful matches
+        @instances = [Helper.clone @subtokens[0]] # instances of the subtoken used for the individual repetitions
+        @pos = []                                  # "current" positions that were used for successful matches
         @result = false
-        @captureStack = []                   # remembers the captures of hidden instances on the above stack
+        @captureStack = []                         # remembers the captures of hidden instances on the above stack
         
     # @minGroup is the smallest group number contained in the subtokens of this quantifier
     # @nGroups is the number of groups contained in the subtokens of this quantifier
@@ -67,22 +67,10 @@ class root.Quantifier extends root.Token
                 @captureStack.push(state.captures[@minGroup...@minGroup+@nGroups])
                 state.captures[@minGroup...@minGroup+@nGroups] = @clearer
                 
-                @instances.push(@clone(@subtokens[0]))
+                @instances.push(Helper.clone @subtokens[0])
                 @pos.push(state.currentPosition)
                 state.currentPosition = result
                 return -1
-
-    # Taken from http://coffeescriptcookbook.com/chapters/classes_and_objects/cloning and slightly modified
-    clone: (obj) ->
-        if not obj? or typeof obj isnt 'object'
-            return obj
-
-        newInstance = new obj.constructor()
-
-        for key of obj
-            newInstance[key] = @clone(obj[key])
-
-        return newInstance
         
 class root.Option extends root.Quantifier
     constructor: (debug, token) ->

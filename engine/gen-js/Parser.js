@@ -9,15 +9,15 @@
     function Parser() {}
 
     Parser.prototype.parsePattern = function(string) {
-      var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, nestingStack, regex, squash, start, _, _ref, _ref1;
+      var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, maxGroup, nestingStack, squash, start, treeRoot, _, _ref, _ref1;
       debug = {
         sourceOpenLength: 0,
         sourceCloseLength: 0,
         id: 0
       };
-      regex = new Group(debug, new Disjunction(null, new Sequence()), 0);
+      treeRoot = new Group(debug, new Disjunction(null, new Sequence()), 0);
       nestingStack = [];
-      current = regex.subtokens[0];
+      current = treeRoot.subtokens[0];
       i = 0;
       lastCaptureIndex = 0;
       lastId = 0;
@@ -122,7 +122,7 @@
           return _results;
         }
       };
-      squash(regex);
+      squash(treeRoot);
       fillGroupRanges = function(token) {
         var max, min, subMax, subMin, subtoken, _i, _len, _ref1, _ref2;
         if (token instanceof Group) {
@@ -146,8 +146,8 @@
         }
         return [min, max];
       };
-      _ref1 = fillGroupRanges(regex), _ = _ref1[0], regex.maxGroup = _ref1[1];
-      return regex;
+      _ref1 = fillGroupRanges(treeRoot), _ = _ref1[0], maxGroup = _ref1[1];
+      return [treeRoot, maxGroup];
     };
 
     Parser.prototype.parseCharacterClass = function(string, current, i, id) {

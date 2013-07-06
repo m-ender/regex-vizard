@@ -12,9 +12,9 @@ class root.Parser
             sourceOpenLength: 0
             sourceCloseLength: 0
             id: 0
-        regex = new Group(debug, new Disjunction(null, new Sequence()), 0)
+        treeRoot = new Group(debug, new Disjunction(null, new Sequence()), 0)
         nestingStack = []
-        current = regex.subtokens[0]
+        current = treeRoot.subtokens[0]
         i = 0
         
         lastCaptureIndex = 0
@@ -95,7 +95,7 @@ class root.Parser
                         subtoken = token.subtokens[i]
                     squash(subtoken)
         
-        squash(regex)
+        squash(treeRoot)
         
         # Now traverse token tree again to tell quantifiers which groups they contain
         fillGroupRanges = (token) ->
@@ -117,9 +117,9 @@ class root.Parser
                     
             return [min, max]
         
-        [_, regex.maxGroup] = fillGroupRanges(regex)
+        [_, maxGroup] = fillGroupRanges(treeRoot)
         
-        return regex
+        return [treeRoot, maxGroup]
         
     parseCharacterClass: (string, current, i, id) ->
         if i < string.length and string.charAt(i) == "^"

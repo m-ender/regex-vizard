@@ -83,6 +83,7 @@ task 'build:frontend', 'Compile frontend code to JavaScript.', (options) ->
 
 task 'build:backend', 'Compile regex engine to JavaScript for client.', (options) ->
     appFiles = [
+        'Helper'
         'Guards'
         'Tokens/Token'
         'Tokens/Assertion'

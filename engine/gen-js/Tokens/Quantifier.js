@@ -21,7 +21,7 @@
 
     Quantifier.prototype.reset = function() {
       Quantifier.__super__.reset.call(this);
-      this.instances = [this.clone(this.subtokens[0])];
+      this.instances = [Helper.clone(this.subtokens[0])];
       this.pos = [];
       this.result = false;
       return this.captureStack = [];
@@ -87,23 +87,11 @@
           }
           this.captureStack.push(state.captures.slice(this.minGroup, this.minGroup + this.nGroups));
           [].splice.apply(state.captures, [(_ref4 = this.minGroup), (this.minGroup + this.nGroups) - _ref4].concat(_ref5 = this.clearer)), _ref5;
-          this.instances.push(this.clone(this.subtokens[0]));
+          this.instances.push(Helper.clone(this.subtokens[0]));
           this.pos.push(state.currentPosition);
           state.currentPosition = result;
           return -1;
       }
-    };
-
-    Quantifier.prototype.clone = function(obj) {
-      var key, newInstance;
-      if (!(obj != null) || typeof obj !== 'object') {
-        return obj;
-      }
-      newInstance = new obj.constructor();
-      for (key in obj) {
-        newInstance[key] = this.clone(obj[key]);
-      }
-      return newInstance;
     };
 
     return Quantifier;

@@ -7,85 +7,51 @@
   root.Regex = (function() {
 
     function Regex(regexString, report) {
+      var _ref;
       if (report == null) {
         report = false;
       }
       if (report) {
         console.log("Regex string:", regexString);
       }
-      this.regex = new Parser().parsePattern(regexString);
+      _ref = new Parser().parsePattern(regexString), this.regex = _ref[0], this.nGroups = _ref[1];
       if (report) {
         console.log("Regex pattern:", this.regex);
       }
     }
 
     Regex.prototype.test = function(inputString, report) {
-      var i, result, state;
+      var matcher;
       if (report == null) {
         report = false;
       }
       this.regex.reset();
-      if (report) {
-        console.log(this.regex);
+      matcher = this.getMatcher(inputString);
+      while (matcher.stepForward()) {
+        continue;
       }
-      if (report) {
-        console.log("Input string:", inputString);
-      }
-      state = this.setupInitialState(inputString, this.regex.maxGroup);
-      if (report) {
-        console.log("Input:", state.input);
-      }
-      while (state.startingPosition < state.input.length) {
-        result = this.regex.nextMatch(state, report);
-        while (result === 0 || result === -1) {
-          result = this.regex.nextMatch(state, report);
-        }
-        if (result === false) {
-          state.currentPosition = ++state.startingPosition;
-        } else {
-          break;
-        }
-      }
-      i = 0;
-      if (report) {
-        console.log(state.captures);
-      }
-      return state.startingPosition < state.input.length;
+      return matcher.success;
     };
 
     Regex.prototype.match = function(inputString, report) {
-      var i, result, state;
+      var matcher;
       if (report == null) {
         report = false;
       }
       this.regex.reset();
-      if (report) {
-        console.log(this.regex);
+      matcher = this.getMatcher(inputString);
+      while (matcher.stepForward()) {
+        continue;
       }
-      if (report) {
-        console.log("Input string:", inputString);
-      }
-      state = this.setupInitialState(inputString, this.regex.maxGroup);
-      if (report) {
-        console.log("Input:", state.input);
-      }
-      while (state.startingPosition < state.input.length) {
-        result = this.regex.nextMatch(state, report);
-        while (result === 0 || result === -1) {
-          result = this.regex.nextMatch(state, report);
-        }
-        if (result === false) {
-          state.currentPosition = ++state.startingPosition;
-        } else {
-          break;
-        }
-      }
-      i = 0;
-      if (result === false) {
-        return null;
+      if (matcher.success) {
+        return matcher.groups();
       } else {
-        return state.captures;
+        return null;
       }
+    };
+
+    Regex.prototype.getMatcher = function(inputString) {
+      return new Matcher(Helper.clone(this.regex), this.nGroups, inputString);
     };
 
     Regex.prototype.parseInput = function(inputString) {

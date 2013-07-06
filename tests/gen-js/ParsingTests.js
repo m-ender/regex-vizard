@@ -11,7 +11,7 @@
     },
     "testCharacter": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("a");
+      regex = this.Parser.parsePattern("a")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -25,7 +25,7 @@
     },
     "testEscapedMetacharacter": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("\\?");
+      regex = this.Parser.parsePattern("\\?")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -39,7 +39,7 @@
     },
     "testEscapeSequence": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("\\n");
+      regex = this.Parser.parsePattern("\\n")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -53,7 +53,7 @@
     },
     "testWildcard": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern(".");
+      regex = this.Parser.parsePattern(".")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -67,7 +67,7 @@
     },
     "testStartAnchor": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("^");
+      regex = this.Parser.parsePattern("^")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -81,7 +81,7 @@
     },
     "testEndAnchor": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("$");
+      regex = this.Parser.parsePattern("$")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -95,7 +95,7 @@
     },
     "testSequence": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("abc");
+      regex = this.Parser.parsePattern("abc")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -120,7 +120,7 @@
     },
     "testDisjunction": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("a|b|c");
+      regex = this.Parser.parsePattern("a|b|c")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -145,7 +145,7 @@
     },
     "testOption": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("a?");
+      regex = this.Parser.parsePattern("a?")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -164,7 +164,7 @@
     },
     "testRepeatZeroOrMore": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("a*");
+      regex = this.Parser.parsePattern("a*")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -183,7 +183,7 @@
     },
     "testRepeatOneOrMore": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("a+");
+      regex = this.Parser.parsePattern("a+")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -201,8 +201,9 @@
       return this.assertSyntaxTree(expectedTree, regex);
     },
     "testGroup": function() {
-      var expectedTree, regex;
-      regex = this.Parser.parsePattern("(a)");
+      var expectedTree, nGroups, regex, _ref;
+      _ref = this.Parser.parsePattern("(a)"), regex = _ref[0], nGroups = _ref[1];
+      assertEquals(1, nGroups);
       expectedTree = {
         type: Group,
         subtokens: [
@@ -230,24 +231,24 @@
           }
         ]
       };
-      regex = this.Parser.parsePattern("[]");
+      regex = this.Parser.parsePattern("[]")[0];
       this.assertSyntaxTree(expectedTree, regex);
-      regex = this.Parser.parsePattern("[a]");
+      regex = this.Parser.parsePattern("[a]")[0];
       this.assertSyntaxTree(expectedTree, regex);
-      regex = this.Parser.parsePattern("[abc]");
+      regex = this.Parser.parsePattern("[abc]")[0];
       this.assertSyntaxTree(expectedTree, regex);
-      regex = this.Parser.parsePattern("[^]");
+      regex = this.Parser.parsePattern("[^]")[0];
       this.assertSyntaxTree(expectedTree, regex);
-      regex = this.Parser.parsePattern("[^abc]");
+      regex = this.Parser.parsePattern("[^abc]")[0];
       this.assertSyntaxTree(expectedTree, regex);
-      regex = this.Parser.parsePattern("[a-c]");
+      regex = this.Parser.parsePattern("[a-c]")[0];
       this.assertSyntaxTree(expectedTree, regex);
-      regex = this.Parser.parsePattern("[a\\]c]");
+      regex = this.Parser.parsePattern("[a\\]c]")[0];
       return this.assertSyntaxTree(expectedTree, regex);
     },
     "testWordBoundary": function() {
       var expectedTree, regex;
-      regex = this.Parser.parsePattern("\\b");
+      regex = this.Parser.parsePattern("\\b")[0];
       expectedTree = {
         type: Group,
         subtokens: [
@@ -258,12 +259,13 @@
         ]
       };
       this.assertSyntaxTree(expectedTree, regex);
-      regex = this.Parser.parsePattern("\\B");
+      regex = this.Parser.parsePattern("\\B")[0];
       return this.assertSyntaxTree(expectedTree, regex);
     },
     "testComplexExpression": function() {
-      var expectedTree, regex;
-      regex = this.Parser.parsePattern("d.(a[be]?|c|)*$");
+      var expectedTree, nGroups, regex, _ref;
+      _ref = this.Parser.parsePattern("d(.)(a[be]?|c|)*$"), regex = _ref[0], nGroups = _ref[1];
+      assertEquals(2, nGroups);
       expectedTree = {
         type: Group,
         subtokens: [
@@ -274,8 +276,13 @@
                 type: Character,
                 subtokens: []
               }, {
-                type: Wildcard,
-                subtokens: []
+                type: Group,
+                subtokens: [
+                  {
+                    type: Wildcard,
+                    subtokens: []
+                  }
+                ]
               }, {
                 type: RepeatZeroOrMore,
                 subtokens: [

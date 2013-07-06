@@ -8,7 +8,7 @@ TestCase("ParsingTests",
             @Parser = new window.Parser
         
     "testCharacter": () ->
-        regex = @Parser.parsePattern("a")
+        regex = @Parser.parsePattern("a")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -18,7 +18,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testEscapedMetacharacter": () ->
-        regex = @Parser.parsePattern("\\?")
+        regex = @Parser.parsePattern("\\?")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -28,7 +28,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testEscapeSequence": () ->
-        regex = @Parser.parsePattern("\\n")
+        regex = @Parser.parsePattern("\\n")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -38,7 +38,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testWildcard": () ->
-        regex = @Parser.parsePattern(".")
+        regex = @Parser.parsePattern(".")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -48,7 +48,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testStartAnchor": () ->
-        regex = @Parser.parsePattern("^")
+        regex = @Parser.parsePattern("^")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -58,7 +58,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testEndAnchor": () ->
-        regex = @Parser.parsePattern("$")
+        regex = @Parser.parsePattern("$")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -68,7 +68,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testSequence": () ->
-        regex = @Parser.parsePattern("abc")
+        regex = @Parser.parsePattern("abc")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -87,7 +87,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testDisjunction": () ->
-        regex = @Parser.parsePattern("a|b|c")
+        regex = @Parser.parsePattern("a|b|c")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -106,7 +106,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testOption": () ->
-        regex = @Parser.parsePattern("a?")
+        regex = @Parser.parsePattern("a?")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -119,7 +119,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testRepeatZeroOrMore": () ->
-        regex = @Parser.parsePattern("a*")
+        regex = @Parser.parsePattern("a*")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -132,7 +132,7 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
 
     "testRepeatOneOrMore": () ->
-        regex = @Parser.parsePattern("a+")
+        regex = @Parser.parsePattern("a+")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -145,7 +145,8 @@ TestCase("ParsingTests",
         @assertSyntaxTree(expectedTree, regex)
         
     "testGroup": () ->
-        regex = @Parser.parsePattern("(a)")
+        [regex, nGroups] = @Parser.parsePattern("(a)")
+        assertEquals(1, nGroups)
         expectedTree =
             type: Group
             subtokens: [
@@ -165,29 +166,29 @@ TestCase("ParsingTests",
                 subtokens: []
             ]
             
-        regex = @Parser.parsePattern("[]")
+        regex = @Parser.parsePattern("[]")[0]
         @assertSyntaxTree(expectedTree, regex)
             
-        regex = @Parser.parsePattern("[a]")
+        regex = @Parser.parsePattern("[a]")[0]
         @assertSyntaxTree(expectedTree, regex)
         
-        regex = @Parser.parsePattern("[abc]")
+        regex = @Parser.parsePattern("[abc]")[0]
         @assertSyntaxTree(expectedTree, regex)
         
-        regex = @Parser.parsePattern("[^]")
+        regex = @Parser.parsePattern("[^]")[0]
         @assertSyntaxTree(expectedTree, regex)
         
-        regex = @Parser.parsePattern("[^abc]")
+        regex = @Parser.parsePattern("[^abc]")[0]
         @assertSyntaxTree(expectedTree, regex)
         
-        regex = @Parser.parsePattern("[a-c]")
+        regex = @Parser.parsePattern("[a-c]")[0]
         @assertSyntaxTree(expectedTree, regex)
         
-        regex = @Parser.parsePattern("[a\\]c]")
+        regex = @Parser.parsePattern("[a\\]c]")[0]
         @assertSyntaxTree(expectedTree, regex)
         
     "testWordBoundary": () ->
-        regex = @Parser.parsePattern("\\b")
+        regex = @Parser.parsePattern("\\b")[0]
         expectedTree =
             type: Group
             subtokens: [
@@ -197,11 +198,13 @@ TestCase("ParsingTests",
         
         @assertSyntaxTree(expectedTree, regex)
         
-        regex = @Parser.parsePattern("\\B")
+        regex = @Parser.parsePattern("\\B")[0]
         @assertSyntaxTree(expectedTree, regex)
             
     "testComplexExpression": () ->
-        regex = @Parser.parsePattern("d.(a[be]?|c|)*$")
+        [regex, nGroups] = @Parser.parsePattern("d(.)(a[be]?|c|)*$")
+        assertEquals(2, nGroups)
+        
         expectedTree =
             type: Group
             subtokens: [
@@ -210,8 +213,11 @@ TestCase("ParsingTests",
                     type: Character
                     subtokens: []
                    ,
-                    type: Wildcard
-                    subtokens: []
+                    type: Group
+                    subtokens: [
+                        type: Wildcard
+                        subtokens: []
+                    ]
                    ,
                     type: RepeatZeroOrMore
                     subtokens: [

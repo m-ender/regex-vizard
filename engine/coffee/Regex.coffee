@@ -3,56 +3,32 @@ root = global ? window
 class root.Regex
     constructor: (regexString, report = false) ->      
         console.log("Regex string:", regexString) if report
-        @regex = new Parser().parsePattern(regexString)
+        [@regex, @nGroups] = new Parser().parsePattern(regexString)
         console.log("Regex pattern:", @regex) if report
 
     test: (inputString, report = false) ->
         @regex.reset()
-        
-        console.log(@regex) if report
-        
-        # Build character array and surround it with -1 and 1 as guards for the
-        # start and end of the input string
-        console.log("Input string:", inputString) if report
-        state = @setupInitialState(inputString, @regex.maxGroup)        
-        console.log("Input:", state.input) if report
 
-        while state.startingPosition < state.input.length
-            result = @regex.nextMatch(state, report)
-            while result == 0 or result == -1
-                result = @regex.nextMatch(state, report)
-            if result == false
-                state.currentPosition = ++state.startingPosition
-            else
-                break
+        matcher = @getMatcher(inputString)
         
-        i = 0
-        console.log(state.captures) if report
-        return state.startingPosition < state.input.length
+        continue while matcher.stepForward()
+        
+        return matcher.success
         
     match: (inputString, report = false) ->
         @regex.reset()
-    
-        console.log(@regex) if report
-        
-        console.log("Input string:", inputString) if report
-        state = @setupInitialState(inputString, @regex.maxGroup)        
-        console.log("Input:", state.input) if report
 
-        while state.startingPosition < state.input.length
-            result = @regex.nextMatch(state, report)
-            while result == 0 or result == -1
-                result = @regex.nextMatch(state, report)
-            if result == false
-                state.currentPosition = ++state.startingPosition
-            else
-                break
+        matcher = @getMatcher(inputString)
         
-        i = 0
-        if result is false
-            return null
+        continue while matcher.stepForward()
+        
+        if matcher.success
+            return matcher.groups()
         else
-            return if report then state else state.captures
+            return null
+            
+    getMatcher: (inputString) ->
+        return new Matcher(Helper.clone(@regex), @nGroups, inputString)
         
     # Build character array and surround it with special objects as guards for the
     # start and end of the input string
