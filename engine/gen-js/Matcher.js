@@ -8,19 +8,19 @@
 
     function Matcher(regex, nGroups, subject) {
       this.regex = regex;
+      this.subject = subject;
       this.startingPosition = 1;
       this.success = false;
-      this.state = this.setupInitialState(subject, nGroups);
+      this.state = this.setupInitialState(nGroups);
     }
 
-    Matcher.prototype.setupInitialState = function(str, nGroups) {
+    Matcher.prototype.setupInitialState = function(nGroups) {
       var i, state, _i;
       if (nGroups == null) {
         nGroups = 0;
       }
       state = {
-        inputString: str,
-        input: this.parseInput(str),
+        input: this.parseInput(this.subject),
         currentPosition: 1,
         captures: []
       };

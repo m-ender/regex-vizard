@@ -3,7 +3,7 @@ fs            = require 'fs'
 {spawn, exec} = require 'child_process'
 
 # workaround because spawn does not read PATHEXT
-if /^Windows/i.test require('os').type() 
+if /^Windows/i.test require('os').type()
     coffee = 'coffee.cmd'
     stylus = 'stylus.cmd'
 else
@@ -22,30 +22,30 @@ captureOutput = (prog) ->
             console.log 'Done.'
 
 option '-w', '--watch', 'Set up the compiler to watch for changes in the source. Works for "engine", "css" and "tests".'
-    
+
 task 'build', 'Alias for "build:release"', (options) ->
     invoke 'build:release'
-    
+
 task 'build:release', 'Bundles all tasks necessary for a full release build.', (options) ->
     invoke 'build:assets'
     invoke 'build:css'
     invoke 'build:frontend'
     invoke 'build:backend'
-                    
+
 task 'build:assets', 'Copy assets to public folder.', () ->
     console.log 'Copying files from assets/ to public/...'
-    
+
     assets = [
         'index.html'
         'js/jquery-1.10.1.js'
         'js/jquery.color-2.1.2.js'
     ]
-    
+
     for file in assets
         fs.createReadStream("assets/#{file}").pipe fs.createWriteStream "public/#{file}"
-        
+
     console.log "Done."
-    
+
 task 'build:css', 'Compile Stylus files to CSS and deploy.', (options) ->
     if options.watch
         watch = '-w'
@@ -55,7 +55,7 @@ task 'build:css', 'Compile Stylus files to CSS and deploy.', (options) ->
         console.log 'Compiling Stylus from styles/ to public/css/...'
     stylusProc = spawn stylus, [watch, '-o', 'public/css/', 'styles/']
     captureOutput(stylusProc)
-    
+
 task 'build:frontend', 'Compile frontend code to JavaScript.', (options) ->
     appFiles = [
         'jQueryPlugins'
@@ -124,7 +124,7 @@ task 'build:engine', 'Compile regex engine to JavaScript for testing.', (options
         console.log 'Compiling CoffeeScript from engine/coffee/ to engine/gen-js/...'
     coffeeProc = spawn coffee, ['-c', watch, '-o', 'engine/gen-js/', 'engine/coffee/']
     captureOutput(coffeeProc)
-    
+
 task 'build:tests', 'Compile test suite to JavaScript.', (options) ->
     if options.watch
         watch = '-w'
@@ -134,19 +134,23 @@ task 'build:tests', 'Compile test suite to JavaScript.', (options) ->
         console.log 'Compiling CoffeeScript from tests/coffee/ to tests/gen-js/...'
     coffeeProc = spawn coffee, ['-c', watch, '-o', 'tests/gen-js/', 'tests/coffee/']
     captureOutput(coffeeProc)
-            
+
 task 'server', 'Start up HTTP server (on port 1618)', (options) ->
     server = spawn coffee, ['./server.coffee'], {cwd: undefined, env: process.env}
     captureOutput(server)
-            
+
 option '-t', '--tests [TEST_SELECTOR]', 'Regular expression to select tests to be run. Use "all" to run everything.'
-            
+
 task 'test', 'Run tests with jsTestDriver', (options) ->
     options.tests = options.tests or 'all'
     console.log 'Running tests...'
-    test = spawn 'java', ['-jar', ".\\tools\\jsTestDriver\\JsTestDriver-1.3.5.jar", '--tests', options.tests, '--captureConsole'], {cwd: undefined, env: process.env}
+    test = spawn 'java', [
+                '-jar', '.\\tools\\jsTestDriver\\JsTestDriver-1.3.5.jar',
+                '--tests', options.tests,
+                '--captureConsole'
+            ], {cwd: undefined, env: process.env}
     captureOutput(test)
-    
+
 option '-b', '--browsers', 'Open and capture all browsers after starting jsTestDriver.'
 
 task 'driver', 'Starts up jsTestDriver', (options) ->
@@ -154,5 +158,10 @@ task 'driver', 'Starts up jsTestDriver', (options) ->
     browserOption = if options.browsers then '--browser' else ''
     browserArgument = if options.browsers then 'C:\\Users\\martin\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe,C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe,C:\\Program Files (x86)\\Safari\\Safari.exe,C:\\Program Files (x86)\\Opera\\opera.exe,C:\\Program Files\\Internet Explorer\\iexplore.exe' else ''
     console.log 'Starting up jsTestDriver...'
-    driver = spawn 'java', ['-jar', ".\\tools\\jsTestDriver\\JsTestDriver-1.3.5.jar", '--port', port, browserOption, browserArgument]
+    driver = spawn 'java', [
+                '-jar', ".\\tools\\jsTestDriver\\JsTestDriver-1.3.5.jar",
+                '--port', port,
+                browserOption, browserArgument,
+                '--browserTimeout', '120000'
+            ]
     captureOutput(driver)

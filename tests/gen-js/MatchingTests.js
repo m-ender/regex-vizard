@@ -2,6 +2,38 @@
 (function() {
 
   TestCase("MatchingTests", {
+    assertCharCodeTrue: function(cl, charCodeRange) {
+      var charRange, failedChar, i, m, regex;
+      regex = new Regex("^" + cl + "*");
+      charRange = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = charCodeRange.length; _i < _len; _i++) {
+          i = charCodeRange[_i];
+          _results.push(String.fromCharCode(i));
+        }
+        return _results;
+      })();
+      m = regex.match(charRange.join(''));
+      failedChar = charCodeRange[0] + m[0].length;
+      return assertTrue("" + cl + " failed to match character 0x" + (failedChar.toString(16)), m[0].length === charRange.length);
+    },
+    assertCharCodeFalse: function(cl, charCodeRange) {
+      var char, charRange, i, m, regex, _ref;
+      regex = new Regex(cl);
+      charRange = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = charCodeRange.length; _i < _len; _i++) {
+          i = charCodeRange[_i];
+          _results.push(String.fromCharCode(i));
+        }
+        return _results;
+      })();
+      m = regex.match(charRange.join(''));
+      char = (_ref = m != null ? m[0].charCodeAt(0) : void 0) != null ? _ref : "";
+      return assertFalse("" + cl + " erroneously matched character 0x" + (char.toString(16)), m != null);
+    },
     "testEmptyPattern": function() {
       var regex;
       regex = new Regex("");
@@ -479,356 +511,305 @@
       return assertEquals(["aca"], regex.match("bacaba"));
     },
     "testBuiltInCharacterClasses": function() {
-      var assertCharCodeFalse, assertCharCodeTrue, regex, _aa, _ab, _ac, _ad, _ae, _af, _ag, _ah, _ai, _aj, _ak, _al, _am, _an, _ao, _ap, _aq, _ar, _as, _at, _au, _av, _aw, _ax, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _results, _results1, _results10, _results11, _results12, _results13, _results14, _results15, _results16, _results17, _results18, _results19, _results2, _results20, _results21, _results22, _results23, _results24, _results25, _results26, _results27, _results28, _results29, _results3, _results30, _results31, _results32, _results33, _results34, _results35, _results36, _results37, _results38, _results39, _results4, _results40, _results41, _results5, _results6, _results7, _results8, _results9, _s, _t, _u, _v, _w, _x, _y, _z;
-      assertCharCodeTrue = function(cl, charCodeRange) {
-        var char, i, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = charCodeRange.length; _i < _len; _i++) {
-          i = charCodeRange[_i];
-          char = String.fromCharCode(i);
-          _results.push(assertTrue("" + cl + " failed to match character " + i + " (0x" + (i.toString(16)) + "): " + char, regex.test(char)));
-        }
-        return _results;
-      };
-      assertCharCodeFalse = function(cl, charCodeRange) {
-        var char, i, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = charCodeRange.length; _i < _len; _i++) {
-          i = charCodeRange[_i];
-          char = String.fromCharCode(i);
-          _results.push(assertFalse("" + cl + " erroneously match character " + i + " (0x" + (i.toString(16)) + "): " + char, regex.test(char)));
-        }
-        return _results;
-      };
-      regex = new Regex("^\\d$");
-      assertCharCodeFalse("\\d", (function() {
+      var _aa, _ab, _ac, _ad, _ae, _af, _ag, _ah, _ai, _aj, _ak, _al, _am, _an, _ao, _ap, _aq, _ar, _as, _at, _au, _av, _aw, _ax, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _results, _results1, _results10, _results11, _results12, _results13, _results14, _results15, _results16, _results17, _results18, _results19, _results2, _results20, _results21, _results22, _results23, _results24, _results25, _results26, _results27, _results28, _results29, _results3, _results30, _results31, _results32, _results33, _results34, _results35, _results36, _results37, _results38, _results39, _results4, _results40, _results41, _results5, _results6, _results7, _results8, _results9, _s, _t, _u, _v, _w, _x, _y, _z;
+      this.assertCharCodeFalse("\\d", (function() {
         _results = [];
         for (_i = 0; _i <= 47; _i++){ _results.push(_i); }
         return _results;
       }).apply(this));
-      assertCharCodeTrue("\\d", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-      assertCharCodeFalse("\\d", (function() {
+      this.assertCharCodeTrue("\\d", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+      this.assertCharCodeFalse("\\d", (function() {
         _results1 = [];
         for (var _j = 58; 58 <= 0xffff ? _j <= 0xffff : _j >= 0xffff; 58 <= 0xffff ? _j++ : _j--){ _results1.push(_j); }
         return _results1;
       }).apply(this));
-      regex = new Regex("^\\D$");
-      assertFalse(regex.test(""));
-      assertCharCodeTrue("\\D", (function() {
+      assertFalse(new Regex("^\\D$").test(""));
+      this.assertCharCodeTrue("\\D", (function() {
         _results2 = [];
         for (_k = 0; _k <= 47; _k++){ _results2.push(_k); }
         return _results2;
       }).apply(this));
-      assertCharCodeFalse("\\D", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-      assertCharCodeTrue("\\D", (function() {
+      this.assertCharCodeFalse("\\D", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+      this.assertCharCodeTrue("\\D", (function() {
         _results3 = [];
         for (var _l = 58; 58 <= 0xffff ? _l <= 0xffff : _l >= 0xffff; 58 <= 0xffff ? _l++ : _l--){ _results3.push(_l); }
         return _results3;
       }).apply(this));
-      regex = new Regex("^\\w$");
-      assertCharCodeFalse("\\w", (function() {
+      this.assertCharCodeFalse("\\w", (function() {
         _results4 = [];
         for (_m = 0; _m <= 47; _m++){ _results4.push(_m); }
         return _results4;
       }).apply(this));
-      assertCharCodeTrue("\\w", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-      assertCharCodeFalse("\\w", [58, 59, 60, 61, 62, 63, 64]);
-      assertCharCodeTrue("\\w", (function() {
+      this.assertCharCodeTrue("\\w", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+      this.assertCharCodeFalse("\\w", [58, 59, 60, 61, 62, 63, 64]);
+      this.assertCharCodeTrue("\\w", (function() {
         _results5 = [];
         for (_n = 65; _n <= 90; _n++){ _results5.push(_n); }
         return _results5;
       }).apply(this));
-      assertCharCodeFalse("\\w", [91, 92, 93, 94]);
-      assertCharCodeTrue("\\w", [95]);
-      assertCharCodeFalse("\\w", [96]);
-      assertCharCodeTrue("\\w", (function() {
+      this.assertCharCodeFalse("\\w", [91, 92, 93, 94]);
+      this.assertCharCodeTrue("\\w", [95]);
+      this.assertCharCodeFalse("\\w", [96]);
+      this.assertCharCodeTrue("\\w", (function() {
         _results6 = [];
         for (_o = 97; _o <= 122; _o++){ _results6.push(_o); }
         return _results6;
       }).apply(this));
-      assertCharCodeFalse("\\w", (function() {
+      this.assertCharCodeFalse("\\w", (function() {
         _results7 = [];
         for (var _p = 123; 123 <= 0xffff ? _p <= 0xffff : _p >= 0xffff; 123 <= 0xffff ? _p++ : _p--){ _results7.push(_p); }
         return _results7;
       }).apply(this));
-      regex = new Regex("^\\W$");
-      assertFalse(regex.test(""));
-      assertCharCodeTrue("\\W", (function() {
+      assertFalse(new Regex("^\\W$").test(""));
+      this.assertCharCodeTrue("\\W", (function() {
         _results8 = [];
         for (_q = 0; _q <= 47; _q++){ _results8.push(_q); }
         return _results8;
       }).apply(this));
-      assertCharCodeFalse("\\W", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-      assertCharCodeTrue("\\W", [58, 59, 60, 61, 62, 63, 64]);
-      assertCharCodeFalse("\\W", (function() {
+      this.assertCharCodeFalse("\\W", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+      this.assertCharCodeTrue("\\W", [58, 59, 60, 61, 62, 63, 64]);
+      this.assertCharCodeFalse("\\W", (function() {
         _results9 = [];
         for (_r = 65; _r <= 90; _r++){ _results9.push(_r); }
         return _results9;
       }).apply(this));
-      assertCharCodeTrue("\\W", [91, 92, 93, 94]);
-      assertCharCodeFalse("\\W", [95]);
-      assertCharCodeTrue("\\W", [96]);
-      assertCharCodeFalse("\\W", (function() {
+      this.assertCharCodeTrue("\\W", [91, 92, 93, 94]);
+      this.assertCharCodeFalse("\\W", [95]);
+      this.assertCharCodeTrue("\\W", [96]);
+      this.assertCharCodeFalse("\\W", (function() {
         _results10 = [];
         for (_s = 97; _s <= 122; _s++){ _results10.push(_s); }
         return _results10;
       }).apply(this));
-      assertCharCodeTrue("\\W", (function() {
+      this.assertCharCodeTrue("\\W", (function() {
         _results11 = [];
         for (var _t = 123; 123 <= 0xffff ? _t <= 0xffff : _t >= 0xffff; 123 <= 0xffff ? _t++ : _t--){ _results11.push(_t); }
         return _results11;
       }).apply(this));
-      regex = new Regex("^\\s$");
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeFalse("\\s", (function() {
         _results12 = [];
         for (var _u = 0x0; 0x0 <= 0x8 ? _u <= 0x8 : _u >= 0x8; 0x0 <= 0x8 ? _u++ : _u--){ _results12.push(_u); }
         return _results12;
       }).apply(this));
-      assertCharCodeTrue("\\s", (function() {
+      this.assertCharCodeTrue("\\s", (function() {
         _results13 = [];
         for (var _v = 0x9; 0x9 <= 0xd ? _v <= 0xd : _v >= 0xd; 0x9 <= 0xd ? _v++ : _v--){ _results13.push(_v); }
         return _results13;
       }).apply(this));
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeFalse("\\s", (function() {
         _results14 = [];
         for (var _w = 0xe; 0xe <= 0x1f ? _w <= 0x1f : _w >= 0x1f; 0xe <= 0x1f ? _w++ : _w--){ _results14.push(_w); }
         return _results14;
       }).apply(this));
-      assertCharCodeTrue("\\s", [0x20]);
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeTrue("\\s", [0x20]);
+      this.assertCharCodeFalse("\\s", (function() {
         _results15 = [];
         for (var _x = 0x21; 0x21 <= 0x9f ? _x <= 0x9f : _x >= 0x9f; 0x21 <= 0x9f ? _x++ : _x--){ _results15.push(_x); }
         return _results15;
       }).apply(this));
-      assertCharCodeTrue("\\s", [0xa0]);
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeTrue("\\s", [0xa0]);
+      this.assertCharCodeFalse("\\s", (function() {
         _results16 = [];
         for (var _y = 0xa1; 0xa1 <= 0x167f ? _y <= 0x167f : _y >= 0x167f; 0xa1 <= 0x167f ? _y++ : _y--){ _results16.push(_y); }
         return _results16;
       }).apply(this));
-      assertCharCodeTrue("\\s", [0x1680]);
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeTrue("\\s", [0x1680]);
+      this.assertCharCodeFalse("\\s", (function() {
         _results17 = [];
         for (var _z = 0x1681; 0x1681 <= 0x180d ? _z <= 0x180d : _z >= 0x180d; 0x1681 <= 0x180d ? _z++ : _z--){ _results17.push(_z); }
         return _results17;
       }).apply(this));
-      assertCharCodeTrue("\\s", [0x180e]);
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeTrue("\\s", [0x180e]);
+      this.assertCharCodeFalse("\\s", (function() {
         _results18 = [];
         for (var _aa = 0x180f; 0x180f <= 0x1fff ? _aa <= 0x1fff : _aa >= 0x1fff; 0x180f <= 0x1fff ? _aa++ : _aa--){ _results18.push(_aa); }
         return _results18;
       }).apply(this));
-      assertCharCodeTrue("\\s", (function() {
+      this.assertCharCodeTrue("\\s", (function() {
         _results19 = [];
         for (var _ab = 0x2000; 0x2000 <= 0x200a ? _ab <= 0x200a : _ab >= 0x200a; 0x2000 <= 0x200a ? _ab++ : _ab--){ _results19.push(_ab); }
         return _results19;
       }).apply(this));
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeFalse("\\s", (function() {
         _results20 = [];
         for (var _ac = 0x200b; 0x200b <= 0x2027 ? _ac <= 0x2027 : _ac >= 0x2027; 0x200b <= 0x2027 ? _ac++ : _ac--){ _results20.push(_ac); }
         return _results20;
       }).apply(this));
-      assertCharCodeTrue("\\s", (function() {
+      this.assertCharCodeTrue("\\s", (function() {
         _results21 = [];
         for (var _ad = 0x2028; 0x2028 <= 0x2029 ? _ad <= 0x2029 : _ad >= 0x2029; 0x2028 <= 0x2029 ? _ad++ : _ad--){ _results21.push(_ad); }
         return _results21;
       }).apply(this));
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeFalse("\\s", (function() {
         _results22 = [];
         for (var _ae = 0x202a; 0x202a <= 0x202e ? _ae <= 0x202e : _ae >= 0x202e; 0x202a <= 0x202e ? _ae++ : _ae--){ _results22.push(_ae); }
         return _results22;
       }).apply(this));
-      assertCharCodeTrue("\\s", [0x202f]);
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeTrue("\\s", [0x202f]);
+      this.assertCharCodeFalse("\\s", (function() {
         _results23 = [];
         for (var _af = 0x2030; 0x2030 <= 0x205e ? _af <= 0x205e : _af >= 0x205e; 0x2030 <= 0x205e ? _af++ : _af--){ _results23.push(_af); }
         return _results23;
       }).apply(this));
-      assertCharCodeTrue("\\s", [0x205f]);
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeTrue("\\s", [0x205f]);
+      this.assertCharCodeFalse("\\s", (function() {
         _results24 = [];
         for (var _ag = 0x2060; 0x2060 <= 0x2fff ? _ag <= 0x2fff : _ag >= 0x2fff; 0x2060 <= 0x2fff ? _ag++ : _ag--){ _results24.push(_ag); }
         return _results24;
       }).apply(this));
-      assertCharCodeTrue("\\s", [0x3000]);
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeTrue("\\s", [0x3000]);
+      this.assertCharCodeFalse("\\s", (function() {
         _results25 = [];
         for (var _ah = 0x3001; 0x3001 <= 0xfefe ? _ah <= 0xfefe : _ah >= 0xfefe; 0x3001 <= 0xfefe ? _ah++ : _ah--){ _results25.push(_ah); }
         return _results25;
       }).apply(this));
-      assertCharCodeTrue("\\s", [0xfeff]);
-      assertCharCodeFalse("\\s", (function() {
+      this.assertCharCodeTrue("\\s", [0xfeff]);
+      this.assertCharCodeFalse("\\s", (function() {
         _results26 = [];
         for (var _ai = 0xff00; 0xff00 <= 0xffff ? _ai <= 0xffff : _ai >= 0xffff; 0xff00 <= 0xffff ? _ai++ : _ai--){ _results26.push(_ai); }
         return _results26;
       }).apply(this));
-      regex = new Regex("^\\S$");
-      assertCharCodeTrue("\\S", (function() {
+      assertFalse(new Regex("^\\S$").test(""));
+      this.assertCharCodeTrue("\\S", (function() {
         _results27 = [];
         for (var _aj = 0x0; 0x0 <= 0x8 ? _aj <= 0x8 : _aj >= 0x8; 0x0 <= 0x8 ? _aj++ : _aj--){ _results27.push(_aj); }
         return _results27;
       }).apply(this));
-      assertCharCodeFalse("\\S", (function() {
+      this.assertCharCodeFalse("\\S", (function() {
         _results28 = [];
         for (var _ak = 0x9; 0x9 <= 0xd ? _ak <= 0xd : _ak >= 0xd; 0x9 <= 0xd ? _ak++ : _ak--){ _results28.push(_ak); }
         return _results28;
       }).apply(this));
-      assertCharCodeTrue("\S", (function() {
+      this.assertCharCodeTrue("\\S", (function() {
         _results29 = [];
         for (var _al = 0xe; 0xe <= 0x1f ? _al <= 0x1f : _al >= 0x1f; 0xe <= 0x1f ? _al++ : _al--){ _results29.push(_al); }
         return _results29;
       }).apply(this));
-      assertCharCodeFalse("\\S", [0x20]);
-      assertCharCodeTrue("\S", (function() {
+      this.assertCharCodeFalse("\\S", [0x20]);
+      this.assertCharCodeTrue("\\S", (function() {
         _results30 = [];
         for (var _am = 0x21; 0x21 <= 0x9f ? _am <= 0x9f : _am >= 0x9f; 0x21 <= 0x9f ? _am++ : _am--){ _results30.push(_am); }
         return _results30;
       }).apply(this));
-      assertCharCodeFalse("\\S", [0xa0]);
-      assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeFalse("\\S", [0xa0]);
+      this.assertCharCodeTrue("\\S", (function() {
         _results31 = [];
         for (var _an = 0xa1; 0xa1 <= 0x167f ? _an <= 0x167f : _an >= 0x167f; 0xa1 <= 0x167f ? _an++ : _an--){ _results31.push(_an); }
         return _results31;
       }).apply(this));
-      assertCharCodeFalse("\\S", [0x1680]);
-      assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeFalse("\\S", [0x1680]);
+      this.assertCharCodeTrue("\\S", (function() {
         _results32 = [];
         for (var _ao = 0x1681; 0x1681 <= 0x180d ? _ao <= 0x180d : _ao >= 0x180d; 0x1681 <= 0x180d ? _ao++ : _ao--){ _results32.push(_ao); }
         return _results32;
       }).apply(this));
-      assertCharCodeFalse("\\S", [0x180e]);
-      assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeFalse("\\S", [0x180e]);
+      this.assertCharCodeTrue("\\S", (function() {
         _results33 = [];
         for (var _ap = 0x180f; 0x180f <= 0x1fff ? _ap <= 0x1fff : _ap >= 0x1fff; 0x180f <= 0x1fff ? _ap++ : _ap--){ _results33.push(_ap); }
         return _results33;
       }).apply(this));
-      assertCharCodeFalse("\\S", (function() {
+      this.assertCharCodeFalse("\\S", (function() {
         _results34 = [];
         for (var _aq = 0x2000; 0x2000 <= 0x200a ? _aq <= 0x200a : _aq >= 0x200a; 0x2000 <= 0x200a ? _aq++ : _aq--){ _results34.push(_aq); }
         return _results34;
       }).apply(this));
-      assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeTrue("\\S", (function() {
         _results35 = [];
         for (var _ar = 0x200b; 0x200b <= 0x2027 ? _ar <= 0x2027 : _ar >= 0x2027; 0x200b <= 0x2027 ? _ar++ : _ar--){ _results35.push(_ar); }
         return _results35;
       }).apply(this));
-      assertCharCodeFalse("\\S", (function() {
+      this.assertCharCodeFalse("\\S", (function() {
         _results36 = [];
         for (var _as = 0x2028; 0x2028 <= 0x2029 ? _as <= 0x2029 : _as >= 0x2029; 0x2028 <= 0x2029 ? _as++ : _as--){ _results36.push(_as); }
         return _results36;
       }).apply(this));
-      assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeTrue("\\S", (function() {
         _results37 = [];
         for (var _at = 0x202a; 0x202a <= 0x202e ? _at <= 0x202e : _at >= 0x202e; 0x202a <= 0x202e ? _at++ : _at--){ _results37.push(_at); }
         return _results37;
       }).apply(this));
-      assertCharCodeFalse("\\S", [0x202f]);
-      assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeFalse("\\S", [0x202f]);
+      this.assertCharCodeTrue("\\S", (function() {
         _results38 = [];
         for (var _au = 0x2030; 0x2030 <= 0x205e ? _au <= 0x205e : _au >= 0x205e; 0x2030 <= 0x205e ? _au++ : _au--){ _results38.push(_au); }
         return _results38;
       }).apply(this));
-      assertCharCodeFalse("\\S", [0x205f]);
-      assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeFalse("\\S", [0x205f]);
+      this.assertCharCodeTrue("\\S", (function() {
         _results39 = [];
         for (var _av = 0x2060; 0x2060 <= 0x2fff ? _av <= 0x2fff : _av >= 0x2fff; 0x2060 <= 0x2fff ? _av++ : _av--){ _results39.push(_av); }
         return _results39;
       }).apply(this));
-      assertCharCodeFalse("\\S", [0x3000]);
-      assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeFalse("\\S", [0x3000]);
+      this.assertCharCodeTrue("\\S", (function() {
         _results40 = [];
         for (var _aw = 0x3001; 0x3001 <= 0xfefe ? _aw <= 0xfefe : _aw >= 0xfefe; 0x3001 <= 0xfefe ? _aw++ : _aw--){ _results40.push(_aw); }
         return _results40;
       }).apply(this));
-      assertCharCodeFalse("\\S", [0xfeff]);
-      return assertCharCodeTrue("\\S", (function() {
+      this.assertCharCodeFalse("\\S", [0xfeff]);
+      return this.assertCharCodeTrue("\\S", (function() {
         _results41 = [];
         for (var _ax = 0xff00; 0xff00 <= 0xffff ? _ax <= 0xffff : _ax >= 0xffff; 0xff00 <= 0xffff ? _ax++ : _ax--){ _results41.push(_ax); }
         return _results41;
       }).apply(this));
     },
     "testNestedCharacterClass": function() {
-      var assertCharCodeFalse, assertCharCodeTrue, regex, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _results, _results1, _results2, _results3, _results4, _results5, _results6, _results7, _results8, _results9;
-      assertCharCodeTrue = function(cl, charCodeRange) {
-        var char, i, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = charCodeRange.length; _i < _len; _i++) {
-          i = charCodeRange[_i];
-          char = String.fromCharCode(i);
-          _results.push(assertTrue("" + cl + " failed to match character " + i + " (0x" + (i.toString(16)) + "): " + char, regex.test(char)));
-        }
-        return _results;
-      };
-      assertCharCodeFalse = function(cl, charCodeRange) {
-        var char, i, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = charCodeRange.length; _i < _len; _i++) {
-          i = charCodeRange[_i];
-          char = String.fromCharCode(i);
-          _results.push(assertFalse("" + cl + " erroneously match character " + i + " (0x" + (i.toString(16)) + "): " + char, regex.test(char)));
-        }
-        return _results;
-      };
-      regex = new Regex("^[\\d]$");
-      assertCharCodeFalse("[\\d]", (function() {
+      var _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _results, _results1, _results2, _results3, _results4, _results5, _results6, _results7, _results8, _results9;
+      this.assertCharCodeFalse("[\\d]", (function() {
         _results = [];
         for (_i = 0; _i <= 47; _i++){ _results.push(_i); }
         return _results;
       }).apply(this));
-      assertCharCodeTrue("[\\d]", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-      assertCharCodeFalse("[\\d]", (function() {
+      this.assertCharCodeTrue("[\\d]", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+      this.assertCharCodeFalse("[\\d]", (function() {
         _results1 = [];
         for (var _j = 58; 58 <= 0xffff ? _j <= 0xffff : _j >= 0xffff; 58 <= 0xffff ? _j++ : _j--){ _results1.push(_j); }
         return _results1;
       }).apply(this));
-      regex = new Regex("^[\\D]$");
-      assertFalse(regex.test(""));
-      assertCharCodeTrue("[\\D]", (function() {
+      assertFalse(new Regex("^[\\D]$").test(""));
+      this.assertCharCodeTrue("[\\D]", (function() {
         _results2 = [];
         for (_k = 0; _k <= 47; _k++){ _results2.push(_k); }
         return _results2;
       }).apply(this));
-      assertCharCodeFalse("[\\D]", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-      assertCharCodeTrue("[\\D]", (function() {
+      this.assertCharCodeFalse("[\\D]", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+      this.assertCharCodeTrue("[\\D]", (function() {
         _results3 = [];
         for (var _l = 58; 58 <= 0xffff ? _l <= 0xffff : _l >= 0xffff; 58 <= 0xffff ? _l++ : _l--){ _results3.push(_l); }
         return _results3;
       }).apply(this));
-      regex = new Regex("^[^\\D]$");
-      assertCharCodeFalse("[^\\D]", (function() {
+      this.assertCharCodeFalse("[^\\D]", (function() {
         _results4 = [];
         for (_m = 0; _m <= 47; _m++){ _results4.push(_m); }
         return _results4;
       }).apply(this));
-      assertCharCodeTrue("[^\\D]", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-      assertCharCodeFalse("[^\\D]", (function() {
+      this.assertCharCodeTrue("[^\\D]", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+      this.assertCharCodeFalse("[^\\D]", (function() {
         _results5 = [];
         for (var _n = 58; 58 <= 0xffff ? _n <= 0xffff : _n >= 0xffff; 58 <= 0xffff ? _n++ : _n--){ _results5.push(_n); }
         return _results5;
       }).apply(this));
-      regex = new Regex("^[^\\d]$");
-      assertFalse(regex.test(""));
-      assertCharCodeTrue("[^\\d]", (function() {
+      assertFalse(new Regex("^[^\\d]$").test(""));
+      this.assertCharCodeTrue("[^\\d]", (function() {
         _results6 = [];
         for (_o = 0; _o <= 47; _o++){ _results6.push(_o); }
         return _results6;
       }).apply(this));
-      assertCharCodeFalse("[^\\d]", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-      assertCharCodeTrue("[^\\d]", (function() {
+      this.assertCharCodeFalse("[^\\d]", [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+      this.assertCharCodeTrue("[^\\d]", (function() {
         _results7 = [];
         for (var _p = 58; 58 <= 0xffff ? _p <= 0xffff : _p >= 0xffff; 58 <= 0xffff ? _p++ : _p--){ _results7.push(_p); }
         return _results7;
       }).apply(this));
-      regex = new Regex("^[\\s\\S]$");
-      assertFalse(regex.test(""));
-      assertCharCodeTrue("[\\s\\S]", (function() {
+      assertFalse(new Regex("^[\\s\\S]$").test(""));
+      this.assertCharCodeTrue("[\\s\\S]", (function() {
         _results8 = [];
         for (var _q = 0; 0 <= 0xffff ? _q <= 0xffff : _q >= 0xffff; 0 <= 0xffff ? _q++ : _q--){ _results8.push(_q); }
         return _results8;
       }).apply(this));
-      regex = new Regex("^[^\\s\\S]$");
-      assertFalse(regex.test(""));
-      return assertCharCodeFalse("[^\\s\\S]", (function() {
+      assertFalse(new Regex("^[^\\s\\S]$").test(""));
+      return this.assertCharCodeFalse("[^\\s\\S]", (function() {
         _results9 = [];
         for (var _r = 0; 0 <= 0xffff ? _r <= 0xffff : _r >= 0xffff; 0 <= 0xffff ? _r++ : _r--){ _results9.push(_r); }
         return _results9;

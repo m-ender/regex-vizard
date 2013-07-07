@@ -627,7 +627,7 @@
     function Parser() {}
 
     Parser.prototype.parsePattern = function(string) {
-      var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, maxGroup, nestingStack, squash, start, treeRoot, _, _ref, _ref1;
+      var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, nGroups, nestingStack, squash, start, treeRoot, _, _ref, _ref1;
       debug = {
         sourceOpenLength: 0,
         sourceCloseLength: 0,
@@ -727,18 +727,19 @@
       }
       squash = function(token) {
         var subtoken, _i, _ref1, _results;
-        if (token.subtokens.length > 0) {
-          _results = [];
-          for (i = _i = 0, _ref1 = token.subtokens.length - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
-            subtoken = token.subtokens[i];
-            while (((subtoken instanceof Disjunction) || (subtoken instanceof Sequence)) && (subtoken.subtokens.length === 1)) {
-              token.subtokens[i] = subtoken.subtokens[0];
-              subtoken = token.subtokens[i];
-            }
-            _results.push(squash(subtoken));
-          }
-          return _results;
+        if (token.subtokens.length === 0) {
+          return;
         }
+        _results = [];
+        for (i = _i = 0, _ref1 = token.subtokens.length - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
+          subtoken = token.subtokens[i];
+          while (((subtoken instanceof Disjunction) || (subtoken instanceof Sequence)) && (subtoken.subtokens.length === 1)) {
+            token.subtokens[i] = subtoken.subtokens[0];
+            subtoken = token.subtokens[i];
+          }
+          _results.push(squash(subtoken));
+        }
+        return _results;
       };
       squash(treeRoot);
       fillGroupRanges = function(token) {
@@ -764,8 +765,8 @@
         }
         return [min, max];
       };
-      _ref1 = fillGroupRanges(treeRoot), _ = _ref1[0], maxGroup = _ref1[1];
-      return [treeRoot, maxGroup];
+      _ref1 = fillGroupRanges(treeRoot), _ = _ref1[0], nGroups = _ref1[1];
+      return [treeRoot, nGroups];
     };
 
     Parser.prototype.parseCharacterClass = function(string, current, i, id) {

@@ -87,13 +87,15 @@ class root.Parser
             }
         # Now traverse the token tree to remove unnecessary disjunctions and sequences
         squash = (token) ->
-            if token.subtokens.length > 0
-                for i in [0..token.subtokens.length-1]
+            if token.subtokens.length == 0
+                return
+
+            for i in [0..token.subtokens.length-1]
+                subtoken = token.subtokens[i]
+                while ((subtoken instanceof Disjunction) or (subtoken instanceof Sequence)) and (subtoken.subtokens.length == 1)
+                    token.subtokens[i] = subtoken.subtokens[0]
                     subtoken = token.subtokens[i]
-                    while ((subtoken instanceof Disjunction) or (subtoken instanceof Sequence)) and (subtoken.subtokens.length == 1)
-                        token.subtokens[i] = subtoken.subtokens[0]
-                        subtoken = token.subtokens[i]
-                    squash(subtoken)
+                squash(subtoken)
 
         squash(treeRoot)
 
@@ -117,9 +119,10 @@ class root.Parser
 
             return [min, max]
 
-        [_, maxGroup] = fillGroupRanges(treeRoot)
+        [_, nGroups] = fillGroupRanges(treeRoot)
 
-        return [treeRoot, maxGroup]
+
+        return [treeRoot, nGroups]
 
     parseCharacterClass: (string, current, i, id) ->
         if i < string.length and string.charAt(i) == "^"

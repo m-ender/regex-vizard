@@ -12,11 +12,13 @@
 		{
 			"name": "Regex Vizard",
 			"cmd": ["cake.cmd", "build"],
+            "file_regex": "Error: In ([^,]+),(?: .* on line (10)(): (.*))?",
     		"working_dir": "$project_path",
     		"variants": [
     			{
     				"name": "Run",
-    				"cmd": ["cake.cmd", "test"]
+    				"cmd": ["cake.cmd", "test"],
+                    "file_regex": "at \\S+ \\(http://[^/]+/test/([^:]+):(\\d+):(\\d+)"
 				},
     			{
     				"name": "Assets",

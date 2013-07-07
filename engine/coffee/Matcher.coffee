@@ -1,15 +1,14 @@
 root = global ? window
 
 class root.Matcher
-    constructor: (@regex, nGroups, subject) ->
+    constructor: (@regex, nGroups, @subject) ->
         @startingPosition = 1
         @success = false
-        @state = @setupInitialState(subject, nGroups)
+        @state = @setupInitialState(nGroups)
 
-    setupInitialState: (str, nGroups = 0) ->
+    setupInitialState: (nGroups = 0) ->
         state =
-            inputString: str
-            input: @parseInput(str)
+            input: @parseInput(@subject)
             currentPosition: 1
             captures: []
 
