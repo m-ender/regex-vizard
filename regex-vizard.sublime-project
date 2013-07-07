@@ -1,0 +1,48 @@
+{
+	"folders":
+	[
+		{
+			"path": "/D/Development/Repositories/regex-vizard",
+			"folder_exclude_patterns": [".git", "-p"]
+		}
+	],
+
+	"build_systems":
+	[
+		{
+			"name": "Regex Vizard",
+			"cmd": ["cake.cmd", "build"],
+    		"working_dir": "$project_path",
+    		"variants": [
+    			{
+    				"name": "Run",
+    				"cmd": ["cake.cmd", "test"]
+				},
+    			{
+    				"name": "Assets",
+    				"cmd": ["cake.cmd", "build:assets"]
+    			},
+    			{
+    				"name": "CSS",
+    				"cmd": ["cake.cmd", "build:css"]
+    			},
+    			{
+    				"name": "Frontend",
+    				"cmd": ["cake.cmd", "build:frontend"]
+    			},
+    			{
+    				"name": "Backend",
+    				"cmd": ["cake.cmd", "build:backend"]
+    			},
+    			{
+    				"name": "Engine",
+    				"cmd": ["cake.cmd", "build:engine"]
+    			},
+    			{
+    				"name": "Tests",
+    				"cmd": ["cake.cmd", "build:tests"]
+    			}
+    		]
+		}
+	]
+}
