@@ -4,16 +4,16 @@ class root.ColorGenerator
     constructor: (baseColor = '#74DDF2') ->
         @baseColor = jQuery.Color baseColor
         @i = 0
-        
+
     nextColor: (correctHue = true) ->
         if correctHue
             return @baseColor.hue @correctHue(@baseColor.hue() + @phi * @i++)
         else
             return @baseColor.hue (@baseColor.hue() + @phi * @i++)
-    
+
     # The Golden Ratio in degrees
     phi: 0.61803398874989484820 * 360
-    
+
     # Hue correction code from http://vis4.net/labs/colorscales/
     hueCorrection: [
         [5,10]
@@ -39,6 +39,6 @@ class root.ColorGenerator
             else if hue < pair[0]
                 newHue = ly + (pair[1]-ly)/(pair[0]-lx) * (hue - lx)
                 return Math.floor(newHue * 360/256)
-                
+
             lx = pair[0];
             ly = pair[1];

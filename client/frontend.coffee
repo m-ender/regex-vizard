@@ -5,14 +5,14 @@ setupEngine = () ->
     regexString = $('#input-pattern').val()
     regex = new Regex regexString
     subjectString = $('#input-subject').val()
-    
+
     $('#output-subject').html subjectString
     $('#output-pattern').html regexString
     $('#button-step-fw').visible()
 
 stepForward = () ->
     result = regex.match subjectString, true
-        
+
     if result
         startPos = result.startingPosition - 1
         length = result.captures[0].length
@@ -24,13 +24,13 @@ stepForward = () ->
         $('#output-subject').html highlight
     else
         $('#output-subject').html "<span class='nomatch'>#{s}</span>"
-    
+
 $(document).ready () ->
     JQueryHelper.addJQueryPlugins()
-    
+
     $('#button-start').on 'click', setupEngine
     $('#button-step-fw').on 'click', stepForward
-    
+
     colors = [
         "aqua"
         "black"
@@ -48,10 +48,10 @@ $(document).ready () ->
         "teal"
         "white"
         "yellow"
-    ]    
-        
-        
-    
+    ]
+
+
+
     colGen = new ColorGenerator(
         hue: 180
         saturation: 1
@@ -71,4 +71,3 @@ $(document).ready () ->
     for i in [1..50]
         color = colGen.nextColor(false).toHexString()
         $('#output-colortest').append "<span style='color:#{color};'>#{colors[Math.floor(Math.random()*colors.length)]}</span><wbr />"
-    

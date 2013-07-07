@@ -3,7 +3,7 @@ root = global ? window
 class root.Disjunction extends root.Token
     constructor: (debug, token) ->
         super(debug, token)
-        
+
     reset: () ->
         super()
         @i = 0 # the first subtoken to try upon calling nextMatch
@@ -12,9 +12,9 @@ class root.Disjunction extends root.Token
         if @i == @subtokens.length
             @reset()
             return false
-            
+
         result = @subtokens[@i].nextMatch(state, report)
-        
+
         if result != false
             return result
         else

@@ -1,8 +1,8 @@
 root = global ? window
 
 class root.Parser
-    constructor: () -> 
-    
+    constructor: () ->
+
     parsePattern: (string) ->
         # In order not to patch in disjunctions once the first | has been read, we treat everything as an
         # disjunction of sequences (possibly with only one alternative or only one token in the sequence).
@@ -16,7 +16,7 @@ class root.Parser
         nestingStack = []
         current = treeRoot.subtokens[0]
         i = 0
-        
+
         lastCaptureIndex = 0
         lastId = 0
         while i < string.length
@@ -69,7 +69,7 @@ class root.Parser
                             message: "Unmatched closing parenthesis \")\" at index " + i
                             index: i
                         }
-                    
+
                     current = nestingStack.pop()
                     ++i
                 when "?", "*", "+"
@@ -94,9 +94,9 @@ class root.Parser
                         token.subtokens[i] = subtoken.subtokens[0]
                         subtoken = token.subtokens[i]
                     squash(subtoken)
-        
+
         squash(treeRoot)
-        
+
         # Now traverse token tree again to tell quantifiers which groups they contain
         fillGroupRanges = (token) ->
             if token instanceof Group
@@ -105,32 +105,32 @@ class root.Parser
             else
                 min = Infinity
                 max = -Infinity
-                
+
             if token.subtokens.length > 0
                 for subtoken in token.subtokens
                     [subMin, subMax] = fillGroupRanges(subtoken)
                     min = Math.min(min, subMin)
                     max = Math.max(max, subMax)
-                    
+
             if token instanceof Quantifier and min < Infinity and max > -Infinity
                     token.setGroupRange(min, max-min+1)
-                    
+
             return [min, max]
-        
+
         [_, maxGroup] = fillGroupRanges(treeRoot)
-        
+
         return [treeRoot, maxGroup]
-        
+
     parseCharacterClass: (string, current, i, id) ->
         if i < string.length and string.charAt(i) == "^"
             negated = true
             ++i
         else
             negated = false
-            
+
         elements = []
-        
-        while i < string.length                
+
+        while i < string.length
             char = string.charAt(i)
             switch char
                 when "]"
@@ -154,16 +154,16 @@ class root.Parser
                         newI = i + 2
                         if nextElement == "\\"
                             [newI, nextElement] = @parseEscapeSequence(true, string, i+2)
-                        
+
                         if nextElement instanceof CharacterClass
                             throw {
                                 name: "CharacterClassInRangeException"
                                 message: "Built-in character classes cannot be used in ranges"
                             }
-                        
+
                         startC = lastElement.charCodeAt(0)
                         endC = nextElement.charCodeAt(0)
-                                                
+
                         if startC > endC
                             throw {
                                 name: "CharacterClassRangeOutOfOrderException"
@@ -176,18 +176,18 @@ class root.Parser
                         )
                         i = newI
                     else
-                        elements.push(char)                        
+                        elements.push(char)
                         ++i
                 else
                     elements.push(char)
                     ++i
-        
+
         throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
             name: "UnterminatedCharacterClassException"
             message: "Missing closing bracket \"]\""
             index: i
         }
-        
+
     # inCharacterClass is a boolean that indicates where the current sequence was found
     parseEscapeSequence: (inCharacterClass, string, i) ->
         if i == string.length
@@ -196,7 +196,7 @@ class root.Parser
                 message: "There is nothing to escape. Most likely, the pattern ends in a backslash \"\\\""
                 index: i-1
             }
-            
+
         char = string.charAt(i)
         switch char
             # special characters
@@ -212,7 +212,7 @@ class root.Parser
                 element = "\t"
             when "v"
                 element = "\v"
-                
+
             # built-in character classes
             when "d", "D"
                 negated = char is "D"
@@ -223,22 +223,22 @@ class root.Parser
             when "s", "S"
                 negated = char is "S"
                 element = new WhitespaceClass(null, negated)
-                
+
             # treat b correctly
             when "b"
                 element = if inCharacterClass then "\b" else new WordBoundary(null, false)
             when "B"
                 element = if inCharacterClass then "B" else new WordBoundary(null, true)
-                
+
             # all other characters are treated literally
             else
                 element = char
-        
+
         if typeof element is "string" and not inCharacterClass
             element = new Character(null, element)
-        
+
         return [i + 1, element]
-        
+
     parseQuantifier: (current, char, i, id) ->
         st = current.subtokens
         if st[st.length-1].subtokens.length == 0
@@ -254,23 +254,23 @@ class root.Parser
                 message: "The is nothing to repeat for quantifier \"" + char + "\" at index " + i + ". Only groups, characters and wildcard may be quantified."
                 index: i
             }
-        
+
         debug =
             sourceLength: 1
             id: id
-        
+
         quantifierClass =
             "*": RepeatZeroOrMore
             "+": RepeatOneOrMore
             "?": Option
-            
+
         @append(current, new (quantifierClass[char])(debug, target)) # take the currently last token, stuff it into an appropriate quantifier token and append the option instead
         return i+1
-        
+
     append: (current, token) ->
         st = current.subtokens
         st[st.length-1].subtokens.push(token)
-        
+
     remove: (current) ->
         st = current.subtokens
         return st[st.length-1].subtokens.pop()

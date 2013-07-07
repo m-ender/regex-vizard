@@ -3,12 +3,12 @@ root = global ? window
 class root.Group extends root.Token
     constructor: (debug, token, @index) ->
         super(debug, token)
-        
+
     reset: () ->
         super()
         @result = 0
         @firstPosition = false
-        
+
     nextMatch: (state, report) ->
         if @result isnt 0
             result = @result
@@ -17,10 +17,10 @@ class root.Group extends root.Token
             else
                 @result = 0
             return result
-            
+
         if @firstPosition is false
             @firstPosition = state.currentPosition
-            
+
         result = @subtokens[0].nextMatch(state, report)
         switch result
             when 0, -1

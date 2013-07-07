@@ -6,7 +6,7 @@ TestCase("ParsingTests",
         else
             #On a client
             @Parser = new window.Parser
-        
+
     "testCharacter": () ->
         regex = @Parser.parsePattern("a")[0]
         expectedTree =
@@ -16,7 +16,7 @@ TestCase("ParsingTests",
                 subtokens: []
             ]
         @assertSyntaxTree(expectedTree, regex)
-        
+
     "testEscapedMetacharacter": () ->
         regex = @Parser.parsePattern("\\?")[0]
         expectedTree =
@@ -26,7 +26,7 @@ TestCase("ParsingTests",
                 subtokens: []
             ]
         @assertSyntaxTree(expectedTree, regex)
-        
+
     "testEscapeSequence": () ->
         regex = @Parser.parsePattern("\\n")[0]
         expectedTree =
@@ -36,7 +36,7 @@ TestCase("ParsingTests",
                 subtokens: []
             ]
         @assertSyntaxTree(expectedTree, regex)
-        
+
     "testWildcard": () ->
         regex = @Parser.parsePattern(".")[0]
         expectedTree =
@@ -46,7 +46,7 @@ TestCase("ParsingTests",
                 subtokens: []
             ]
         @assertSyntaxTree(expectedTree, regex)
-        
+
     "testStartAnchor": () ->
         regex = @Parser.parsePattern("^")[0]
         expectedTree =
@@ -56,7 +56,7 @@ TestCase("ParsingTests",
                 subtokens: []
             ]
         @assertSyntaxTree(expectedTree, regex)
-        
+
     "testEndAnchor": () ->
         regex = @Parser.parsePattern("$")[0]
         expectedTree =
@@ -143,7 +143,7 @@ TestCase("ParsingTests",
                 ]
             ]
         @assertSyntaxTree(expectedTree, regex)
-        
+
     "testGroup": () ->
         [regex, nGroups] = @Parser.parsePattern("(a)")
         assertEquals(1, nGroups)
@@ -157,7 +157,7 @@ TestCase("ParsingTests",
                 ]
             ]
         @assertSyntaxTree(expectedTree, regex)
-        
+
     "testCharacterClass": () ->
         expectedTree =
             type: Group
@@ -165,28 +165,28 @@ TestCase("ParsingTests",
                 type: CharacterClass
                 subtokens: []
             ]
-            
+
         regex = @Parser.parsePattern("[]")[0]
         @assertSyntaxTree(expectedTree, regex)
-            
+
         regex = @Parser.parsePattern("[a]")[0]
         @assertSyntaxTree(expectedTree, regex)
-        
+
         regex = @Parser.parsePattern("[abc]")[0]
         @assertSyntaxTree(expectedTree, regex)
-        
+
         regex = @Parser.parsePattern("[^]")[0]
         @assertSyntaxTree(expectedTree, regex)
-        
+
         regex = @Parser.parsePattern("[^abc]")[0]
         @assertSyntaxTree(expectedTree, regex)
-        
+
         regex = @Parser.parsePattern("[a-c]")[0]
         @assertSyntaxTree(expectedTree, regex)
-        
+
         regex = @Parser.parsePattern("[a\\]c]")[0]
         @assertSyntaxTree(expectedTree, regex)
-        
+
     "testWordBoundary": () ->
         regex = @Parser.parsePattern("\\b")[0]
         expectedTree =
@@ -195,16 +195,16 @@ TestCase("ParsingTests",
                 type: WordBoundary
                 subtokens: []
             ]
-        
+
         @assertSyntaxTree(expectedTree, regex)
-        
+
         regex = @Parser.parsePattern("\\B")[0]
         @assertSyntaxTree(expectedTree, regex)
-            
+
     "testComplexExpression": () ->
         [regex, nGroups] = @Parser.parsePattern("d(.)(a[be]?|c|)*$")
         assertEquals(2, nGroups)
-        
+
         expectedTree =
             type: Group
             subtokens: [
@@ -247,26 +247,26 @@ TestCase("ParsingTests",
                     ]
                    ,
                     type: EndAnchor
-                    subtokens: []                    
+                    subtokens: []
                 ]
             ]
         @assertSyntaxTree(expectedTree, regex)
-            
+
     "testInvalidSyntax": () ->
         that = this
-        
+
         assertParsingException = (pattern, exception) ->
             assertException(
                 () -> that.Parser.parsePattern(pattern)
                 exception
             )
-            
+
         assertParsingException("\\", "NothingToEscapeException")
         assertParsingException("[\\", "NothingToEscapeException")
         assertParsingException(")", "UnmatchedClosingParenthesisException")
         assertParsingException("())", "UnmatchedClosingParenthesisException")
         assertParsingException("(", "MissingClosingParenthesisException")
-        assertParsingException("()(", "MissingClosingParenthesisException")            
+        assertParsingException("()(", "MissingClosingParenthesisException")
         assertParsingException("(()", "MissingClosingParenthesisException")
         assertParsingException("?", "NothingToRepeatException")
         assertParsingException("a(?)", "NothingToRepeatException")
@@ -290,7 +290,7 @@ TestCase("ParsingTests",
         assertParsingException("[b-a]", "CharacterClassRangeOutOfOrderException")
         assertParsingException("[\\d-a]", "CharacterClassInRangeException")
         assertParsingException("[a-\\d]", "CharacterClassInRangeException")
-        
+
     assertSyntaxTree: (expectedTree, actualTree) ->
         #console.log(actualTree, expectedTree.type)
         assertTrue(actualTree.constructor is expectedTree.type)

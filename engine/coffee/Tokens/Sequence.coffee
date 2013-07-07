@@ -5,17 +5,17 @@ root = global ? window
 class root.Sequence extends root.Token
     constructor: () ->
         super()
-        
+
     reset: () ->
         super()
         @i = 0 # the first subtoken to try upon calling nextMatch
         @pos = [] # "current" positions that were used by successful subtokens
-        
-    nextMatch: (state, report) ->            
+
+    nextMatch: (state, report) ->
         if @i == -1
             @reset()
             return false
-            
+
         if @subtokens.length == 0
             --@i
             return state.currentPosition
@@ -35,5 +35,5 @@ class root.Sequence extends root.Token
                 else
                     ++@i
                     @pos.push(state.currentPosition)
-                    state.currentPosition = result                    
+                    state.currentPosition = result
                     return -1

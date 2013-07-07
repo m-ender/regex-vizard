@@ -1,10 +1,10 @@
-TestCase("MatchingTests",            
+TestCase("MatchingTests",
     "testEmptyPattern": () ->
         regex = new Regex("")
         assertTrue(regex.test(""))
         assertTrue(regex.test("a"))
-            
-    "testSingleCharacter": () -> 
+
+    "testSingleCharacter": () ->
         regex = new Regex("a")
         assertTrue(regex.test("a"))
         assertTrue(regex.test("bar"))
@@ -16,7 +16,7 @@ TestCase("MatchingTests",
 
     "testMultipleCharacters": () ->
         regex = new Regex("aa")
-        assertTrue(regex.test("aa"))    
+        assertTrue(regex.test("aa"))
         assertTrue(regex.test("baar"))
         assertTrue(regex.test("braa"))
         assertTrue(regex.test("abraa"))
@@ -24,7 +24,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("aba"))
         assertFalse(regex.test("bb"))
         regex = new Regex("ab")
-        assertTrue(regex.test("ab"))    
+        assertTrue(regex.test("ab"))
         assertFalse(regex.test("baar"))
         assertFalse(regex.test("braa"))
         assertTrue(regex.test("abraa"))
@@ -32,7 +32,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("aba"))
         assertFalse(regex.test("bb"))
         assertEquals(["ab"], regex.match("aabar"))
-        
+
     "testAnchors": () ->
         regex = new Regex("^")
         assertTrue(regex.test("a"))
@@ -70,7 +70,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("abar"))
         assertFalse(regex.test("bara"))
         assertFalse(regex.test("abara"))
-        
+
     "testWildcard": () ->
         regex = new Regex(".")
         assertFalse(regex.test(""))
@@ -94,7 +94,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("a"))
         regex = new Regex("a.")
         assertFalse(regex.test("a\nb"))
-    
+
     # Note that every \\ becomes a single \ in the string, which then becomes the regex
     # i.e. matching a literal \ requires regex "\\\\", because the engine needs to
     # receive two backslashes, so that the first escapes the second one
@@ -146,7 +146,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("aa"))
         regex = new Regex("\\^")
         assertEquals(["^"], regex.match("^"))
-        
+
     "testEscapeSequences": () ->
         regex = new Regex("\n")
         assertTrue(regex.test("\n"))
@@ -178,7 +178,7 @@ TestCase("MatchingTests",
         regex = new Regex("\\0")
         assertFalse(regex.test("0"))
         assertTrue(regex.test("\0"))
-        
+
     "testDisjunction": () ->
         regex = new Regex("a|b")
         assertTrue(regex.test("a"))
@@ -204,7 +204,7 @@ TestCase("MatchingTests",
         assertEquals(["ab"], regex.match("ab"))
         regex = new Regex("b|a|ab")
         assertEquals(["a"], regex.match("ab"))
-        
+
     "testGrouping": () ->
         regex = new Regex("(a)")
         assertTrue(regex.test("a"))
@@ -246,14 +246,14 @@ TestCase("MatchingTests",
         regex = new Regex("^a(b|c(d|e))$")
         assertFalse(regex.test("abd"))
         assertFalse(regex.test("abe"))
-    
+
     "testBacktracking": () ->
         regex = new Regex("(a|ab|abc)d")
         assertTrue(regex.test("ad"))
         assertTrue(regex.test("abd"))
         assertTrue(regex.test("abcd"))
         assertEquals(["abcd", "abc"], regex.match("abcd"))
-        
+
     "testOption": () ->
         regex = new Regex("ab?c")
         assertTrue(regex.test("abc"))
@@ -264,7 +264,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("abcd"))
         assertTrue(regex.test("ad"))
         assertEquals(["abcd", "bc"], regex.match("abcd"))
-        
+
     "testRepeatZeroOrMore": () ->
         regex = new Regex("a*")
         assertTrue(regex.test(""))
@@ -283,7 +283,7 @@ TestCase("MatchingTests",
         regex = new Regex("^(a|b)*$")
         assertTrue(regex.test("abababbaabab"))
         assertEquals(["abababbaabab", "b"], regex.match("abababbaabab"))
-        
+
     "testRepeatOneOrMore": () ->
         regex = new Regex("a+")
         assertFalse(regex.test(""))
@@ -302,7 +302,7 @@ TestCase("MatchingTests",
         regex = new Regex("^(a|b)+$")
         assertTrue(regex.test("abababbaabab"))
         assertEquals(["abababbaabab", "b"], regex.match("abababbaabab"))
-        
+
     "testInfiniteLoop": () ->
         regex = new Regex("^(a*)*$")
         assertFalse(regex.test("b"))
@@ -312,14 +312,14 @@ TestCase("MatchingTests",
         assertFalse(regex.test("abc"))
         regex = new Regex("(\b)*a")
         assertFalse(regex.test("b"))
-        
+
     "testLeftMostMatch": () ->
         regex = new Regex("(a|b)")
         assertEquals(["a", "a"], regex.match("ab"))
         assertEquals(["b", "b"], regex.match("ba"))
         regex = new Regex("a*")
         assertEquals(["aa"], regex.match("aabaaa"))
-        
+
     "testGreediness": () ->
         regex = new Regex("a?")
         assertEquals(["a"], regex.match("a"))
@@ -335,14 +335,14 @@ TestCase("MatchingTests",
         assertEquals(["abc", "b"], regex.match("abcdc"))
         regex = new Regex("(a|bc|b|d)*c")
         assertEquals(["abcdc", "d"], regex.match("abcdc"))
-        
+
     "testBasicCharacterClass": () ->
         regex = new Regex("[ac]")
         assertTrue(regex.test("a"))
         assertFalse(regex.test("b"))
         assertTrue(regex.test("c"))
         assertEquals(["a"], regex.match("ac"))
-        
+
     "testEmptyCharacterClass": () ->
         regex = new Regex("[]")
         assertFalse(regex.test("a"))
@@ -351,7 +351,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test(""))
         assertTrue(regex.test("a"))
         assertTrue(regex.test("§"))
-        
+
     "testNegatedCharacterClass": () ->
         regex = new Regex("[^ac]")
         assertFalse(regex.test(""))
@@ -359,7 +359,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("b"))
         assertFalse(regex.test("c"))
         assertEquals(["b"], regex.match("acbd"))
-        
+
     "testCharacterClassRange": () ->
         regex = new Regex("[a-c]")
         assertFalse(regex.test(""))
@@ -389,7 +389,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("\\"))
         assertTrue(regex.test("]"))
         assertFalse(regex.test("-"))
-        
+
     "testNegatedCharacterClassRange": () ->
         regex = new Regex("[^a-c]")
         assertFalse(regex.test(""))
@@ -414,7 +414,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("Z"))
         assertFalse(regex.test("5"))
         assertTrue(regex.test("="))
-    
+
     # This tests both escape sequences and situations in which metacharacters do not have to be escaped.
     "testCharacterClassEscapeSequences": () ->
         regex = new Regex("^[\\b]$")
@@ -449,35 +449,35 @@ TestCase("MatchingTests",
         regex = new Regex("^[a^]$")
         assertTrue(regex.test("a"))
         assertTrue(regex.test("^"))
-        
+
     "testQuantifyCharacterClass": () ->
         regex = new Regex("[ac]+")
         assertTrue(regex.test("aaccacac"))
         assertFalse(regex.test("bde"))
         assertEquals(["aca"], regex.match("bacaba"))
-        
+
     "testBuiltInCharacterClasses": () ->
         assertCharCodeTrue = (cl, charCodeRange) ->
             for i in charCodeRange
                 char = String.fromCharCode(i)
                 assertTrue("#{cl} failed to match character #{i} (0x#{i.toString(16)}): #{char}", regex.test(char))
-            
+
         assertCharCodeFalse = (cl, charCodeRange) ->
             for i in charCodeRange
                 char = String.fromCharCode(i)
                 assertFalse("#{cl} erroneously match character #{i} (0x#{i.toString(16)}): #{char}", regex.test(char))
-            
+
         regex = new Regex("^\\d$")
         assertCharCodeFalse("\\d", [0..47])
         assertCharCodeTrue("\\d", [48..57]) # digits 0 to 9
         assertCharCodeFalse("\\d", [58..0xffff])
-        
+
         regex = new Regex("^\\D$")
         assertFalse(regex.test(""))
         assertCharCodeTrue("\\D", [0..47])
         assertCharCodeFalse("\\D", [48..57]) # digits 0 to 9
         assertCharCodeTrue("\\D", [58..0xffff])
-            
+
         regex = new Regex("^\\w$")
         assertCharCodeFalse("\\w", [0..47])
         assertCharCodeTrue("\\w", [48..57]) # digits 0 to 9
@@ -488,7 +488,7 @@ TestCase("MatchingTests",
         assertCharCodeFalse("\\w", [96]) # "`"
         assertCharCodeTrue("\\w", [97..122]) # letters a to z
         assertCharCodeFalse("\\w", [123..0xffff])
-        
+
         regex = new Regex("^\\W$")
         assertFalse(regex.test(""))
         assertCharCodeTrue("\\W", [0..47])
@@ -500,7 +500,7 @@ TestCase("MatchingTests",
         assertCharCodeTrue("\\W", [96]) # "`"
         assertCharCodeFalse("\\W", [97..122]) # letters a to z
         assertCharCodeTrue("\\W", [123..0xffff])
-        
+
         regex = new Regex("^\\s$")
         assertCharCodeFalse("\\s", [0x0..0x8])
         assertCharCodeTrue("\\s", [0x9..0xd]) # horizontal tab, line feed, vertical tab, form feed, carriage return
@@ -525,7 +525,7 @@ TestCase("MatchingTests",
         assertCharCodeFalse("\\s", [0x3001..0xfefe])
         assertCharCodeTrue("\\s", [0xfeff]) # Zero-width no-break space
         assertCharCodeFalse("\\s", [0xff00..0xffff])
-        
+
         regex = new Regex("^\\S$")
         assertCharCodeTrue("\\S", [0x0..0x8])
         assertCharCodeFalse("\\S", [0x9..0xd]) # horizontal tab, line feed, vertical tab, form feed, carriage return
@@ -550,48 +550,48 @@ TestCase("MatchingTests",
         assertCharCodeTrue("\\S", [0x3001..0xfefe])
         assertCharCodeFalse("\\S", [0xfeff]) # Zero-width no-break space
         assertCharCodeTrue("\\S", [0xff00..0xffff])
-        
+
     "testNestedCharacterClass": () ->
         assertCharCodeTrue = (cl, charCodeRange) ->
             for i in charCodeRange
                 char = String.fromCharCode(i)
                 assertTrue("#{cl} failed to match character #{i} (0x#{i.toString(16)}): #{char}", regex.test(char))
-            
+
         assertCharCodeFalse = (cl, charCodeRange) ->
             for i in charCodeRange
                 char = String.fromCharCode(i)
                 assertFalse("#{cl} erroneously match character #{i} (0x#{i.toString(16)}): #{char}", regex.test(char))
-            
+
         regex = new Regex("^[\\d]$")
         assertCharCodeFalse("[\\d]", [0..47])
         assertCharCodeTrue("[\\d]", [48..57]) # digits 0 to 9
         assertCharCodeFalse("[\\d]", [58..0xffff])
-        
+
         regex = new Regex("^[\\D]$")
         assertFalse(regex.test(""))
         assertCharCodeTrue("[\\D]", [0..47])
         assertCharCodeFalse("[\\D]", [48..57]) # digits 0 to 9
         assertCharCodeTrue("[\\D]", [58..0xffff])
-            
+
         regex = new Regex("^[^\\D]$")
         assertCharCodeFalse("[^\\D]", [0..47])
         assertCharCodeTrue("[^\\D]", [48..57]) # digits 0 to 9
         assertCharCodeFalse("[^\\D]", [58..0xffff])
-        
+
         regex = new Regex("^[^\\d]$")
         assertFalse(regex.test(""))
         assertCharCodeTrue("[^\\d]", [0..47])
         assertCharCodeFalse("[^\\d]", [48..57]) # digits 0 to 9
         assertCharCodeTrue("[^\\d]", [58..0xffff])
-        
+
         regex = new Regex("^[\\s\\S]$")
         assertFalse(regex.test(""))
         assertCharCodeTrue("[\\s\\S]", [0..0xffff])
-        
+
         regex = new Regex("^[^\\s\\S]$")
         assertFalse(regex.test(""))
         assertCharCodeFalse("[^\\s\\S]", [0..0xffff])
-        
+
     "testWordBoundary": () ->
         regex = new Regex("\\b")
         assertFalse(regex.test(""))
@@ -600,7 +600,7 @@ TestCase("MatchingTests",
         assertTrue(regex.test("_"))
         assertFalse(regex.test(" "))
         assertFalse(regex.test("-"))
-        
+
         regex = new Regex("\\bfoo\\b")
         assertTrue(regex.test("foo"))
         assertTrue(regex.test("-foo"))
@@ -614,8 +614,8 @@ TestCase("MatchingTests",
         assertFalse(regex.test("afooa"))
         assertFalse(regex.test("0foo"))
         assertFalse(regex.test("foo0"))
-        assertFalse(regex.test("0foo0")) 
-        
+        assertFalse(regex.test("0foo0"))
+
         regex = new Regex("\\B")
         assertTrue(regex.test(""))
         assertFalse(regex.test("a"))
@@ -623,7 +623,7 @@ TestCase("MatchingTests",
         assertFalse(regex.test("_"))
         assertTrue(regex.test(" "))
         assertTrue(regex.test("-"))
-        
+
         regex = new Regex("\\Bfoo\\B")
         assertFalse(regex.test("foo"))
         assertFalse(regex.test("-foo"))
@@ -637,8 +637,8 @@ TestCase("MatchingTests",
         assertTrue(regex.test("afooa"))
         assertFalse(regex.test("0foo"))
         assertFalse(regex.test("foo0"))
-        assertTrue(regex.test("0foo0"))         
-        
+        assertTrue(regex.test("0foo0"))
+
     "testCapturing": () ->
         # The following three test cases are taken straight from the ECMAScript standard's notes on capturing
         # and backtracking.

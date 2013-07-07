@@ -6,6 +6,28 @@
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
+  root.Helper = (function() {
+
+    function Helper() {}
+
+    Helper.clone = function(obj) {
+      var key, newInstance;
+      if (!(obj != null) || typeof obj !== 'object') {
+        return obj;
+      }
+      newInstance = new obj.constructor();
+      for (key in obj) {
+        newInstance[key] = this.clone(obj[key]);
+      }
+      return newInstance;
+    };
+
+    return Helper;
+
+  })();
+
+  root = typeof global !== "undefined" && global !== null ? global : window;
+
   root.StartGuard = {};
 
   root.EndGuard = {};
@@ -432,7 +454,7 @@
 
     Quantifier.prototype.reset = function() {
       Quantifier.__super__.reset.call(this);
-      this.instances = [this.clone(this.subtokens[0])];
+      this.instances = [Helper.clone(this.subtokens[0])];
       this.pos = [];
       this.result = false;
       return this.captureStack = [];
@@ -498,23 +520,11 @@
           }
           this.captureStack.push(state.captures.slice(this.minGroup, this.minGroup + this.nGroups));
           [].splice.apply(state.captures, [(_ref4 = this.minGroup), (this.minGroup + this.nGroups) - _ref4].concat(_ref5 = this.clearer)), _ref5;
-          this.instances.push(this.clone(this.subtokens[0]));
+          this.instances.push(Helper.clone(this.subtokens[0]));
           this.pos.push(state.currentPosition);
           state.currentPosition = result;
           return -1;
       }
-    };
-
-    Quantifier.prototype.clone = function(obj) {
-      var key, newInstance;
-      if (!(obj != null) || typeof obj !== 'object') {
-        return obj;
-      }
-      newInstance = new obj.constructor();
-      for (key in obj) {
-        newInstance[key] = this.clone(obj[key]);
-      }
-      return newInstance;
     };
 
     return Quantifier;
@@ -617,15 +627,15 @@
     function Parser() {}
 
     Parser.prototype.parsePattern = function(string) {
-      var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, nestingStack, regex, squash, start, _, _ref, _ref1;
+      var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, maxGroup, nestingStack, squash, start, treeRoot, _, _ref, _ref1;
       debug = {
         sourceOpenLength: 0,
         sourceCloseLength: 0,
         id: 0
       };
-      regex = new Group(debug, new Disjunction(null, new Sequence()), 0);
+      treeRoot = new Group(debug, new Disjunction(null, new Sequence()), 0);
       nestingStack = [];
-      current = regex.subtokens[0];
+      current = treeRoot.subtokens[0];
       i = 0;
       lastCaptureIndex = 0;
       lastId = 0;
@@ -730,7 +740,7 @@
           return _results;
         }
       };
-      squash(regex);
+      squash(treeRoot);
       fillGroupRanges = function(token) {
         var max, min, subMax, subMin, subtoken, _i, _len, _ref1, _ref2;
         if (token instanceof Group) {
@@ -754,8 +764,8 @@
         }
         return [min, max];
       };
-      _ref1 = fillGroupRanges(regex), _ = _ref1[0], regex.maxGroup = _ref1[1];
-      return regex;
+      _ref1 = fillGroupRanges(treeRoot), _ = _ref1[0], maxGroup = _ref1[1];
+      return [treeRoot, maxGroup];
     };
 
     Parser.prototype.parseCharacterClass = function(string, current, i, id) {
@@ -943,89 +953,51 @@
   root.Regex = (function() {
 
     function Regex(regexString, report) {
+      var _ref;
       if (report == null) {
         report = false;
       }
       if (report) {
         console.log("Regex string:", regexString);
       }
-      this.regex = new Parser().parsePattern(regexString);
+      _ref = new Parser().parsePattern(regexString), this.regex = _ref[0], this.nGroups = _ref[1];
       if (report) {
         console.log("Regex pattern:", this.regex);
       }
     }
 
     Regex.prototype.test = function(inputString, report) {
-      var i, result, state;
+      var matcher;
       if (report == null) {
         report = false;
       }
       this.regex.reset();
-      if (report) {
-        console.log(this.regex);
+      matcher = this.getMatcher(inputString);
+      while (matcher.stepForward()) {
+        continue;
       }
-      if (report) {
-        console.log("Input string:", inputString);
-      }
-      state = this.setupInitialState(inputString, this.regex.maxGroup);
-      if (report) {
-        console.log("Input:", state.input);
-      }
-      while (state.startingPosition < state.input.length) {
-        result = this.regex.nextMatch(state, report);
-        while (result === 0 || result === -1) {
-          result = this.regex.nextMatch(state, report);
-        }
-        if (result === false) {
-          state.currentPosition = ++state.startingPosition;
-        } else {
-          break;
-        }
-      }
-      i = 0;
-      if (report) {
-        console.log(state.captures);
-      }
-      return state.startingPosition < state.input.length;
+      return matcher.success;
     };
 
     Regex.prototype.match = function(inputString, report) {
-      var i, result, state;
+      var matcher;
       if (report == null) {
         report = false;
       }
       this.regex.reset();
-      if (report) {
-        console.log(this.regex);
+      matcher = this.getMatcher(inputString);
+      while (matcher.stepForward()) {
+        continue;
       }
-      if (report) {
-        console.log("Input string:", inputString);
-      }
-      state = this.setupInitialState(inputString, this.regex.maxGroup);
-      if (report) {
-        console.log("Input:", state.input);
-      }
-      while (state.startingPosition < state.input.length) {
-        result = this.regex.nextMatch(state, report);
-        while (result === 0 || result === -1) {
-          result = this.regex.nextMatch(state, report);
-        }
-        if (result === false) {
-          state.currentPosition = ++state.startingPosition;
-        } else {
-          break;
-        }
-      }
-      i = 0;
-      if (result === false) {
-        return null;
+      if (matcher.success) {
+        return matcher.groups();
       } else {
-        if (report) {
-          return state;
-        } else {
-          return state.captures;
-        }
+        return null;
       }
+    };
+
+    Regex.prototype.getMatcher = function(inputString) {
+      return new Matcher(Helper.clone(this.regex), this.nGroups, inputString);
     };
 
     Regex.prototype.parseInput = function(inputString) {
