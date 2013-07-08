@@ -14,18 +14,14 @@
       if (report) {
         console.log("Regex string:", regexString);
       }
-      _ref = new Parser().parsePattern(regexString), this.regex = _ref[0], this.nGroups = _ref[1];
+      _ref = Parser.parsePattern(regexString), this.regex = _ref[0], this.nGroups = _ref[1];
       if (report) {
         console.log("Regex pattern:", this.regex);
       }
     }
 
-    Regex.prototype.test = function(inputString, report) {
+    Regex.prototype.test = function(inputString) {
       var matcher;
-      if (report == null) {
-        report = false;
-      }
-      this.regex.reset();
       matcher = this.getMatcher(inputString);
       while (matcher.stepForward()) {
         continue;
@@ -33,12 +29,8 @@
       return matcher.success;
     };
 
-    Regex.prototype.match = function(inputString, report) {
+    Regex.prototype.match = function(inputString) {
       var matcher;
-      if (report == null) {
-        report = false;
-      }
-      this.regex.reset();
       matcher = this.getMatcher(inputString);
       while (matcher.stepForward()) {
         continue;
@@ -51,7 +43,7 @@
     };
 
     Regex.prototype.getMatcher = function(inputString) {
-      return new Matcher(Helper.clone(this.regex), this.nGroups, inputString);
+      return new Matcher(this.regex, this.nGroups, inputString);
     };
 
     Regex.prototype.parseInput = function(inputString) {

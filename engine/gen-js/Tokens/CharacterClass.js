@@ -16,9 +16,19 @@
       CharacterClass.__super__.constructor.call(this, debug);
     }
 
-    CharacterClass.prototype.reset = function() {
-      CharacterClass.__super__.reset.call(this);
-      return this.attempted = false;
+    CharacterClass.prototype.reset = function(state) {
+      CharacterClass.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].attempted = false;
+    };
+
+    CharacterClass.prototype.setupStateObject = function() {
+      return {
+        attempted: false
+      };
+    };
+
+    CharacterClass.prototype.register = function(state) {
+      return state.tokens[this.debug.id] = this.setupStateObject();
     };
 
     CharacterClass.prototype.addCharacter = function(character) {
@@ -32,15 +42,16 @@
       });
     };
 
-    CharacterClass.prototype.nextMatch = function(state, report) {
-      var char;
-      if (this.attempted) {
-        this.reset();
+    CharacterClass.prototype.nextMatch = function(state) {
+      var char, tokenState;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.attempted) {
+        this.reset(state);
         return false;
       }
       char = state.input[state.currentPosition];
       if (this.isInClass(char)) {
-        this.attempted = true;
+        tokenState.attempted = true;
         return state.currentPosition + 1;
       }
       return false;
@@ -141,22 +152,29 @@
     __extends(Wildcard, _super);
 
     function Wildcard(debug) {
-      Wildcard.__super__.constructor.call(this, debug);
+      Wildcard.__super__.constructor.apply(this, arguments);
     }
 
-    Wildcard.prototype.reset = function() {
-      Wildcard.__super__.reset.call(this);
-      return this.attempted = false;
+    Wildcard.prototype.reset = function(state) {
+      Wildcard.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].attempted = false;
     };
 
-    Wildcard.prototype.nextMatch = function(state, report) {
-      var _ref;
-      if (this.attempted) {
-        this.reset();
+    Wildcard.prototype.setupStateObject = function() {
+      return {
+        attempted: false
+      };
+    };
+
+    Wildcard.prototype.nextMatch = function(state) {
+      var tokenState, _ref;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.attempted) {
+        this.reset(state);
         return false;
       }
       if ((_ref = state.input[state.currentPosition]) !== "\n" && _ref !== "\r" && _ref !== "\u2028" && _ref !== "\u2029" && _ref !== EndGuard) {
-        this.attempted = true;
+        tokenState.attempted = true;
         return state.currentPosition + 1;
       }
       return false;

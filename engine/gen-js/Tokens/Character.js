@@ -15,18 +15,26 @@
       Character.__super__.constructor.call(this, debug);
     }
 
-    Character.prototype.reset = function() {
-      Character.__super__.reset.call(this);
-      return this.attempted = false;
+    Character.prototype.reset = function(state) {
+      Character.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].attempted = false;
     };
 
-    Character.prototype.nextMatch = function(state, report) {
-      if (this.attempted) {
-        this.reset();
+    Character.prototype.setupStateObject = function() {
+      return {
+        attempted: false
+      };
+    };
+
+    Character.prototype.nextMatch = function(state) {
+      var tokenState;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.attempted) {
+        this.reset(state);
         return false;
       }
       if (state.input[state.currentPosition] === this.character) {
-        this.attempted = true;
+        tokenState.attempted = true;
         return state.currentPosition + 1;
       }
       return false;

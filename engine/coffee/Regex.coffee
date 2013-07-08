@@ -3,21 +3,17 @@ root = global ? window
 class root.Regex
     constructor: (regexString, report = false) ->
         console.log("Regex string:", regexString) if report
-        [@regex, @nGroups] = new Parser().parsePattern(regexString)
+        [@regex, @nGroups] = Parser.parsePattern(regexString)
         console.log("Regex pattern:", @regex) if report
 
-    test: (inputString, report = false) ->
-        @regex.reset()
-
+    test: (inputString) ->
         matcher = @getMatcher(inputString)
 
         continue while matcher.stepForward()
 
         return matcher.success
 
-    match: (inputString, report = false) ->
-        @regex.reset()
-
+    match: (inputString) ->
         matcher = @getMatcher(inputString)
 
         continue while matcher.stepForward()
@@ -28,7 +24,7 @@ class root.Regex
             return null
 
     getMatcher: (inputString) ->
-        return new Matcher(Helper.clone(@regex), @nGroups, inputString)
+        return new Matcher(@regex, @nGroups, inputString)
 
     # Build character array and surround it with special objects as guards for the
     # start and end of the input string

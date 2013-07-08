@@ -2,10 +2,10 @@ TestCase("ParsingTests",
     setUp : () ->
         if typeof module != "undefined" && module.exports
             #On a server
-            @Parser = new require("Parser").Parser
+            @Parser = require("Parser").Parser
         else
             #On a client
-            @Parser = new window.Parser
+            @Parser = window.Parser
 
     "testCharacter": () ->
         regex = @Parser.parsePattern("a")[0]

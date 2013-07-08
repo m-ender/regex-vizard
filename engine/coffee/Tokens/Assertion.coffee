@@ -2,37 +2,45 @@ root = global ? window
 
 class root.StartAnchor extends root.Token
     constructor: (debug) ->
-        super(debug)
+        super
 
-    reset: () ->
-        super()
-        @attempted = false
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].attempted = false
 
-    nextMatch: (state, report) ->
-        if @attempted
-            @reset()
+    setupStateObject: ->
+        attempted: false
+
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.attempted
+            @reset(state)
             return false
 
         if state.input[state.currentPosition - 1] == StartGuard
-            @attempted = true
+            tokenState.attempted = true
             return state.currentPosition
         return false
 
 class root.EndAnchor extends root.Token
     constructor: (debug) ->
-        super(debug)
+        super
 
-    reset: () ->
-        super()
-        @attempted = false
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].attempted = false
 
-    nextMatch: (state, report) ->
-        if @attempted
-            @reset()
+    setupStateObject: ->
+        attempted: false
+
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.attempted
+            @reset(state)
             return false
 
         if state.input[state.currentPosition] == EndGuard
-            @attempted = true
+            tokenState.attempted = true
             return state.currentPosition
         return false
 
@@ -41,17 +49,21 @@ class root.WordBoundary extends root.Token
         super(debug)
         @wordClass = new WordClass()
 
-    reset: () ->
-        super()
-        @attempted = false
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].attempted = false
 
-    nextMatch: (state, report) ->
-        if @attempted
-            @reset()
+    setupStateObject: () ->
+        attempted: false
+
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.attempted
+            @reset(state)
             return false
         leftChar = state.input[state.currentPosition-1]
         rightChar = state.input[state.currentPosition]
         if (@wordClass.isInClass(leftChar) isnt @wordClass.isInClass(rightChar)) isnt @negated
-            @attempted = true
+            tokenState.attempted = true
             return state.currentPosition
         return false

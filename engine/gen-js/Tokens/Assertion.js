@@ -11,21 +11,29 @@
     __extends(StartAnchor, _super);
 
     function StartAnchor(debug) {
-      StartAnchor.__super__.constructor.call(this, debug);
+      StartAnchor.__super__.constructor.apply(this, arguments);
     }
 
-    StartAnchor.prototype.reset = function() {
-      StartAnchor.__super__.reset.call(this);
-      return this.attempted = false;
+    StartAnchor.prototype.reset = function(state) {
+      StartAnchor.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].attempted = false;
     };
 
-    StartAnchor.prototype.nextMatch = function(state, report) {
-      if (this.attempted) {
-        this.reset();
+    StartAnchor.prototype.setupStateObject = function() {
+      return {
+        attempted: false
+      };
+    };
+
+    StartAnchor.prototype.nextMatch = function(state) {
+      var tokenState;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.attempted) {
+        this.reset(state);
         return false;
       }
       if (state.input[state.currentPosition - 1] === StartGuard) {
-        this.attempted = true;
+        tokenState.attempted = true;
         return state.currentPosition;
       }
       return false;
@@ -40,21 +48,29 @@
     __extends(EndAnchor, _super);
 
     function EndAnchor(debug) {
-      EndAnchor.__super__.constructor.call(this, debug);
+      EndAnchor.__super__.constructor.apply(this, arguments);
     }
 
-    EndAnchor.prototype.reset = function() {
-      EndAnchor.__super__.reset.call(this);
-      return this.attempted = false;
+    EndAnchor.prototype.reset = function(state) {
+      EndAnchor.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].attempted = false;
     };
 
-    EndAnchor.prototype.nextMatch = function(state, report) {
-      if (this.attempted) {
-        this.reset();
+    EndAnchor.prototype.setupStateObject = function() {
+      return {
+        attempted: false
+      };
+    };
+
+    EndAnchor.prototype.nextMatch = function(state) {
+      var tokenState;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.attempted) {
+        this.reset(state);
         return false;
       }
       if (state.input[state.currentPosition] === EndGuard) {
-        this.attempted = true;
+        tokenState.attempted = true;
         return state.currentPosition;
       }
       return false;
@@ -74,21 +90,28 @@
       this.wordClass = new WordClass();
     }
 
-    WordBoundary.prototype.reset = function() {
-      WordBoundary.__super__.reset.call(this);
-      return this.attempted = false;
+    WordBoundary.prototype.reset = function(state) {
+      WordBoundary.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].attempted = false;
     };
 
-    WordBoundary.prototype.nextMatch = function(state, report) {
-      var leftChar, rightChar;
-      if (this.attempted) {
-        this.reset();
+    WordBoundary.prototype.setupStateObject = function() {
+      return {
+        attempted: false
+      };
+    };
+
+    WordBoundary.prototype.nextMatch = function(state) {
+      var leftChar, rightChar, tokenState;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.attempted) {
+        this.reset(state);
         return false;
       }
       leftChar = state.input[state.currentPosition - 1];
       rightChar = state.input[state.currentPosition];
       if ((this.wordClass.isInClass(leftChar) !== this.wordClass.isInClass(rightChar)) !== this.negated) {
-        this.attempted = true;
+        tokenState.attempted = true;
         return state.currentPosition;
       }
       return false;

@@ -4,32 +4,41 @@ class root.Group extends root.Token
     constructor: (debug, token, @index) ->
         super(debug, token)
 
-    reset: () ->
-        super()
-        @result = 0
-        @firstPosition = false
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].result = 0
+        state.tokens[@debug.id].firstPosition = false
 
-    nextMatch: (state, report) ->
-        if @result isnt 0
-            result = @result
+    setupStateObject: ->
+        result: 0
+        firstPosition: false
+
+    register: (state) ->
+        state.captures[@index] = undefined
+        super
+
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.result isnt 0
+            result = tokenState.result
             if result is false
-                @reset()
+                @reset(state)
             else
-                @result = 0
+                tokenState.result = 0
             return result
 
-        if @firstPosition is false
-            @firstPosition = state.currentPosition
+        if tokenState.firstPosition is false
+            tokenState.firstPosition = state.currentPosition
 
-        result = @subtokens[0].nextMatch(state, report)
+        result = @subtokens[0].nextMatch(state)
         switch result
             when 0, -1
                 return result
             when false
-                @result = false
+                tokenState.result = false
                 state.captures[@index] = undefined
                 return 0
             else
-                state.captures[@index] = state.input[@firstPosition...result].join("")
-                @result = result
+                state.captures[@index] = state.input[tokenState.firstPosition...result].join("")
+                tokenState.result = result
                 return -1

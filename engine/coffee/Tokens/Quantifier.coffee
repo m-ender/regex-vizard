@@ -7,12 +7,37 @@ class root.Quantifier extends root.Token
         @nGroups = 0
         @clearer = []
 
-    reset: () ->
-        super()
-        @instances = [Helper.clone @subtokens[0]] # instances of the subtoken used for the individual repetitions
-        @pos = []                                  # "current" positions that were used for successful matches
-        @result = false
-        @captureStack = []                         # remembers the captures of hidden instances on the above stack
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].freshSubStates = @collectSubStates(state, @subtokens[0])
+        state.tokens[@debug.id].instances = [Helper.clone state.tokens[@debug.id].freshSubStates]
+        state.tokens[@debug.id].pos = []
+        state.tokens[@debug.id].result = false
+        state.tokens[@debug.id].captureStack = []
+
+    setupStateObject: (state) ->
+        stateObject =
+            freshSubStates: @collectSubStates(state, @subtokens[0])
+            instances: []                           # instances of the subtoken used for the individual repetitions
+            pos: []                                 # "current" positions that were used for successful matches
+            result: false
+            captureStack: []                        # remembers the captures of hidden instances on the above stack
+        stateObject.instances.push(Helper.clone stateObject.freshSubStates)
+        return stateObject
+
+    collectSubStates: (state, token) ->
+        states = []
+        key = token.debug.id
+        states[key] = state.tokens[key]
+        for subtoken in token.subtokens
+            for key, val of @collectSubStates(state, subtoken)
+                states[key] = val
+        return states
+
+    restoreSubStates: (state, subStates) ->
+        for key, val of subStates
+            state.tokens[key] = val
+
 
     # [Number] minGroup is the smallest group number contained in the subtokens of this quantifier
     # [Number] nGroups is the number of groups contained in the subtokens of this quantifier
@@ -20,55 +45,57 @@ class root.Quantifier extends root.Token
         for i in [0...@nGroups]
             @clearer[i] = undefined
 
-    nextMatch: (state, report) ->
-        if @result
-            result = @result
-            @result = false
-            if @instances.length >= @min
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.result
+            result = tokenState.result
+            tokenState.result = false
+            if tokenState.instances.length >= @min
                 return result
             else
                 return 0
 
-        if @instances.length == 0
-            @reset()
+        if tokenState.instances.length == 0
+            @reset(state)
             return false
 
-        if @instances.length > @max
-            @instances.pop()
+        if tokenState.instances.length > @max
+            tokenState.instances.pop()
             result = state.currentPosition
-            if @pos.length > 0
-                state.currentPosition = @pos.pop()
+            if tokenState.pos.length > 0
+                state.currentPosition = tokenState.pos.pop()
 
-            if @captureStack.length > 0
-                state.captures[@minGroup...@minGroup+@nGroups] = @captureStack.pop()
+            if tokenState.captureStack.length > 0
+                state.captures[@minGroup...@minGroup+@nGroups] = tokenState.captureStack.pop()
             return result
 
-        instance = @instances.pop()
+        token = @subtokens[0]
+        @restoreSubStates(state, tokenState.instances.pop())
 
-        result = instance.nextMatch(state, report)
+        result = token.nextMatch(state)
         switch result
             when 0, -1
-                @instances.push(instance)
+                tokenState.instances.push(@collectSubStates(state, token))
                 return result
             when false
-                @result = state.currentPosition
-                if @pos.length > 0
-                    state.currentPosition = @pos.pop()
-                if @captureStack.length > 0
-                    state.captures[@minGroup...@minGroup+@nGroups] = @captureStack.pop()
+                tokenState.result = state.currentPosition
+                if tokenState.pos.length > 0
+                    state.currentPosition = tokenState.pos.pop()
+                if tokenState.captureStack.length > 0
+                    state.captures[@minGroup...@minGroup+@nGroups] = tokenState.captureStack.pop()
 
                 return 0
             else
-                @instances.push(instance)
+                tokenState.instances.push(@collectSubStates(state, token))
                 # only the first @min instances are allowed to match empty, to avoid infinite loops
-                if result == state.currentPosition and @instances.length > @min
-                    return @nextMatch(state, report)
+                if result == state.currentPosition and tokenState.instances.length > @min
+                    return @nextMatch(state)
 
-                @captureStack.push(state.captures[@minGroup...@minGroup+@nGroups])
+                tokenState.captureStack.push(state.captures[@minGroup...@minGroup+@nGroups])
                 state.captures[@minGroup...@minGroup+@nGroups] = @clearer
 
-                @instances.push(Helper.clone @subtokens[0])
-                @pos.push(state.currentPosition)
+                tokenState.instances.push(Helper.clone tokenState.freshSubStates)
+                tokenState.pos.push(state.currentPosition)
                 state.currentPosition = result
                 return -1
 

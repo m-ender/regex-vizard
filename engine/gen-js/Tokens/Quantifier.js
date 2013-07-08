@@ -19,12 +19,53 @@
       this.clearer = [];
     }
 
-    Quantifier.prototype.reset = function() {
-      Quantifier.__super__.reset.call(this);
-      this.instances = [Helper.clone(this.subtokens[0])];
-      this.pos = [];
-      this.result = false;
-      return this.captureStack = [];
+    Quantifier.prototype.reset = function(state) {
+      Quantifier.__super__.reset.apply(this, arguments);
+      state.tokens[this.debug.id].freshSubStates = this.collectSubStates(state, this.subtokens[0]);
+      state.tokens[this.debug.id].instances = [Helper.clone(state.tokens[this.debug.id].freshSubStates)];
+      state.tokens[this.debug.id].pos = [];
+      state.tokens[this.debug.id].result = false;
+      return state.tokens[this.debug.id].captureStack = [];
+    };
+
+    Quantifier.prototype.setupStateObject = function(state) {
+      var stateObject;
+      stateObject = {
+        freshSubStates: this.collectSubStates(state, this.subtokens[0]),
+        instances: [],
+        pos: [],
+        result: false,
+        captureStack: []
+      };
+      stateObject.instances.push(Helper.clone(stateObject.freshSubStates));
+      return stateObject;
+    };
+
+    Quantifier.prototype.collectSubStates = function(state, token) {
+      var key, states, subtoken, val, _i, _len, _ref, _ref1;
+      states = [];
+      key = token.debug.id;
+      states[key] = state.tokens[key];
+      _ref = token.subtokens;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        subtoken = _ref[_i];
+        _ref1 = this.collectSubStates(state, subtoken);
+        for (key in _ref1) {
+          val = _ref1[key];
+          states[key] = val;
+        }
+      }
+      return states;
+    };
+
+    Quantifier.prototype.restoreSubStates = function(state, subStates) {
+      var key, val, _results;
+      _results = [];
+      for (key in subStates) {
+        val = subStates[key];
+        _results.push(state.tokens[key] = val);
+      }
+      return _results;
     };
 
     Quantifier.prototype.setGroupRange = function(minGroup, nGroups) {
@@ -38,57 +79,59 @@
       return _results;
     };
 
-    Quantifier.prototype.nextMatch = function(state, report) {
-      var instance, result, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
-      if (this.result) {
-        result = this.result;
-        this.result = false;
-        if (this.instances.length >= this.min) {
+    Quantifier.prototype.nextMatch = function(state) {
+      var result, token, tokenState, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.result) {
+        result = tokenState.result;
+        tokenState.result = false;
+        if (tokenState.instances.length >= this.min) {
           return result;
         } else {
           return 0;
         }
       }
-      if (this.instances.length === 0) {
-        this.reset();
+      if (tokenState.instances.length === 0) {
+        this.reset(state);
         return false;
       }
-      if (this.instances.length > this.max) {
-        this.instances.pop();
+      if (tokenState.instances.length > this.max) {
+        tokenState.instances.pop();
         result = state.currentPosition;
-        if (this.pos.length > 0) {
-          state.currentPosition = this.pos.pop();
+        if (tokenState.pos.length > 0) {
+          state.currentPosition = tokenState.pos.pop();
         }
-        if (this.captureStack.length > 0) {
-          [].splice.apply(state.captures, [(_ref = this.minGroup), (this.minGroup + this.nGroups) - _ref].concat(_ref1 = this.captureStack.pop())), _ref1;
+        if (tokenState.captureStack.length > 0) {
+          [].splice.apply(state.captures, [(_ref = this.minGroup), (this.minGroup + this.nGroups) - _ref].concat(_ref1 = tokenState.captureStack.pop())), _ref1;
         }
         return result;
       }
-      instance = this.instances.pop();
-      result = instance.nextMatch(state, report);
+      token = this.subtokens[0];
+      this.restoreSubStates(state, tokenState.instances.pop());
+      result = token.nextMatch(state);
       switch (result) {
         case 0:
         case -1:
-          this.instances.push(instance);
+          tokenState.instances.push(this.collectSubStates(state, token));
           return result;
         case false:
-          this.result = state.currentPosition;
-          if (this.pos.length > 0) {
-            state.currentPosition = this.pos.pop();
+          tokenState.result = state.currentPosition;
+          if (tokenState.pos.length > 0) {
+            state.currentPosition = tokenState.pos.pop();
           }
-          if (this.captureStack.length > 0) {
-            [].splice.apply(state.captures, [(_ref2 = this.minGroup), (this.minGroup + this.nGroups) - _ref2].concat(_ref3 = this.captureStack.pop())), _ref3;
+          if (tokenState.captureStack.length > 0) {
+            [].splice.apply(state.captures, [(_ref2 = this.minGroup), (this.minGroup + this.nGroups) - _ref2].concat(_ref3 = tokenState.captureStack.pop())), _ref3;
           }
           return 0;
         default:
-          this.instances.push(instance);
-          if (result === state.currentPosition && this.instances.length > this.min) {
-            return this.nextMatch(state, report);
+          tokenState.instances.push(this.collectSubStates(state, token));
+          if (result === state.currentPosition && tokenState.instances.length > this.min) {
+            return this.nextMatch(state);
           }
-          this.captureStack.push(state.captures.slice(this.minGroup, this.minGroup + this.nGroups));
+          tokenState.captureStack.push(state.captures.slice(this.minGroup, this.minGroup + this.nGroups));
           [].splice.apply(state.captures, [(_ref4 = this.minGroup), (this.minGroup + this.nGroups) - _ref4].concat(_ref5 = this.clearer)), _ref5;
-          this.instances.push(Helper.clone(this.subtokens[0]));
-          this.pos.push(state.currentPosition);
+          tokenState.instances.push(Helper.clone(tokenState.freshSubStates));
+          tokenState.pos.push(state.currentPosition);
           state.currentPosition = result;
           return -1;
       }

@@ -13,3 +13,8 @@ class root.Helper
             newInstance[key] = @clone(obj[key])
 
         return newInstance
+
+    @extend: (target, sources...) ->
+        for object in sources
+            target[key] = val for key, val of object
+        target

@@ -2,21 +2,25 @@ root = global ? window
 
 class root.Disjunction extends root.Token
     constructor: (debug, token) ->
-        super(debug, token)
+        super
 
-    reset: () ->
-        super()
-        @i = 0 # the first subtoken to try upon calling nextMatch
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].i = 0 # the first subtoken to try upon calling nextMatch
 
-    nextMatch: (state, report) ->
-        if @i == @subtokens.length
-            @reset()
+    setupStateObject: ->
+        i: 0
+
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.i == @subtokens.length
+            @reset(state)
             return false
 
-        result = @subtokens[@i].nextMatch(state, report)
+        result = @subtokens[tokenState.i].nextMatch(state)
 
         if result != false
             return result
         else
-            ++@i
+            ++tokenState.i
             return 0

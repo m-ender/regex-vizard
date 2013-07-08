@@ -2,15 +2,16 @@ TestCase("TokenTests",
     setUp : () ->
         if typeof module != "undefined" && module.exports
             #On a server
-            @Regex = new require("Regex").Regex("")
+            @Matcher = require("Matcher").Matcher
         else
             #On a client
-            @Regex = new window.Regex("")
+            @Matcher = window.Matcher
 
     "testCharacterToken": () ->
-        state = @Regex.setupInitialState("ab")
+        state = @Matcher.setupInitialState("ab")
         # Put together token for regex /a/
-        token = new Character(null, "a")
+        token = new Character({id: 0}, "a")
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             2
         ])
@@ -19,9 +20,10 @@ TestCase("TokenTests",
         state.currentPosition = 3 # advance to end of string
         @assertNextMatchSequence(token, state, [])
 
-        state.currentPosition = 1
+        state = @Matcher.setupInitialState("ab")
         # Put together token for regex /b/
-        token = new Character(null, "b")
+        token = new Character({id: 0}, "b")
+        token.register(state)
         @assertNextMatchSequence(token, state, [])
         state.currentPosition = 2 # advance to position before b
         @assertNextMatchSequence(token, state, [
@@ -31,9 +33,10 @@ TestCase("TokenTests",
         @assertNextMatchSequence(token, state, [])
 
     "testWildcardToken": () ->
-        state = @Regex.setupInitialState("a\nb\r")
+        state = @Matcher.setupInitialState("a\nb\r")
         # Put together token for regex /./
-        token = new Wildcard(null, )
+        token = new Wildcard({id: 0}, )
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             2
         ])
@@ -49,9 +52,10 @@ TestCase("TokenTests",
         @assertNextMatchSequence(token, state, [])
 
     "testStartAnchorToken": () ->
-        state = @Regex.setupInitialState("ab")
+        state = @Matcher.setupInitialState("ab")
         # Put together token for regex /^/
-        token = new StartAnchor(null, )
+        token = new StartAnchor({id: 0}, )
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             1
         ])
@@ -61,9 +65,10 @@ TestCase("TokenTests",
         @assertNextMatchSequence(token, state, [])
 
     "testEndAnchorToken": () ->
-        state = @Regex.setupInitialState("ab")
+        state = @Matcher.setupInitialState("ab")
         # Put together token for regex /$/
-        token = new EndAnchor(null, )
+        token = new EndAnchor({id: 0}, )
+        token.register(state)
         @assertNextMatchSequence(token, state, [])
         state.currentPosition = 2 # advance to position before b
         @assertNextMatchSequence(token, state, [])
@@ -73,12 +78,13 @@ TestCase("TokenTests",
         ])
 
     "testDisjunctionToken": () ->
-        state = @Regex.setupInitialState("abc")
+        state = @Matcher.setupInitialState("abc")
         # Put together token for regex /a|b|c/
-        token = new Disjunction(null, )
-        token.subtokens.push(new Character(null, "a"))
-        token.subtokens.push(new Character(null, "b"))
-        token.subtokens.push(new Character(null, "c"))
+        token = new Disjunction({id: 0}, )
+        token.subtokens.push(new Character({id: 1}, "a"))
+        token.subtokens.push(new Character({id: 2}, "b"))
+        token.subtokens.push(new Character({id: 3}, "c"))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             2 # subtoken "a" matches
             0 # subtoken "a" cannot backtrack, so subtoken fails
@@ -107,12 +113,13 @@ TestCase("TokenTests",
         ])
 
     "testSequenceToken": () ->
-        state = @Regex.setupInitialState("abc")
+        state = @Matcher.setupInitialState("abc")
         # Put together token for regex /abc/
-        token = new Sequence(null, )
-        token.subtokens.push(new Character(null, "a"))
-        token.subtokens.push(new Character(null, "b"))
-        token.subtokens.push(new Character(null, "c"))
+        token = new Sequence({id: 0}, )
+        token.subtokens.push(new Character({id: 1}, "a"))
+        token.subtokens.push(new Character({id: 2}, "b"))
+        token.subtokens.push(new Character({id: 3}, "c"))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
            -1 # subtoken "a" matches
            -1 # subtoken "b" matches
@@ -122,11 +129,13 @@ TestCase("TokenTests",
             0 # subtoken "a" cannot backtrack, so subtoken fails
         ])
 
+        state = @Matcher.setupInitialState("abc")
         # Put together token for regex /ab?b/
-        token = new Sequence(null, )
-        token.subtokens.push(new Character(null, "a"))
-        token.subtokens.push(new Option(null, new Character(null, "b")))
-        token.subtokens.push(new Character(null, "b"))
+        token = new Sequence({id: 0}, )
+        token.subtokens.push(new Character({id: 1}, "a"))
+        token.subtokens.push(new Option({id: 2}, new Character({id: 3}, "b")))
+        token.subtokens.push(new Character({id: 4}, "b"))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
            -1 # subtoken "a" matches
            -1 # subsubtoken "b" matches
@@ -141,13 +150,15 @@ TestCase("TokenTests",
         ])
 
     "testEmptySequenceToken": () ->
-        state = @Regex.setupInitialState("")
+        state = @Matcher.setupInitialState("")
         # Put together token for regex //
-        token = new Sequence(null, )
+        token = new Sequence({id: 0}, )
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             1 # token matches but does not advance the cursor
         ])
-        state = @Regex.setupInitialState("a")
+        state = @Matcher.setupInitialState("a")
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             1 # token matches but does not advance the cursor
         ])
@@ -157,9 +168,10 @@ TestCase("TokenTests",
         ])
 
     "testOptionToken": () ->
-        state = @Regex.setupInitialState("ab")
+        state = @Matcher.setupInitialState("ab")
         # Put together token for regex /a?/
-        token = new Option(null, new Character(null, "a"))
+        token = new Option({id: 0}, new Character({id: 1}, "a"))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
            -1 # subtoken "a" matches
             2 # subtoken has matched, so report overall match
@@ -178,9 +190,10 @@ TestCase("TokenTests",
         ])
 
     "testGroupToken": () ->
-        state = @Regex.setupInitialState("a")
+        state = @Matcher.setupInitialState("a")
         # Put together token for regex /(a?)/
-        token = new Group(null, new Option(null, new Character(null, "a")))
+        token = new Group({id: 0}, new Option({id: 1}, new Character({id: 2}, "a")))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
            -1 # subsubtoken "a" matches
            -1 # subsubtoken has matched, so subtoken "a?" matches
@@ -193,9 +206,10 @@ TestCase("TokenTests",
         ])
 
     "testRepeatZeroOrMoreToken": () ->
-        state = @Regex.setupInitialState("aaab")
+        state = @Matcher.setupInitialState("aaab")
         # Put together token for regex /a*/
-        token = new RepeatZeroOrMore(null, new Character(null, "a"))
+        token = new RepeatZeroOrMore({id: 0}, new Character({id: 1}, "a"))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
            -1 # first instance of subtoken "a" matches
            -1 # second instance of subtoken "a" matches
@@ -216,11 +230,12 @@ TestCase("TokenTests",
         ])
 
         # Put together token for regex /(a|b)*/
-        state = @Regex.setupInitialState("ab")
-        disjunction = new Disjunction(null, )
-        disjunction.subtokens.push(new Character(null, "a"))
-        disjunction.subtokens.push(new Character(null, "b"))
-        token = new RepeatZeroOrMore(null, new Group(null, disjunction))
+        state = @Matcher.setupInitialState("ab")
+        disjunction = new Disjunction({id: 0}, )
+        disjunction.subtokens.push(new Character({id: 1}, "a"))
+        disjunction.subtokens.push(new Character({id: 2}, "b"))
+        token = new RepeatZeroOrMore({id: 3}, new Group({id: 4}, disjunction))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
            -1 # subsubtoken "a" matches
            -1 # therefore, first instance of subtoken "(a|b)" matches
@@ -244,9 +259,10 @@ TestCase("TokenTests",
         ])
 
     "testRepeatOneOrMoreToken": () ->
-        state = @Regex.setupInitialState("aaab")
+        state = @Matcher.setupInitialState("aaab")
         # Put together token for regex /a+/
-        token = new RepeatOneOrMore(null, new Character(null, "a"))
+        token = new RepeatOneOrMore({id: 0}, new Character({id: 1}, "a"))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
            -1 # first instance of subtoken "a" matches
            -1 # second instance of subtoken "a" matches
@@ -267,11 +283,12 @@ TestCase("TokenTests",
         ])
 
         # Put together token for regex /(a|b)+/
-        state = @Regex.setupInitialState("ab")
-        disjunction = new Disjunction(null, )
-        disjunction.subtokens.push(new Character(null, "a"))
-        disjunction.subtokens.push(new Character(null, "b"))
-        token = new RepeatOneOrMore(null, new Group(null, disjunction))
+        state = @Matcher.setupInitialState("ab")
+        disjunction = new Disjunction({id: 0}, )
+        disjunction.subtokens.push(new Character({id: 1}, "a"))
+        disjunction.subtokens.push(new Character({id: 2}, "b"))
+        token = new RepeatOneOrMore({id: 3}, new Group({id: 4}, disjunction))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
            -1 # subsubtoken "a" matches
            -1 # therefore, first instance of subtoken "(a|b)" matches
@@ -295,17 +312,20 @@ TestCase("TokenTests",
         ])
 
     "testInfiniteLoop": () ->
-        state = @Regex.setupInitialState("b")
+        state = @Matcher.setupInitialState("b")
         # Put together token for regex /(a*)*/ omitting the Group token as it only forwards nextMatch() calls
-        token = new RepeatZeroOrMore(null, new RepeatZeroOrMore(null, new Character(null, "a")))
+        token = new RepeatZeroOrMore({id: 0}, new RepeatZeroOrMore({id: 1}, new Character({id: 2}, "a")))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             0 # first instance of subtoken "a*" fails when trying first instance of "a"
             0 # first instance of subtoken "a*" matches after discarding first instance of "a", but empty submatches are disregarded, so subtoken fails
             1 # first instance is discarded to give a match
         ])
 
+        state = @Matcher.setupInitialState("b")
         # Put together token for regex /(a?)+/ omitting the Group token as it only forwards nextMatch() calls
-        token = new RepeatOneOrMore(null, new Option(null, new Character(null, "a")))
+        token = new RepeatOneOrMore({id: 0}, new Option({id: 1}, new Character({id: 2}, "a")))
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             0 # first instance of subtoken "a?" fails when trying "a"
            -1 # first instance of subtoken "a?" matches empty
@@ -317,11 +337,12 @@ TestCase("TokenTests",
         ])
 
     "testBasicCharacterClass": () ->
-        state = @Regex.setupInitialState("abc")
+        state = @Matcher.setupInitialState("abc")
         # Put together token for regex /[ac]/
-        token = new CharacterClass(null)
+        token = new CharacterClass({id: 0})
         token.addCharacter("a")
         token.addCharacter("c")
+        token.register(state)
 
         @assertNextMatchSequence(token, state, [
             2 # "a" is part of the class
@@ -336,11 +357,12 @@ TestCase("TokenTests",
         ])
 
     "testNegatedCharacterClass": () ->
-        state = @Regex.setupInitialState("abc")
+        state = @Matcher.setupInitialState("abc")
         # Put together token for regex /[^ac]/
-        token = new CharacterClass(null, true)
+        token = new CharacterClass({id: 0}, true)
         token.addCharacter("a")
         token.addCharacter("c")
+        token.register(state)
 
         @assertNextMatchSequence(token, state, [])
 
@@ -353,10 +375,11 @@ TestCase("TokenTests",
         @assertNextMatchSequence(token, state, [])
 
     "testCharacterClassRange": () ->
-        state = @Regex.setupInitialState("abcd")
+        state = @Matcher.setupInitialState("abcd")
         # Put together token for regex /[a-c]/
-        token = new CharacterClass(null)
+        token = new CharacterClass({id: 0})
         token.addRange("a","c")
+        token.register(state)
 
         @assertNextMatchSequence(token, state, [
             2 # "a" is part of the class
@@ -376,18 +399,20 @@ TestCase("TokenTests",
         @assertNextMatchSequence(token, state, [])
 
     "testNestedCharacterClass": () ->
-        state = @Regex.setupInitialState("0")
+        state = @Matcher.setupInitialState("0")
         # Put together token for regex /[\d]/
-        token = new CharacterClass(null, false, [new DigitClass(null)])
+        token = new CharacterClass({id: 0}, false, [new DigitClass({id: 1})])
+        token.register(state)
 
         @assertNextMatchSequence(token, state, [
             2 # "1" is part of the class
         ])
 
     "testWordBoundary": () ->
-        state = @Regex.setupInitialState("a_0-b")
+        state = @Matcher.setupInitialState("a_0-b")
         # Put together token for regex /\b/
-        token = new WordBoundary(null)
+        token = new WordBoundary({id: 0})
+        token.register(state)
 
         @assertNextMatchSequence(token, state, [
             1
@@ -414,18 +439,21 @@ TestCase("TokenTests",
             6
         ])
 
-        state = @Regex.setupInitialState("")
+        state = @Matcher.setupInitialState("")
+        token.register(state)
         @assertNextMatchSequence(token, state, [])
 
-        state = @Regex.setupInitialState("-")
+        state = @Matcher.setupInitialState("-")
+        token.register(state)
         @assertNextMatchSequence(token, state, [])
         state.currentPosition = 2 # advance to position at end of string
         @assertNextMatchSequence(token, state, [])
 
 
-        state = @Regex.setupInitialState("a_0-b")
+        state = @Matcher.setupInitialState("a_0-b")
         # Put together token for regex /\B/
-        token = new WordBoundary(null, true)
+        token = new WordBoundary({id: 0}, true)
+        token.register(state)
 
         @assertNextMatchSequence(token, state, [])
 
@@ -448,12 +476,14 @@ TestCase("TokenTests",
         state.currentPosition = 6 # advance to position at end of string
         @assertNextMatchSequence(token, state, [])
 
-        state = @Regex.setupInitialState("")
+        state = @Matcher.setupInitialState("")
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             1
         ])
 
-        state = @Regex.setupInitialState("-")
+        state = @Matcher.setupInitialState("-")
+        token.register(state)
         @assertNextMatchSequence(token, state, [
             1
         ])

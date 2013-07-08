@@ -10,43 +10,51 @@
 
     __extends(Sequence, _super);
 
-    function Sequence() {
-      Sequence.__super__.constructor.call(this);
+    function Sequence(debug) {
+      Sequence.__super__.constructor.call(this, debug);
     }
 
-    Sequence.prototype.reset = function() {
-      Sequence.__super__.reset.call(this);
-      this.i = 0;
-      return this.pos = [];
+    Sequence.prototype.reset = function(state) {
+      Sequence.__super__.reset.apply(this, arguments);
+      state.tokens[this.debug.id].i = 0;
+      return state.tokens[this.debug.id].pos = [];
     };
 
-    Sequence.prototype.nextMatch = function(state, report) {
-      var result;
-      if (this.i === -1) {
-        this.reset();
+    Sequence.prototype.setupStateObject = function() {
+      return {
+        i: 0,
+        pos: []
+      };
+    };
+
+    Sequence.prototype.nextMatch = function(state) {
+      var result, tokenState;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.i === -1) {
+        this.reset(state);
         return false;
       }
       if (this.subtokens.length === 0) {
-        --this.i;
+        --tokenState.i;
         return state.currentPosition;
       }
-      result = this.subtokens[this.i].nextMatch(state, report);
+      result = this.subtokens[tokenState.i].nextMatch(state);
       switch (result) {
         case false:
-          --this.i;
-          if (this.pos.length > 0) {
-            state.currentPosition = this.pos.pop();
+          --tokenState.i;
+          if (tokenState.pos.length > 0) {
+            state.currentPosition = tokenState.pos.pop();
           }
           return 0;
         case -1:
         case 0:
           return result;
         default:
-          if (this.i === this.subtokens.length - 1) {
+          if (tokenState.i === this.subtokens.length - 1) {
             return result;
           } else {
-            ++this.i;
-            this.pos.push(state.currentPosition);
+            ++tokenState.i;
+            tokenState.pos.push(state.currentPosition);
             state.currentPosition = result;
             return -1;
           }

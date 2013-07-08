@@ -1,24 +1,26 @@
 root = global ? window
 
 class root.Parser
-    constructor: () ->
-
-    parsePattern: (string) ->
+    @parsePattern: (string) ->
         # In order not to patch in disjunctions once the first | has been read, we treat everything as an
         # disjunction of sequences (possibly with only one alternative or only one token in the sequence).
         # Unnecessary disjunctions and sequences will be removed at the end.
         # We also use a group as the root of the pattern, which will correspond to capturing group 0.
-        debug =
-            sourceOpenLength: 0
-            sourceCloseLength: 0
-            id: 0
-        treeRoot = new Group(debug, new Disjunction(null, new Sequence()), 0)
+        lastId = -1
+
+        treeRoot = new Group(
+                     sourceOpenLength: 0
+                     sourceCloseLength: 0
+                     id: ++lastId
+                    ,
+                     new Disjunction({id: ++lastId}, new Sequence({id: ++lastId}))
+                    ,
+                     0)
         nestingStack = []
         current = treeRoot.subtokens[0]
         i = 0
 
         lastCaptureIndex = 0
-        lastId = 0
         while i < string.length
             char = string.charAt(i)
             switch char
@@ -50,14 +52,14 @@ class root.Parser
                     @append(current, new Wildcard(debug))
                     ++i
                 when "|"
-                    current.subtokens.push(new Sequence())
+                    current.subtokens.push(new Sequence({id: ++lastId}))
                     ++i
                 when "("
                     debug =
                         sourceOpenLength: 1
                         sourceCloseLength: 1
                         id: ++lastId
-                    group = new Group(debug, new Disjunction(null, new Sequence()), ++lastCaptureIndex)
+                    group = new Group(debug, new Disjunction({id: ++lastId}, new Sequence({id: ++lastId})), ++lastCaptureIndex)
                     @append(current, group)
                     nestingStack.push(current)
                     current = group.subtokens[0]
@@ -124,7 +126,7 @@ class root.Parser
 
         return [treeRoot, nGroups]
 
-    parseCharacterClass: (string, current, i, id) ->
+    @parseCharacterClass: (string, current, i, id) ->
         if i < string.length and string.charAt(i) == "^"
             negated = true
             ++i
@@ -192,7 +194,7 @@ class root.Parser
         }
 
     # inCharacterClass is a boolean that indicates where the current sequence was found
-    parseEscapeSequence: (inCharacterClass, string, i) ->
+    @parseEscapeSequence: (inCharacterClass, string, i) ->
         if i == string.length
             throw { # we need the curly brackets here, because CoffeeScript will cause problems, otherwise
                 name: "NothingToEscapeException"
@@ -242,7 +244,7 @@ class root.Parser
 
         return [i + 1, element]
 
-    parseQuantifier: (current, char, i, id) ->
+    @parseQuantifier: (current, char, i, id) ->
         st = current.subtokens
         if st[st.length-1].subtokens.length == 0
             throw {
@@ -270,10 +272,10 @@ class root.Parser
         @append(current, new (quantifierClass[char])(debug, target)) # take the currently last token, stuff it into an appropriate quantifier token and append the option instead
         return i+1
 
-    append: (current, token) ->
+    @append: (current, token) ->
         st = current.subtokens
         st[st.length-1].subtokens.push(token)
 
-    remove: (current) ->
+    @remove: (current) ->
         st = current.subtokens
         return st[st.length-1].subtokens.pop()

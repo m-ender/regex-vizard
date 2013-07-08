@@ -6,9 +6,16 @@ class root.CharacterClass extends root.Token
     constructor: (debug, @negated = false, @elements = []) ->
         super(debug)
 
-    reset: () ->
-        super()
-        @attempted = false
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].attempted = false
+
+    setupStateObject: ->
+        attempted: false
+
+    register: (state) ->
+        state.tokens[@debug.id] = @setupStateObject()
+        # do not recurse into subtokens as they are not "full-fledged" tokens
 
     addCharacter: (character) ->
         @elements.push(character)
@@ -19,15 +26,16 @@ class root.CharacterClass extends root.Token
             end: endCharacter.charCodeAt(0)
         )
 
-    nextMatch: (state, report) ->
-        if @attempted
-            @reset()
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.attempted
+            @reset(state)
             return false
 
         char = state.input[state.currentPosition]
 
         if @isInClass(char)
-            @attempted = true
+            tokenState.attempted = true
             return state.currentPosition + 1
 
         return false
@@ -97,18 +105,22 @@ class root.WhitespaceClass extends root.CharacterClass
 
 class root.Wildcard extends root.Token
     constructor: (debug) ->
-        super(debug)
+        super
 
-    reset: () ->
-        super()
-        @attempted = false
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].attempted = false
 
-    nextMatch: (state, report) ->
-        if @attempted
-            @reset()
+    setupStateObject: ->
+        attempted: false
+
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.attempted
+            @reset(state)
             return false
 
         unless state.input[state.currentPosition] in ["\n", "\r", "\u2028", "\u2029", EndGuard]
-            @attempted = true
+            tokenState.attempted = true
             return state.currentPosition + 1
         return false

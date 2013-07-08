@@ -11,25 +11,32 @@
     __extends(Disjunction, _super);
 
     function Disjunction(debug, token) {
-      Disjunction.__super__.constructor.call(this, debug, token);
+      Disjunction.__super__.constructor.apply(this, arguments);
     }
 
-    Disjunction.prototype.reset = function() {
-      Disjunction.__super__.reset.call(this);
-      return this.i = 0;
+    Disjunction.prototype.reset = function(state) {
+      Disjunction.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].i = 0;
     };
 
-    Disjunction.prototype.nextMatch = function(state, report) {
-      var result;
-      if (this.i === this.subtokens.length) {
-        this.reset();
+    Disjunction.prototype.setupStateObject = function() {
+      return {
+        i: 0
+      };
+    };
+
+    Disjunction.prototype.nextMatch = function(state) {
+      var result, tokenState;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.i === this.subtokens.length) {
+        this.reset(state);
         return false;
       }
-      result = this.subtokens[this.i].nextMatch(state, report);
+      result = this.subtokens[tokenState.i].nextMatch(state);
       if (result !== false) {
         return result;
       } else {
-        ++this.i;
+        ++tokenState.i;
         return 0;
       }
     };

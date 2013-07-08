@@ -3,37 +3,42 @@ root = global ? window
 # This encapsulates concatenation.
 # Empty (sub)patterns are also represented by (empty) sequences
 class root.Sequence extends root.Token
-    constructor: () ->
-        super()
+    constructor: (debug) ->
+        super(debug)
 
-    reset: () ->
-        super()
-        @i = 0 # the first subtoken to try upon calling nextMatch
-        @pos = [] # "current" positions that were used by successful subtokens
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].i = 0 # the first subtoken to try upon calling nextMatch
+        state.tokens[@debug.id].pos = [] # "current" positions that were used by successful subtokens
 
-    nextMatch: (state, report) ->
-        if @i == -1
-            @reset()
+    setupStateObject: ->
+        i: 0
+        pos: []
+
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.i == -1
+            @reset(state)
             return false
 
         if @subtokens.length == 0
-            --@i
+            --tokenState.i
             return state.currentPosition
 
-        result = @subtokens[@i].nextMatch(state, report)
+        result = @subtokens[tokenState.i].nextMatch(state)
         switch result
             when false
-                --@i
-                if @pos.length > 0
-                    state.currentPosition = @pos.pop()
+                --tokenState.i
+                if tokenState.pos.length > 0
+                    state.currentPosition = tokenState.pos.pop()
                 return 0
             when -1, 0
                 return result
             else
-                if @i == @subtokens.length - 1
+                if tokenState.i == @subtokens.length - 1
                     return result
                 else
-                    ++@i
-                    @pos.push(state.currentPosition)
+                    ++tokenState.i
+                    tokenState.pos.push(state.currentPosition)
                     state.currentPosition = result
                     return -1

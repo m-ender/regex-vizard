@@ -4,22 +4,28 @@
   TestCase("TokenTests", {
     setUp: function() {
       if (typeof module !== "undefined" && module.exports) {
-        return this.Regex = new require("Regex").Regex("");
+        return this.Matcher = require("Matcher").Matcher;
       } else {
-        return this.Regex = new window.Regex("");
+        return this.Matcher = window.Matcher;
       }
     },
     "testCharacterToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("ab");
-      token = new Character(null, "a");
+      state = this.Matcher.setupInitialState("ab");
+      token = new Character({
+        id: 0
+      }, "a");
+      token.register(state);
       this.assertNextMatchSequence(token, state, [2]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, []);
       state.currentPosition = 3;
       this.assertNextMatchSequence(token, state, []);
-      state.currentPosition = 1;
-      token = new Character(null, "b");
+      state = this.Matcher.setupInitialState("ab");
+      token = new Character({
+        id: 0
+      }, "b");
+      token.register(state);
       this.assertNextMatchSequence(token, state, []);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, [3]);
@@ -28,8 +34,11 @@
     },
     "testWildcardToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("a\nb\r");
-      token = new Wildcard(null);
+      state = this.Matcher.setupInitialState("a\nb\r");
+      token = new Wildcard({
+        id: 0
+      });
+      token.register(state);
       this.assertNextMatchSequence(token, state, [2]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, []);
@@ -42,8 +51,11 @@
     },
     "testStartAnchorToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("ab");
-      token = new StartAnchor(null);
+      state = this.Matcher.setupInitialState("ab");
+      token = new StartAnchor({
+        id: 0
+      });
+      token.register(state);
       this.assertNextMatchSequence(token, state, [1]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, []);
@@ -52,8 +64,11 @@
     },
     "testEndAnchorToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("ab");
-      token = new EndAnchor(null);
+      state = this.Matcher.setupInitialState("ab");
+      token = new EndAnchor({
+        id: 0
+      });
+      token.register(state);
       this.assertNextMatchSequence(token, state, []);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, []);
@@ -62,11 +77,20 @@
     },
     "testDisjunctionToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("abc");
-      token = new Disjunction(null);
-      token.subtokens.push(new Character(null, "a"));
-      token.subtokens.push(new Character(null, "b"));
-      token.subtokens.push(new Character(null, "c"));
+      state = this.Matcher.setupInitialState("abc");
+      token = new Disjunction({
+        id: 0
+      });
+      token.subtokens.push(new Character({
+        id: 1
+      }, "a"));
+      token.subtokens.push(new Character({
+        id: 2
+      }, "b"));
+      token.subtokens.push(new Character({
+        id: 3
+      }, "c"));
+      token.register(state);
       this.assertNextMatchSequence(token, state, [2, 0, 0, 0]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, [0, 3, 0, 0]);
@@ -77,32 +101,62 @@
     },
     "testSequenceToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("abc");
-      token = new Sequence(null);
-      token.subtokens.push(new Character(null, "a"));
-      token.subtokens.push(new Character(null, "b"));
-      token.subtokens.push(new Character(null, "c"));
+      state = this.Matcher.setupInitialState("abc");
+      token = new Sequence({
+        id: 0
+      });
+      token.subtokens.push(new Character({
+        id: 1
+      }, "a"));
+      token.subtokens.push(new Character({
+        id: 2
+      }, "b"));
+      token.subtokens.push(new Character({
+        id: 3
+      }, "c"));
+      token.register(state);
       this.assertNextMatchSequence(token, state, [-1, -1, 4, 0, 0, 0]);
-      token = new Sequence(null);
-      token.subtokens.push(new Character(null, "a"));
-      token.subtokens.push(new Option(null, new Character(null, "b")));
-      token.subtokens.push(new Character(null, "b"));
+      state = this.Matcher.setupInitialState("abc");
+      token = new Sequence({
+        id: 0
+      });
+      token.subtokens.push(new Character({
+        id: 1
+      }, "a"));
+      token.subtokens.push(new Option({
+        id: 2
+      }, new Character({
+        id: 3
+      }, "b")));
+      token.subtokens.push(new Character({
+        id: 4
+      }, "b"));
+      token.register(state);
       return this.assertNextMatchSequence(token, state, [-1, -1, -1, 0, 0, -1, 3, 0, 0, 0]);
     },
     "testEmptySequenceToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("");
-      token = new Sequence(null);
+      state = this.Matcher.setupInitialState("");
+      token = new Sequence({
+        id: 0
+      });
+      token.register(state);
       this.assertNextMatchSequence(token, state, [1]);
-      state = this.Regex.setupInitialState("a");
+      state = this.Matcher.setupInitialState("a");
+      token.register(state);
       this.assertNextMatchSequence(token, state, [1]);
       state.currentPosition = 2;
       return this.assertNextMatchSequence(token, state, [2]);
     },
     "testOptionToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("ab");
-      token = new Option(null, new Character(null, "a"));
+      state = this.Matcher.setupInitialState("ab");
+      token = new Option({
+        id: 0
+      }, new Character({
+        id: 1
+      }, "a"));
+      token.register(state);
       this.assertNextMatchSequence(token, state, [-1, 2, 0, 1]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, [0, 2]);
@@ -111,52 +165,109 @@
     },
     "testGroupToken": function() {
       var state, token;
-      state = this.Regex.setupInitialState("a");
-      token = new Group(null, new Option(null, new Character(null, "a")));
+      state = this.Matcher.setupInitialState("a");
+      token = new Group({
+        id: 0
+      }, new Option({
+        id: 1
+      }, new Character({
+        id: 2
+      }, "a")));
+      token.register(state);
       return this.assertNextMatchSequence(token, state, [-1, -1, 2, 0, -1, 1, 0]);
     },
     "testRepeatZeroOrMoreToken": function() {
       var disjunction, state, token;
-      state = this.Regex.setupInitialState("aaab");
-      token = new RepeatZeroOrMore(null, new Character(null, "a"));
+      state = this.Matcher.setupInitialState("aaab");
+      token = new RepeatZeroOrMore({
+        id: 0
+      }, new Character({
+        id: 1
+      }, "a"));
+      token.register(state);
       this.assertNextMatchSequence(token, state, [-1, -1, -1, 0, 4, 0, 3, 0, 2, 0, 1]);
       state.currentPosition = 4;
       this.assertNextMatchSequence(token, state, [0, 4]);
-      state = this.Regex.setupInitialState("ab");
-      disjunction = new Disjunction(null);
-      disjunction.subtokens.push(new Character(null, "a"));
-      disjunction.subtokens.push(new Character(null, "b"));
-      token = new RepeatZeroOrMore(null, new Group(null, disjunction));
+      state = this.Matcher.setupInitialState("ab");
+      disjunction = new Disjunction({
+        id: 0
+      });
+      disjunction.subtokens.push(new Character({
+        id: 1
+      }, "a"));
+      disjunction.subtokens.push(new Character({
+        id: 2
+      }, "b"));
+      token = new RepeatZeroOrMore({
+        id: 3
+      }, new Group({
+        id: 4
+      }, disjunction));
+      token.register(state);
       return this.assertNextMatchSequence(token, state, [-1, -1, 0, -1, -1, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 1]);
     },
     "testRepeatOneOrMoreToken": function() {
       var disjunction, state, token;
-      state = this.Regex.setupInitialState("aaab");
-      token = new RepeatOneOrMore(null, new Character(null, "a"));
+      state = this.Matcher.setupInitialState("aaab");
+      token = new RepeatOneOrMore({
+        id: 0
+      }, new Character({
+        id: 1
+      }, "a"));
+      token.register(state);
       this.assertNextMatchSequence(token, state, [-1, -1, -1, 0, 4, 0, 3, 0, 2, 0, 0]);
       state.currentPosition = 4;
       this.assertNextMatchSequence(token, state, [0, 0]);
-      state = this.Regex.setupInitialState("ab");
-      disjunction = new Disjunction(null);
-      disjunction.subtokens.push(new Character(null, "a"));
-      disjunction.subtokens.push(new Character(null, "b"));
-      token = new RepeatOneOrMore(null, new Group(null, disjunction));
+      state = this.Matcher.setupInitialState("ab");
+      disjunction = new Disjunction({
+        id: 0
+      });
+      disjunction.subtokens.push(new Character({
+        id: 1
+      }, "a"));
+      disjunction.subtokens.push(new Character({
+        id: 2
+      }, "b"));
+      token = new RepeatOneOrMore({
+        id: 3
+      }, new Group({
+        id: 4
+      }, disjunction));
+      token.register(state);
       return this.assertNextMatchSequence(token, state, [-1, -1, 0, -1, -1, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0]);
     },
     "testInfiniteLoop": function() {
       var state, token;
-      state = this.Regex.setupInitialState("b");
-      token = new RepeatZeroOrMore(null, new RepeatZeroOrMore(null, new Character(null, "a")));
+      state = this.Matcher.setupInitialState("b");
+      token = new RepeatZeroOrMore({
+        id: 0
+      }, new RepeatZeroOrMore({
+        id: 1
+      }, new Character({
+        id: 2
+      }, "a")));
+      token.register(state);
       this.assertNextMatchSequence(token, state, [0, 0, 1]);
-      token = new RepeatOneOrMore(null, new Option(null, new Character(null, "a")));
+      state = this.Matcher.setupInitialState("b");
+      token = new RepeatOneOrMore({
+        id: 0
+      }, new Option({
+        id: 1
+      }, new Character({
+        id: 2
+      }, "a")));
+      token.register(state);
       return this.assertNextMatchSequence(token, state, [0, -1, 0, 0, 1, 0, 0]);
     },
     "testBasicCharacterClass": function() {
       var state, token;
-      state = this.Regex.setupInitialState("abc");
-      token = new CharacterClass(null);
+      state = this.Matcher.setupInitialState("abc");
+      token = new CharacterClass({
+        id: 0
+      });
       token.addCharacter("a");
       token.addCharacter("c");
+      token.register(state);
       this.assertNextMatchSequence(token, state, [2]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, []);
@@ -165,10 +276,13 @@
     },
     "testNegatedCharacterClass": function() {
       var state, token;
-      state = this.Regex.setupInitialState("abc");
-      token = new CharacterClass(null, true);
+      state = this.Matcher.setupInitialState("abc");
+      token = new CharacterClass({
+        id: 0
+      }, true);
       token.addCharacter("a");
       token.addCharacter("c");
+      token.register(state);
       this.assertNextMatchSequence(token, state, []);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, [3]);
@@ -177,9 +291,12 @@
     },
     "testCharacterClassRange": function() {
       var state, token;
-      state = this.Regex.setupInitialState("abcd");
-      token = new CharacterClass(null);
+      state = this.Matcher.setupInitialState("abcd");
+      token = new CharacterClass({
+        id: 0
+      });
       token.addRange("a", "c");
+      token.register(state);
       this.assertNextMatchSequence(token, state, [2]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, [3]);
@@ -190,14 +307,24 @@
     },
     "testNestedCharacterClass": function() {
       var state, token;
-      state = this.Regex.setupInitialState("0");
-      token = new CharacterClass(null, false, [new DigitClass(null)]);
+      state = this.Matcher.setupInitialState("0");
+      token = new CharacterClass({
+        id: 0
+      }, false, [
+        new DigitClass({
+          id: 1
+        })
+      ]);
+      token.register(state);
       return this.assertNextMatchSequence(token, state, [2]);
     },
     "testWordBoundary": function() {
       var state, token;
-      state = this.Regex.setupInitialState("a_0-b");
-      token = new WordBoundary(null);
+      state = this.Matcher.setupInitialState("a_0-b");
+      token = new WordBoundary({
+        id: 0
+      });
+      token.register(state);
       this.assertNextMatchSequence(token, state, [1]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, []);
@@ -209,14 +336,19 @@
       this.assertNextMatchSequence(token, state, [5]);
       state.currentPosition = 6;
       this.assertNextMatchSequence(token, state, [6]);
-      state = this.Regex.setupInitialState("");
+      state = this.Matcher.setupInitialState("");
+      token.register(state);
       this.assertNextMatchSequence(token, state, []);
-      state = this.Regex.setupInitialState("-");
+      state = this.Matcher.setupInitialState("-");
+      token.register(state);
       this.assertNextMatchSequence(token, state, []);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, []);
-      state = this.Regex.setupInitialState("a_0-b");
-      token = new WordBoundary(null, true);
+      state = this.Matcher.setupInitialState("a_0-b");
+      token = new WordBoundary({
+        id: 0
+      }, true);
+      token.register(state);
       this.assertNextMatchSequence(token, state, []);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, [2]);
@@ -228,9 +360,11 @@
       this.assertNextMatchSequence(token, state, []);
       state.currentPosition = 6;
       this.assertNextMatchSequence(token, state, []);
-      state = this.Regex.setupInitialState("");
+      state = this.Matcher.setupInitialState("");
+      token.register(state);
       this.assertNextMatchSequence(token, state, [1]);
-      state = this.Regex.setupInitialState("-");
+      state = this.Matcher.setupInitialState("-");
+      token.register(state);
       this.assertNextMatchSequence(token, state, [1]);
       state.currentPosition = 2;
       return this.assertNextMatchSequence(token, state, [2]);

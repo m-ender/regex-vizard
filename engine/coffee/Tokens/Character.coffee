@@ -5,16 +5,20 @@ class root.Character extends root.Token
     constructor: (debug, @character) ->
         super(debug)
 
-    reset: () ->
-        super()
-        @attempted = false
+    reset: (state) ->
+        super
+        state.tokens[@debug.id].attempted = false
 
-    nextMatch: (state, report) ->
-        if @attempted
-            @reset()
+    setupStateObject: ->
+        attempted: false
+
+    nextMatch: (state) ->
+        tokenState = state.tokens[@debug.id]
+        if tokenState.attempted
+            @reset(state)
             return false
 
         if state.input[state.currentPosition] == @character
-            @attempted = true
+            tokenState.attempted = true
             return state.currentPosition + 1
         return false

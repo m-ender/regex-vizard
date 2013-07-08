@@ -8,19 +8,22 @@
 
     function Parser() {}
 
-    Parser.prototype.parsePattern = function(string) {
+    Parser.parsePattern = function(string) {
       var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, nGroups, nestingStack, squash, start, treeRoot, _, _ref, _ref1;
-      debug = {
+      lastId = -1;
+      treeRoot = new Group({
         sourceOpenLength: 0,
         sourceCloseLength: 0,
-        id: 0
-      };
-      treeRoot = new Group(debug, new Disjunction(null, new Sequence()), 0);
+        id: ++lastId
+      }, new Disjunction({
+        id: ++lastId
+      }, new Sequence({
+        id: ++lastId
+      })), 0);
       nestingStack = [];
       current = treeRoot.subtokens[0];
       i = 0;
       lastCaptureIndex = 0;
-      lastId = 0;
       while (i < string.length) {
         char = string.charAt(i);
         switch (char) {
@@ -61,7 +64,9 @@
             ++i;
             break;
           case "|":
-            current.subtokens.push(new Sequence());
+            current.subtokens.push(new Sequence({
+              id: ++lastId
+            }));
             ++i;
             break;
           case "(":
@@ -70,7 +75,11 @@
               sourceCloseLength: 1,
               id: ++lastId
             };
-            group = new Group(debug, new Disjunction(null, new Sequence()), ++lastCaptureIndex);
+            group = new Group(debug, new Disjunction({
+              id: ++lastId
+            }, new Sequence({
+              id: ++lastId
+            })), ++lastCaptureIndex);
             this.append(current, group);
             nestingStack.push(current);
             current = group.subtokens[0];
@@ -151,7 +160,7 @@
       return [treeRoot, nGroups];
     };
 
-    Parser.prototype.parseCharacterClass = function(string, current, i, id) {
+    Parser.parseCharacterClass = function(string, current, i, id) {
       var char, debug, element, elements, endC, lastElement, negated, newI, nextElement, startC, _ref, _ref1;
       if (i < string.length && string.charAt(i) === "^") {
         negated = true;
@@ -225,7 +234,7 @@
       };
     };
 
-    Parser.prototype.parseEscapeSequence = function(inCharacterClass, string, i) {
+    Parser.parseEscapeSequence = function(inCharacterClass, string, i) {
       var char, element, negated;
       if (i === string.length) {
         throw {
@@ -284,7 +293,7 @@
       return [i + 1, element];
     };
 
-    Parser.prototype.parseQuantifier = function(current, char, i, id) {
+    Parser.parseQuantifier = function(current, char, i, id) {
       var debug, quantifierClass, st, target;
       st = current.subtokens;
       if (st[st.length - 1].subtokens.length === 0) {
@@ -315,13 +324,13 @@
       return i + 1;
     };
 
-    Parser.prototype.append = function(current, token) {
+    Parser.append = function(current, token) {
       var st;
       st = current.subtokens;
       return st[st.length - 1].subtokens.push(token);
     };
 
-    Parser.prototype.remove = function(current) {
+    Parser.remove = function(current) {
       var st;
       st = current.subtokens;
       return st[st.length - 1].subtokens.pop();

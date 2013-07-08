@@ -4,9 +4,9 @@
   TestCase("ParsingTests", {
     setUp: function() {
       if (typeof module !== "undefined" && module.exports) {
-        return this.Parser = new require("Parser").Parser;
+        return this.Parser = require("Parser").Parser;
       } else {
-        return this.Parser = new window.Parser;
+        return this.Parser = window.Parser;
       }
     },
     "testCharacter": function() {
