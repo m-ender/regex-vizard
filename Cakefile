@@ -94,6 +94,7 @@ task 'build:backend', 'Compile regex engine to JavaScript for client.', (options
         'Tokens/Quantifier'
         'Tokens/Sequence'
         'Parser'
+        'Matcher'
         'Regex'
     ]
     console.log 'Starting build from engine/coffee/ to public/js/vizard.js...'

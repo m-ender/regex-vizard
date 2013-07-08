@@ -1107,6 +1107,66 @@
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
+  root.Matcher = (function() {
+
+    function Matcher(regex, nGroups, subject) {
+      this.regex = regex;
+      this.subject = subject;
+      this.startingPosition = 1;
+      this.success = false;
+      this.state = Matcher.setupInitialState(this.subject);
+      this.regex.register(this.state);
+    }
+
+    Matcher.setupInitialState = function(subject) {
+      var state;
+      state = {
+        input: this.parseInput(subject),
+        currentPosition: 1,
+        tokens: [],
+        captures: []
+      };
+      return state;
+    };
+
+    Matcher.parseInput = function(inputString) {
+      var input;
+      input = [StartGuard].concat(inputString.split(""));
+      input.push(EndGuard);
+      return input;
+    };
+
+    Matcher.prototype.stepForward = function() {
+      switch (this.regex.nextMatch(this.state)) {
+        case false:
+          this.state.currentPosition = ++this.startingPosition;
+          return this.startingPosition < this.state.input.length;
+        case 0:
+        case -1:
+          return true;
+        default:
+          this.success = true;
+          return false;
+      }
+    };
+
+    Matcher.prototype.group = function(n) {
+      if (n == null) {
+        n = 0;
+      }
+      return this.state.captures[n];
+    };
+
+    Matcher.prototype.groups = function() {
+      return this.state.captures;
+    };
+
+    return Matcher;
+
+  })();
+
+  root = typeof global !== "undefined" && global !== null ? global : window;
+
   root.Regex = (function() {
 
     function Regex(regexString, report) {
