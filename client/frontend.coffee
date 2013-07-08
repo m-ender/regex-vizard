@@ -25,8 +25,8 @@ stepForward = () ->
         color = colGen.nextColor().toHexString()
         $('#output-subject').html "<span style='color:#{color};'>#{s}</span>"
     else
+        $('#button-step-fw').invisible()
         if matcher.success
-            $('#button-step-fw').invisible()
             result = matcher.state
             startPos = matcher.startingPosition - 1
             length = result.captures[0].length

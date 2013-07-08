@@ -110,8 +110,8 @@
       color = colGen.nextColor().toHexString();
       return $('#output-subject').html("<span style='color:" + color + ";'>" + s + "</span>");
     } else {
+      $('#button-step-fw').invisible();
       if (matcher.success) {
-        $('#button-step-fw').invisible();
         result = matcher.state;
         startPos = matcher.startingPosition - 1;
         length = result.captures[0].length;
@@ -127,18 +127,9 @@
   };
 
   $(document).ready(function() {
-    var color;
     JQueryHelper.addJQueryPlugins();
     $('#button-start').on('click', setupEngine);
-    $('#button-step-fw').on('click', stepForward);
-    colGen = new ColorGenerator({
-      hue: 180,
-      saturation: 1,
-      lightness: 0.7,
-      alpha: 1
-    });
-    color = colGen.nextColor().toHexString();
-    return $('#output-colortest').append("<span style='color:" + color + ";'>hm</span><wbr />");
+    return $('#button-step-fw').on('click', stepForward);
   });
 
 }).call(this);
