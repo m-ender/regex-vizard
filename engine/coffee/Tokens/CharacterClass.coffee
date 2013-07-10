@@ -11,6 +11,8 @@ class root.CharacterClass extends root.Token
         state.tokens[@debug.id].attempted = false
 
     setupStateObject: ->
+        type: 'characterClass'
+        subtype: 'customClass'
         attempted: false
 
     register: (state) ->
@@ -64,6 +66,11 @@ class root.DigitClass extends root.CharacterClass
             end:   "9".charCodeAt(0)
         ])
 
+    setupStateObject: ->
+        obj = super
+        obj.subtype = 'digitClass'
+        return obj
+
 # For built-in \w and \W
 class root.WordClass extends root.CharacterClass
     constructor: (debug, negated = false) ->
@@ -79,6 +86,11 @@ class root.WordClass extends root.CharacterClass
            ,
             "_"
         ])
+
+    setupStateObject: ->
+        obj = super
+        obj.subtype = 'wordClass'
+        return obj
 
 # For built-in \s and \S
 class root.WhitespaceClass extends root.CharacterClass
@@ -103,6 +115,11 @@ class root.WhitespaceClass extends root.CharacterClass
             "\ufeff" # zero-width no-break space
         ])
 
+    setupStateObject: ->
+        obj = super
+        obj.subtype = 'whitespaceClass'
+        return obj
+
 class root.Wildcard extends root.Token
     constructor: (debug) ->
         super
@@ -112,6 +129,7 @@ class root.Wildcard extends root.Token
         state.tokens[@debug.id].attempted = false
 
     setupStateObject: ->
+        type: 'wildcard'
         attempted: false
 
     nextMatch: (state) ->

@@ -9,6 +9,7 @@ class root.StartAnchor extends root.Token
         state.tokens[@debug.id].attempted = false
 
     setupStateObject: ->
+        type: 'startAnchor'
         attempted: false
 
     nextMatch: (state) ->
@@ -31,6 +32,7 @@ class root.EndAnchor extends root.Token
         state.tokens[@debug.id].attempted = false
 
     setupStateObject: ->
+        type: 'endAnchor'
         attempted: false
 
     nextMatch: (state) ->
@@ -54,6 +56,7 @@ class root.WordBoundary extends root.Token
         state.tokens[@debug.id].attempted = false
 
     setupStateObject: () ->
+        type: 'wordBoundary'
         attempted: false
 
     nextMatch: (state) ->

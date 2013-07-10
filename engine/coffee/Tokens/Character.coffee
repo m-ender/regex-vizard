@@ -10,6 +10,7 @@ class root.Character extends root.Token
         state.tokens[@debug.id].attempted = false
 
     setupStateObject: ->
+        type: 'character'
         attempted: false
 
     nextMatch: (state) ->

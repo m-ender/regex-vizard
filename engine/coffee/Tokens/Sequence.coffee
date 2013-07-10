@@ -12,6 +12,7 @@ class root.Sequence extends root.Token
         state.tokens[@debug.id].pos = [] # "current" positions that were used by successful subtokens
 
     setupStateObject: ->
+        type: 'sequence'
         i: 0
         pos: []
 

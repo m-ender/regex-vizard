@@ -10,6 +10,7 @@ class root.Group extends root.Token
         state.tokens[@debug.id].firstPosition = false
 
     setupStateObject: ->
+        type: 'group'
         result: 0
         firstPosition: false
 
