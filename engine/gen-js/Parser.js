@@ -212,10 +212,7 @@
                 };
               }
               elements.pop();
-              elements.push({
-                start: startC,
-                end: endC
-              });
+              elements.push(new CharacterRange(startC, endC));
               i = newI;
             } else {
               elements.push(char);

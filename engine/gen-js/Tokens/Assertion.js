@@ -21,6 +21,8 @@
 
     StartAnchor.prototype.setupStateObject = function() {
       return {
+        type: 'startAnchor',
+        status: Inactive,
         attempted: false
       };
     };
@@ -58,6 +60,8 @@
 
     EndAnchor.prototype.setupStateObject = function() {
       return {
+        type: 'endAnchor',
+        status: Inactive,
         attempted: false
       };
     };
@@ -97,6 +101,8 @@
 
     WordBoundary.prototype.setupStateObject = function() {
       return {
+        type: 'wordBoundary',
+        status: Inactive,
         attempted: false
       };
     };

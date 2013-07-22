@@ -340,8 +340,8 @@ TestCase("TokenTests",
         state = @Matcher.setupInitialState("abc")
         # Put together token for regex /[ac]/
         token = new CharacterClass({id: 0})
-        token.addCharacter("a")
-        token.addCharacter("c")
+        token.addElement("a")
+        token.addElement("c")
         token.register(state)
 
         @assertNextMatchSequence(token, state, [
@@ -360,8 +360,8 @@ TestCase("TokenTests",
         state = @Matcher.setupInitialState("abc")
         # Put together token for regex /[^ac]/
         token = new CharacterClass({id: 0}, true)
-        token.addCharacter("a")
-        token.addCharacter("c")
+        token.addElement("a")
+        token.addElement("c")
         token.register(state)
 
         @assertNextMatchSequence(token, state, [])

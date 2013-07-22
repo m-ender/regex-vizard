@@ -17,12 +17,15 @@
 
     Group.prototype.reset = function(state) {
       Group.__super__.reset.apply(this, arguments);
+      state.tokens[this.debug.id].status = Inactive;
       state.tokens[this.debug.id].result = 0;
       return state.tokens[this.debug.id].firstPosition = false;
     };
 
     Group.prototype.setupStateObject = function() {
       return {
+        type: 'group',
+        status: Inactive,
         result: 0,
         firstPosition: false
       };
@@ -52,12 +55,15 @@
       switch (result) {
         case 0:
         case -1:
+          tokenState.status = Active;
           return result;
         case false:
+          tokenState.status = Failed;
           tokenState.result = false;
           state.captures[this.index] = void 0;
           return 0;
         default:
+          tokenState.status = Matched;
           state.captures[this.index] = state.input.slice(tokenState.firstPosition, result).join("");
           tokenState.result = result;
           return -1;

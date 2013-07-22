@@ -60,6 +60,7 @@ task 'build:frontend', 'Compile frontend code to JavaScript.', (options) ->
     appFiles = [
         'jQueryPlugins'
         'ColorGenerator'
+        'Renderer'
         'frontend'
     ]
     console.log 'Starting build from client/ to public/js/frontend.js...'
@@ -85,6 +86,7 @@ task 'build:backend', 'Compile regex engine to JavaScript for client.', (options
     appFiles = [
         'Helper'
         'Guards'
+        'Tokens/TokenStatus'
         'Tokens/Token'
         'Tokens/Assertion'
         'Tokens/Character'

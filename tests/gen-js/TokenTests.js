@@ -265,8 +265,8 @@
       token = new CharacterClass({
         id: 0
       });
-      token.addCharacter("a");
-      token.addCharacter("c");
+      token.addElement("a");
+      token.addElement("c");
       token.register(state);
       this.assertNextMatchSequence(token, state, [2]);
       state.currentPosition = 2;
@@ -280,8 +280,8 @@
       token = new CharacterClass({
         id: 0
       }, true);
-      token.addCharacter("a");
-      token.addCharacter("c");
+      token.addElement("a");
+      token.addElement("c");
       token.register(state);
       this.assertNextMatchSequence(token, state, []);
       state.currentPosition = 2;

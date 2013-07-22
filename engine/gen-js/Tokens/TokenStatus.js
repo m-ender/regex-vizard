@@ -4,8 +4,12 @@
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
-  root.StartGuard = -1;
+  root.Inactive = "inactive";
 
-  root.EndGuard = 1;
+  root.Active = "active";
+
+  root.Matched = "matched";
+
+  root.Failed = "failed";
 
 }).call(this);

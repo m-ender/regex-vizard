@@ -17,11 +17,14 @@
 
     Character.prototype.reset = function(state) {
       Character.__super__.reset.apply(this, arguments);
+      state.tokens[this.debug.id].status = Inactive;
       return state.tokens[this.debug.id].attempted = false;
     };
 
     Character.prototype.setupStateObject = function() {
       return {
+        type: 'character',
+        status: Inactive,
         attempted: false
       };
     };
@@ -29,11 +32,12 @@
     Character.prototype.nextMatch = function(state) {
       var tokenState;
       tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
+      if (tokenState.status !== Inactive) {
         this.reset(state);
         return false;
       }
       if (state.input[state.currentPosition] === this.character) {
+        tokenState.status = Matched;
         tokenState.attempted = true;
         return state.currentPosition + 1;
       }

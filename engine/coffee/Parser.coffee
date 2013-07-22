@@ -175,10 +175,8 @@ class root.Parser
                                 message: "The character class \"#{lastElement}\" to \"#{nextElement}\" is out of order."
                             }
                         elements.pop()
-                        elements.push(
-                            start: startC
-                            end:   endC
-                        )
+                        elements.push(new CharacterRange(startC, endC))
+
                         i = newI
                     else
                         elements.push(char)

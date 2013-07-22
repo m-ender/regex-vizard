@@ -1,5 +1,6 @@
 regex = null
 matcher = null
+renderer = null
 subjectString = ''
 
 colGen = new ColorGenerator(
@@ -15,6 +16,8 @@ setupEngine = () ->
     subjectString = $('#input-subject').val()
     matcher = regex.getMatcher subjectString
 
+    renderer = new Renderer regex, subjectString
+
     $('#output-subject').html subjectString
     $('#output-pattern').html regexString
     $('#button-step-fw').visible()
@@ -22,8 +25,7 @@ setupEngine = () ->
 stepForward = () ->
     s = matcher.subject
     if matcher.stepForward()
-        color = colGen.nextColor().toHexString()
-        $('#output-subject').html "<span style='color:#{color};'>#{s}</span>"
+        $('#output-subject').html renderer.render matcher.state
     else
         $('#button-step-fw').invisible()
         if matcher.success

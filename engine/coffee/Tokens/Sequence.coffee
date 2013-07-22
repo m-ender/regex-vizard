@@ -13,6 +13,7 @@ class root.Sequence extends root.Token
 
     setupStateObject: ->
         type: 'sequence'
+        status: Inactive
         i: 0
         pos: []
 
@@ -23,7 +24,7 @@ class root.Sequence extends root.Token
             return false
 
         if @subtokens.length == 0
-            --tokenState.i
+            tokenState.i = -1
             return state.currentPosition
 
         result = @subtokens[tokenState.i].nextMatch(state)

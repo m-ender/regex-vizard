@@ -18,6 +18,7 @@ class root.Quantifier extends root.Token
     setupStateObject: (state) ->
         stateObject =
             type: 'quantifier'
+            status: Inactive
             freshSubStates: @collectSubStates(state, @subtokens[0])
             instances: []                           # instances of the subtoken used for the individual repetitions
             pos: []                                 # "current" positions that were used for successful matches

@@ -22,6 +22,8 @@
 
     Sequence.prototype.setupStateObject = function() {
       return {
+        type: 'sequence',
+        status: Inactive,
         i: 0,
         pos: []
       };
@@ -35,7 +37,7 @@
         return false;
       }
       if (this.subtokens.length === 0) {
-        --tokenState.i;
+        tokenState.i = -1;
         return state.currentPosition;
       }
       result = this.subtokens[tokenState.i].nextMatch(state);

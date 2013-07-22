@@ -10,6 +10,7 @@ class root.StartAnchor extends root.Token
 
     setupStateObject: ->
         type: 'startAnchor'
+        status: Inactive
         attempted: false
 
     nextMatch: (state) ->
@@ -33,6 +34,7 @@ class root.EndAnchor extends root.Token
 
     setupStateObject: ->
         type: 'endAnchor'
+        status: Inactive
         attempted: false
 
     nextMatch: (state) ->
@@ -57,6 +59,7 @@ class root.WordBoundary extends root.Token
 
     setupStateObject: () ->
         type: 'wordBoundary'
+        status: Inactive
         attempted: false
 
     nextMatch: (state) ->

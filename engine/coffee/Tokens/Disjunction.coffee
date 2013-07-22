@@ -10,6 +10,7 @@ class root.Disjunction extends root.Token
 
     setupStateObject: ->
         type: 'disjunction'
+        status: Inactive
         i: 0
 
     nextMatch: (state) ->
@@ -20,7 +21,7 @@ class root.Disjunction extends root.Token
 
         result = @subtokens[tokenState.i].nextMatch(state)
 
-        if result != false
+        if result isnt false
             return result
         else
             ++tokenState.i

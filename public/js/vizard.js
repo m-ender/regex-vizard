@@ -42,9 +42,19 @@
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
-  root.StartGuard = {};
+  root.StartGuard = -1;
 
-  root.EndGuard = {};
+  root.EndGuard = 1;
+
+  root = typeof global !== "undefined" && global !== null ? global : window;
+
+  root.Inactive = "inactive";
+
+  root.Active = "active";
+
+  root.Matched = "matched";
+
+  root.Failed = "failed";
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
@@ -108,6 +118,8 @@
 
     StartAnchor.prototype.setupStateObject = function() {
       return {
+        type: 'startAnchor',
+        status: Inactive,
         attempted: false
       };
     };
@@ -145,6 +157,8 @@
 
     EndAnchor.prototype.setupStateObject = function() {
       return {
+        type: 'endAnchor',
+        status: Inactive,
         attempted: false
       };
     };
@@ -184,6 +198,8 @@
 
     WordBoundary.prototype.setupStateObject = function() {
       return {
+        type: 'wordBoundary',
+        status: Inactive,
         attempted: false
       };
     };
@@ -221,11 +237,14 @@
 
     Character.prototype.reset = function(state) {
       Character.__super__.reset.apply(this, arguments);
+      state.tokens[this.debug.id].status = Inactive;
       return state.tokens[this.debug.id].attempted = false;
     };
 
     Character.prototype.setupStateObject = function() {
       return {
+        type: 'character',
+        status: Inactive,
         attempted: false
       };
     };
@@ -233,11 +252,12 @@
     Character.prototype.nextMatch = function(state) {
       var tokenState;
       tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
+      if (tokenState.status !== Inactive) {
         this.reset(state);
         return false;
       }
       if (state.input[state.currentPosition] === this.character) {
+        tokenState.status = Matched;
         tokenState.attempted = true;
         return state.currentPosition + 1;
       }
@@ -249,6 +269,30 @@
   })(root.Token);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
+
+  root.CharacterRange = (function() {
+
+    function CharacterRange(first, last) {
+      this.first = this.sanitize(first);
+      this.last = this.sanitize(last);
+    }
+
+    CharacterRange.prototype.isInRange = function(char) {
+      var _ref;
+      return (this.first <= (_ref = this.sanitize(char)) && _ref <= this.last);
+    };
+
+    CharacterRange.prototype.sanitize = function(char) {
+      if (typeof char === "string") {
+        return char.charCodeAt(0);
+      } else {
+        return char;
+      }
+    };
+
+    return CharacterRange;
+
+  })();
 
   root.CharacterClass = (function(_super) {
 
@@ -267,6 +311,9 @@
 
     CharacterClass.prototype.setupStateObject = function() {
       return {
+        type: 'characterClass',
+        subtype: 'customClass',
+        status: Inactive,
         attempted: false
       };
     };
@@ -275,15 +322,12 @@
       return state.tokens[this.debug.id] = this.setupStateObject();
     };
 
-    CharacterClass.prototype.addCharacter = function(character) {
-      return this.elements.push(character);
+    CharacterClass.prototype.addElement = function(element) {
+      return this.elements.push(element);
     };
 
-    CharacterClass.prototype.addRange = function(startCharacter, endCharacter) {
-      return this.elements.push({
-        start: startCharacter.charCodeAt(0),
-        end: endCharacter.charCodeAt(0)
-      });
+    CharacterClass.prototype.addRange = function(first, last) {
+      return this.elements.push(new CharacterRange(first, last));
     };
 
     CharacterClass.prototype.nextMatch = function(state) {
@@ -302,20 +346,18 @@
     };
 
     CharacterClass.prototype.isInClass = function(char) {
-      var element, inSet, _i, _len, _ref, _ref1;
+      var element, _i, _len, _ref;
       if (char === StartGuard || char === EndGuard) {
         return false;
       }
-      inSet = false;
       _ref = this.elements;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         element = _ref[_i];
-        if (typeof element === "string" && char === element || element instanceof CharacterClass && element.isInClass(char) || (element.start <= (_ref1 = char.charCodeAt(0)) && _ref1 <= element.end)) {
-          inSet = true;
-          break;
+        if (typeof element === "string" && char === element || element instanceof CharacterClass && element.isInClass(char) || element instanceof CharacterRange && element.isInRange(char)) {
+          return !this.negated;
         }
       }
-      return inSet !== this.negated;
+      return this.negated;
     };
 
     return CharacterClass;
@@ -330,13 +372,15 @@
       if (negated == null) {
         negated = false;
       }
-      DigitClass.__super__.constructor.call(this, debug, negated, [
-        {
-          start: "0".charCodeAt(0),
-          end: "9".charCodeAt(0)
-        }
-      ]);
+      DigitClass.__super__.constructor.call(this, debug, negated, [new CharacterRange("0", "9")]);
     }
+
+    DigitClass.prototype.setupStateObject = function() {
+      var obj;
+      obj = DigitClass.__super__.setupStateObject.apply(this, arguments);
+      obj.subtype = 'digitClass';
+      return obj;
+    };
 
     return DigitClass;
 
@@ -350,19 +394,15 @@
       if (negated == null) {
         negated = false;
       }
-      WordClass.__super__.constructor.call(this, debug, negated, [
-        {
-          start: "A".charCodeAt(0),
-          end: "Z".charCodeAt(0)
-        }, {
-          start: "a".charCodeAt(0),
-          end: "z".charCodeAt(0)
-        }, {
-          start: "0".charCodeAt(0),
-          end: "9".charCodeAt(0)
-        }, "_"
-      ]);
+      WordClass.__super__.constructor.call(this, debug, negated, [new CharacterRange("A", "Z"), new CharacterRange("a", "z"), new CharacterRange("0", "9"), "_"]);
     }
+
+    WordClass.prototype.setupStateObject = function() {
+      var obj;
+      obj = WordClass.__super__.setupStateObject.apply(this, arguments);
+      obj.subtype = 'wordClass';
+      return obj;
+    };
 
     return WordClass;
 
@@ -376,16 +416,15 @@
       if (negated == null) {
         negated = false;
       }
-      WhitespaceClass.__super__.constructor.call(this, debug, negated, [
-        {
-          start: 0x9,
-          end: 0xd
-        }, "\u0020", "\u00a0", "\u1680", "\u180e", {
-          start: 0x2000,
-          end: 0x200a
-        }, "\u2028", "\u2029", "\u202f", "\u205f", "\u3000", "\ufeff"
-      ]);
+      WhitespaceClass.__super__.constructor.call(this, debug, negated, [new CharacterRange(0x9, 0xd), "\u0020", "\u00a0", "\u1680", "\u180e", new CharacterRange(0x2000, 0x200a), "\u2028", "\u2029", "\u202f", "\u205f", "\u3000", "\ufeff"]);
     }
+
+    WhitespaceClass.prototype.setupStateObject = function() {
+      var obj;
+      obj = WhitespaceClass.__super__.setupStateObject.apply(this, arguments);
+      obj.subtype = 'whitespaceClass';
+      return obj;
+    };
 
     return WhitespaceClass;
 
@@ -406,6 +445,8 @@
 
     Wildcard.prototype.setupStateObject = function() {
       return {
+        type: 'wildcard',
+        status: Inactive,
         attempted: false
       };
     };
@@ -445,6 +486,8 @@
 
     Disjunction.prototype.setupStateObject = function() {
       return {
+        type: 'disjunction',
+        status: Inactive,
         i: 0
       };
     };
@@ -482,12 +525,15 @@
 
     Group.prototype.reset = function(state) {
       Group.__super__.reset.apply(this, arguments);
+      state.tokens[this.debug.id].status = Inactive;
       state.tokens[this.debug.id].result = 0;
       return state.tokens[this.debug.id].firstPosition = false;
     };
 
     Group.prototype.setupStateObject = function() {
       return {
+        type: 'group',
+        status: Inactive,
         result: 0,
         firstPosition: false
       };
@@ -517,12 +563,15 @@
       switch (result) {
         case 0:
         case -1:
+          tokenState.status = Active;
           return result;
         case false:
+          tokenState.status = Failed;
           tokenState.result = false;
           state.captures[this.index] = void 0;
           return 0;
         default:
+          tokenState.status = Matched;
           state.captures[this.index] = state.input.slice(tokenState.firstPosition, result).join("");
           tokenState.result = result;
           return -1;
@@ -560,6 +609,8 @@
     Quantifier.prototype.setupStateObject = function(state) {
       var stateObject;
       stateObject = {
+        type: 'quantifier',
+        status: Inactive,
         freshSubStates: this.collectSubStates(state, this.subtokens[0]),
         instances: [],
         pos: [],
@@ -678,6 +729,13 @@
       Option.__super__.constructor.call(this, debug, token, 0, 1);
     }
 
+    Option.prototype.setupStateObject = function() {
+      var obj;
+      obj = Option.__super__.setupStateObject.apply(this, arguments);
+      obj.subtype = 'option';
+      return obj;
+    };
+
     return Option;
 
   })(root.Quantifier);
@@ -690,6 +748,13 @@
       RepeatZeroOrMore.__super__.constructor.call(this, debug, token, 0, Infinity);
     }
 
+    RepeatZeroOrMore.prototype.setupStateObject = function() {
+      var obj;
+      obj = RepeatZeroOrMore.__super__.setupStateObject.apply(this, arguments);
+      obj.subtype = 'zeroOrMore';
+      return obj;
+    };
+
     return RepeatZeroOrMore;
 
   })(root.Quantifier);
@@ -701,6 +766,13 @@
     function RepeatOneOrMore(debug, token) {
       RepeatOneOrMore.__super__.constructor.call(this, debug, token, 1, Infinity);
     }
+
+    RepeatOneOrMore.prototype.setupStateObject = function() {
+      var obj;
+      obj = RepeatOneOrMore.__super__.setupStateObject.apply(this, arguments);
+      obj.subtype = 'oneOrMore';
+      return obj;
+    };
 
     return RepeatOneOrMore;
 
@@ -724,6 +796,8 @@
 
     Sequence.prototype.setupStateObject = function() {
       return {
+        type: 'sequence',
+        status: Inactive,
         i: 0,
         pos: []
       };
@@ -737,7 +811,7 @@
         return false;
       }
       if (this.subtokens.length === 0) {
-        --tokenState.i;
+        tokenState.i = -1;
         return state.currentPosition;
       }
       result = this.subtokens[tokenState.i].nextMatch(state);
@@ -977,10 +1051,7 @@
                 };
               }
               elements.pop();
-              elements.push({
-                start: startC,
-                end: endC
-              });
+              elements.push(new CharacterRange(startC, endC));
               i = newI;
             } else {
               elements.push(char);

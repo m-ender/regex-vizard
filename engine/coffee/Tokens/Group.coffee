@@ -6,11 +6,13 @@ class root.Group extends root.Token
 
     reset: (state) ->
         super
+        state.tokens[@debug.id].status = Inactive
         state.tokens[@debug.id].result = 0
         state.tokens[@debug.id].firstPosition = false
 
     setupStateObject: ->
         type: 'group'
+        status: Inactive
         result: 0
         firstPosition: false
 
@@ -34,12 +36,15 @@ class root.Group extends root.Token
         result = @subtokens[0].nextMatch(state)
         switch result
             when 0, -1
+                tokenState.status = Active
                 return result
             when false
+                tokenState.status = Failed
                 tokenState.result = false
                 state.captures[@index] = undefined
                 return 0
             else
+                tokenState.status = Matched
                 state.captures[@index] = state.input[tokenState.firstPosition...result].join("")
                 tokenState.result = result
                 return -1
