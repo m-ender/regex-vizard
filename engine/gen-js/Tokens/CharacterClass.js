@@ -71,14 +71,14 @@
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
         this.reset(state);
-        return false;
+        return new Result(Failure);
       }
       char = state.input[state.currentPosition];
       if (this.isInClass(char)) {
         tokenState.attempted = true;
-        return state.currentPosition + 1;
+        return new Result(Success, state.currentPosition + 1);
       }
-      return false;
+      return new Result(Failure);
     };
 
     CharacterClass.prototype.isInClass = function(char) {
@@ -192,13 +192,13 @@
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
         this.reset(state);
-        return false;
+        return new Result(Failure);
       }
       if ((_ref = state.input[state.currentPosition]) !== "\n" && _ref !== "\r" && _ref !== "\u2028" && _ref !== "\u2029" && _ref !== EndGuard) {
         tokenState.attempted = true;
-        return state.currentPosition + 1;
+        return new Result(Success, state.currentPosition + 1);
       }
-      return false;
+      return new Result(Failure);
     };
 
     return Wildcard;

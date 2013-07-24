@@ -12,7 +12,7 @@ class root.Quantifier extends root.Token
         state.tokens[@debug.id].freshSubStates = @collectSubStates(state, @subtokens[0])
         state.tokens[@debug.id].instances = [Helper.clone state.tokens[@debug.id].freshSubStates]
         state.tokens[@debug.id].pos = []
-        state.tokens[@debug.id].result = false
+        state.tokens[@debug.id].nextPosition = null
         state.tokens[@debug.id].captureStack = []
 
     setupStateObject: (state) ->
@@ -22,7 +22,7 @@ class root.Quantifier extends root.Token
             freshSubStates: @collectSubStates(state, @subtokens[0])
             instances: []                           # instances of the subtoken used for the individual repetitions
             pos: []                                 # "current" positions that were used for successful matches
-            result: false
+            nextPosition: null
             captureStack: []                        # remembers the captures of hidden instances on the above stack
         stateObject.instances.push(Helper.clone stateObject.freshSubStates)
         return stateObject
@@ -49,48 +49,48 @@ class root.Quantifier extends root.Token
 
     nextMatch: (state) ->
         tokenState = state.tokens[@debug.id]
-        if tokenState.result
-            result = tokenState.result
-            tokenState.result = false
+        if tokenState.nextPosition isnt null
+            pos = tokenState.nextPosition
+            tokenState.nextPosition = null
             if tokenState.instances.length >= @min
-                return result
+                return new Result(Success, pos)
             else
-                return 0
+                return new Result(Indeterminate)
 
         if tokenState.instances.length == 0
             @reset(state)
-            return false
+            return new Result(Failure)
 
         if tokenState.instances.length > @max
             tokenState.instances.pop()
-            result = state.currentPosition
+            pos = state.currentPosition
             if tokenState.pos.length > 0
                 state.currentPosition = tokenState.pos.pop()
 
             if tokenState.captureStack.length > 0
                 state.captures[@minGroup...@minGroup+@nGroups] = tokenState.captureStack.pop()
-            return result
+            return new Result(Success, pos)
 
         token = @subtokens[0]
         @restoreSubStates(state, tokenState.instances.pop())
 
         result = token.nextMatch(state)
-        switch result
-            when 0, -1
+        switch result.type
+            when Indeterminate
                 tokenState.instances.push(@collectSubStates(state, token))
                 return result
-            when false
-                tokenState.result = state.currentPosition
+            when Failure
+                tokenState.nextPosition = state.currentPosition
                 if tokenState.pos.length > 0
                     state.currentPosition = tokenState.pos.pop()
                 if tokenState.captureStack.length > 0
                     state.captures[@minGroup...@minGroup+@nGroups] = tokenState.captureStack.pop()
 
-                return 0
-            else
+                return new Result(Indeterminate)
+            when Success
                 tokenState.instances.push(@collectSubStates(state, token))
                 # only the first @min instances are allowed to match empty, to avoid infinite loops
-                if result == state.currentPosition and tokenState.instances.length > @min
+                if result.nextPosition == state.currentPosition and tokenState.instances.length > @min
                     return @nextMatch(state)
 
                 tokenState.captureStack.push(state.captures[@minGroup...@minGroup+@nGroups])
@@ -98,8 +98,8 @@ class root.Quantifier extends root.Token
 
                 tokenState.instances.push(Helper.clone tokenState.freshSubStates)
                 tokenState.pos.push(state.currentPosition)
-                state.currentPosition = result
-                return -1
+                state.currentPosition = result.nextPosition
+                return new Result(Indeterminate)
 
 class root.Option extends root.Quantifier
     constructor: (debug, token) ->

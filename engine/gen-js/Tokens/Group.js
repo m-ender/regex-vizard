@@ -18,7 +18,7 @@
     Group.prototype.reset = function(state) {
       Group.__super__.reset.apply(this, arguments);
       state.tokens[this.debug.id].status = Inactive;
-      state.tokens[this.debug.id].result = 0;
+      state.tokens[this.debug.id].result = null;
       return state.tokens[this.debug.id].firstPosition = false;
     };
 
@@ -26,7 +26,7 @@
       return {
         type: 'group',
         status: Inactive,
-        result: 0,
+        result: null,
         firstPosition: false
       };
     };
@@ -39,12 +39,14 @@
     Group.prototype.nextMatch = function(state) {
       var result, tokenState;
       tokenState = state.tokens[this.debug.id];
-      if (tokenState.result !== 0) {
+      if (tokenState.result !== null) {
         result = tokenState.result;
-        if (result === false) {
-          this.reset(state);
-        } else {
-          tokenState.result = 0;
+        switch (result.type) {
+          case Failure:
+            this.reset(state);
+            break;
+          case Success:
+            tokenState.result = null;
         }
         return result;
       }
@@ -52,21 +54,20 @@
         tokenState.firstPosition = state.currentPosition;
       }
       result = this.subtokens[0].nextMatch(state);
-      switch (result) {
-        case 0:
-        case -1:
+      switch (result.type) {
+        case Indeterminate:
           tokenState.status = Active;
           return result;
-        case false:
+        case Failure:
           tokenState.status = Failed;
-          tokenState.result = false;
-          state.captures[this.index] = void 0;
-          return 0;
-        default:
-          tokenState.status = Matched;
-          state.captures[this.index] = state.input.slice(tokenState.firstPosition, result).join("");
           tokenState.result = result;
-          return -1;
+          state.captures[this.index] = void 0;
+          return new Result(Indeterminate);
+        case Success:
+          tokenState.status = Matched;
+          state.captures[this.index] = state.input.slice(tokenState.firstPosition, result.nextPosition).join("");
+          tokenState.result = result;
+          return new Result(Indeterminate);
       }
     };
 

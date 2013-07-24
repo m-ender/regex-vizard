@@ -19,10 +19,10 @@ class root.Character extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.status isnt Inactive
             @reset(state)
-            return false
+            return new Result(Failure)
 
         if state.input[state.currentPosition] == @character
             tokenState.status = Matched
             tokenState.attempted = true
-            return state.currentPosition + 1
-        return false
+            return new Result(Success, state.currentPosition + 1)
+        return new Result(Failure)

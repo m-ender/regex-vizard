@@ -86,6 +86,7 @@ task 'build:backend', 'Compile regex engine to JavaScript for client.', (options
     appFiles = [
         'Helper'
         'Guards'
+        'Result'
         'Tokens/TokenStatus'
         'Tokens/Token'
         'Tokens/Assertion'

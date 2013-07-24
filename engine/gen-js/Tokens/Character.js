@@ -34,14 +34,14 @@
       tokenState = state.tokens[this.debug.id];
       if (tokenState.status !== Inactive) {
         this.reset(state);
-        return false;
+        return new Result(Failure);
       }
       if (state.input[state.currentPosition] === this.character) {
         tokenState.status = Matched;
         tokenState.attempted = true;
-        return state.currentPosition + 1;
+        return new Result(Success, state.currentPosition + 1);
       }
-      return false;
+      return new Result(Failure);
     };
 
     return Character;

@@ -26,13 +26,14 @@ class root.Matcher
     # Returns true if there is more to do
     # Returns false if a match has been found or can ultimately not be found
     stepForward: () ->
-        switch @regex.nextMatch(@state)
-            when false
+        result = @regex.nextMatch(@state)
+        switch result.type
+            when Failure
                 @state.currentPosition = ++@startingPosition
                 return @startingPosition < @state.input.length
-            when 0, -1
+            when Indeterminate
                 return true
-            else
+            when Success
                 @success = true
                 return false
 

@@ -370,16 +370,22 @@
       return this.assertNextMatchSequence(token, state, [2]);
     },
     assertNextMatchSequence: function(token, state, sequence) {
-      var expectedResult, i, step, _i, _j, _len, _results;
+      var actualResult, expectedResult, i, step, _i, _j, _len, _results;
       _results = [];
       for (i = _i = 1; _i <= 2; i = ++_i) {
         step = 0;
         for (_j = 0, _len = sequence.length; _j < _len; _j++) {
           expectedResult = sequence[_j];
-          assertSame("Assertion failed at step " + step + ":", expectedResult, token.nextMatch(state));
+          actualResult = token.nextMatch(state);
+          if (expectedResult === (-1) || expectedResult === 0) {
+            assertSame("Assertion failed at step " + step + ":", Indeterminate, actualResult.type);
+          } else {
+            assertSame("Assertion failed at step " + step + ":", Success, actualResult.type);
+            assertSame("Assertion failed at step " + step + ":", expectedResult, actualResult.nextPosition);
+          }
           ++step;
         }
-        _results.push(assertSame(false, token.nextMatch(state)));
+        _results.push(assertSame(Failure, token.nextMatch(state).type));
       }
       return _results;
     }

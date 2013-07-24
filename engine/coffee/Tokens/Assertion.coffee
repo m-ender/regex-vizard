@@ -17,12 +17,12 @@ class root.StartAnchor extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.attempted
             @reset(state)
-            return false
+            return new Result(Failure)
 
         if state.input[state.currentPosition - 1] == StartGuard
             tokenState.attempted = true
-            return state.currentPosition
-        return false
+            return new Result(Success, state.currentPosition)
+        return new Result(Failure)
 
 class root.EndAnchor extends root.Token
     constructor: (debug) ->
@@ -41,12 +41,12 @@ class root.EndAnchor extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.attempted
             @reset(state)
-            return false
+            return new Result(Failure)
 
         if state.input[state.currentPosition] == EndGuard
             tokenState.attempted = true
-            return state.currentPosition
-        return false
+            return new Result(Success, state.currentPosition)
+        return new Result(Failure)
 
 class root.WordBoundary extends root.Token
     constructor: (debug, @negated = false) ->
@@ -66,10 +66,10 @@ class root.WordBoundary extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.attempted
             @reset(state)
-            return false
+            return new Result(Failure)
         leftChar = state.input[state.currentPosition-1]
         rightChar = state.input[state.currentPosition]
         if (@wordClass.isInClass(leftChar) isnt @wordClass.isInClass(rightChar)) isnt @negated
             tokenState.attempted = true
-            return state.currentPosition
-        return false
+            return new Result(Success, state.currentPosition)
+        return new Result(Failure)

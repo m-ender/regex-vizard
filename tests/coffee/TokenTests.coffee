@@ -497,7 +497,13 @@ TestCase("TokenTests",
         for i in [1..2] # run twice to make sure that token's state is reset after reporting "false"
             step = 0
             for expectedResult in sequence
-                assertSame("Assertion failed at step #{step}:", expectedResult, token.nextMatch(state))
+                actualResult = token.nextMatch(state)
+                if expectedResult in [-1, 0]
+                    assertSame("Assertion failed at step #{step}:", Indeterminate, actualResult.type)
+                else
+                    assertSame("Assertion failed at step #{step}:", Success, actualResult.type)
+                    assertSame("Assertion failed at step #{step}:", expectedResult, actualResult.nextPosition)
+
                 ++step
-            assertSame(false, token.nextMatch(state))
+            assertSame(Failure, token.nextMatch(state).type)
 )

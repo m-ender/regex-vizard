@@ -34,31 +34,30 @@
       tokenState = state.tokens[this.debug.id];
       if (tokenState.i === -1) {
         this.reset(state);
-        return false;
+        return new Result(Failure);
       }
       if (this.subtokens.length === 0) {
         tokenState.i = -1;
-        return state.currentPosition;
+        return new Result(Success, state.currentPosition);
       }
       result = this.subtokens[tokenState.i].nextMatch(state);
-      switch (result) {
-        case false:
+      switch (result.type) {
+        case Failure:
           --tokenState.i;
           if (tokenState.pos.length > 0) {
             state.currentPosition = tokenState.pos.pop();
           }
-          return 0;
-        case -1:
-        case 0:
+          return new Result(Indeterminate);
+        case Indeterminate:
           return result;
-        default:
+        case Success:
           if (tokenState.i === this.subtokens.length - 1) {
             return result;
           } else {
             ++tokenState.i;
             tokenState.pos.push(state.currentPosition);
-            state.currentPosition = result;
-            return -1;
+            state.currentPosition = result.nextPosition;
+            return new Result(Indeterminate);
           }
       }
     };

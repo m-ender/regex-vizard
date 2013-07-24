@@ -32,14 +32,16 @@
       tokenState = state.tokens[this.debug.id];
       if (tokenState.i === this.subtokens.length) {
         this.reset(state);
-        return false;
+        return new Result(Failure);
       }
       result = this.subtokens[tokenState.i].nextMatch(state);
-      if (result !== false) {
-        return result;
-      } else {
-        ++tokenState.i;
-        return 0;
+      switch (result.type) {
+        case Success:
+        case Indeterminate:
+          return result;
+        case Failure:
+          ++tokenState.i;
+          return new Result(Indeterminate);
       }
     };
 

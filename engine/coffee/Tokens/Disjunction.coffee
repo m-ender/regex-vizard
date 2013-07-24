@@ -17,12 +17,13 @@ class root.Disjunction extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.i == @subtokens.length
             @reset(state)
-            return false
+            return new Result(Failure)
 
         result = @subtokens[tokenState.i].nextMatch(state)
 
-        if result isnt false
-            return result
-        else
-            ++tokenState.i
-            return 0
+        switch result.type
+            when Success, Indeterminate
+                return result
+            when Failure
+                ++tokenState.i
+                return new Result(Indeterminate)

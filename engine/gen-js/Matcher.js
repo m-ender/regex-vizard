@@ -34,14 +34,15 @@
     };
 
     Matcher.prototype.stepForward = function() {
-      switch (this.regex.nextMatch(this.state)) {
-        case false:
+      var result;
+      result = this.regex.nextMatch(this.state);
+      switch (result.type) {
+        case Failure:
           this.state.currentPosition = ++this.startingPosition;
           return this.startingPosition < this.state.input.length;
-        case 0:
-        case -1:
+        case Indeterminate:
           return true;
-        default:
+        case Success:
           this.success = true;
           return false;
       }

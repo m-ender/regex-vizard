@@ -44,15 +44,15 @@ class root.CharacterClass extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.attempted
             @reset(state)
-            return false
+            return new Result(Failure)
 
         char = state.input[state.currentPosition]
 
         if @isInClass(char)
             tokenState.attempted = true
-            return state.currentPosition + 1
+            return new Result(Success, state.currentPosition + 1)
 
-        return false
+        return new Result(Failure)
 
     # This can be used to query whether a character is inside the class without changing the token's
     # internal state. This is useful for nested character classes and word boundaries.
@@ -133,9 +133,9 @@ class root.Wildcard extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.attempted
             @reset(state)
-            return false
+            return new Result(Failure)
 
         unless state.input[state.currentPosition] in ["\n", "\r", "\u2028", "\u2029", EndGuard]
             tokenState.attempted = true
-            return state.currentPosition + 1
-        return false
+            return new Result(Success, state.currentPosition + 1)
+        return new Result(Failure)

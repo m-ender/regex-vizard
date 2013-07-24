@@ -24,7 +24,7 @@
       state.tokens[this.debug.id].freshSubStates = this.collectSubStates(state, this.subtokens[0]);
       state.tokens[this.debug.id].instances = [Helper.clone(state.tokens[this.debug.id].freshSubStates)];
       state.tokens[this.debug.id].pos = [];
-      state.tokens[this.debug.id].result = false;
+      state.tokens[this.debug.id].nextPosition = null;
       return state.tokens[this.debug.id].captureStack = [];
     };
 
@@ -36,7 +36,7 @@
         freshSubStates: this.collectSubStates(state, this.subtokens[0]),
         instances: [],
         pos: [],
-        result: false,
+        nextPosition: null,
         captureStack: []
       };
       stateObject.instances.push(Helper.clone(stateObject.freshSubStates));
@@ -82,60 +82,59 @@
     };
 
     Quantifier.prototype.nextMatch = function(state) {
-      var result, token, tokenState, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+      var pos, result, token, tokenState, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
       tokenState = state.tokens[this.debug.id];
-      if (tokenState.result) {
-        result = tokenState.result;
-        tokenState.result = false;
+      if (tokenState.nextPosition !== null) {
+        pos = tokenState.nextPosition;
+        tokenState.nextPosition = null;
         if (tokenState.instances.length >= this.min) {
-          return result;
+          return new Result(Success, pos);
         } else {
-          return 0;
+          return new Result(Indeterminate);
         }
       }
       if (tokenState.instances.length === 0) {
         this.reset(state);
-        return false;
+        return new Result(Failure);
       }
       if (tokenState.instances.length > this.max) {
         tokenState.instances.pop();
-        result = state.currentPosition;
+        pos = state.currentPosition;
         if (tokenState.pos.length > 0) {
           state.currentPosition = tokenState.pos.pop();
         }
         if (tokenState.captureStack.length > 0) {
           [].splice.apply(state.captures, [(_ref = this.minGroup), (this.minGroup + this.nGroups) - _ref].concat(_ref1 = tokenState.captureStack.pop())), _ref1;
         }
-        return result;
+        return new Result(Success, pos);
       }
       token = this.subtokens[0];
       this.restoreSubStates(state, tokenState.instances.pop());
       result = token.nextMatch(state);
-      switch (result) {
-        case 0:
-        case -1:
+      switch (result.type) {
+        case Indeterminate:
           tokenState.instances.push(this.collectSubStates(state, token));
           return result;
-        case false:
-          tokenState.result = state.currentPosition;
+        case Failure:
+          tokenState.nextPosition = state.currentPosition;
           if (tokenState.pos.length > 0) {
             state.currentPosition = tokenState.pos.pop();
           }
           if (tokenState.captureStack.length > 0) {
             [].splice.apply(state.captures, [(_ref2 = this.minGroup), (this.minGroup + this.nGroups) - _ref2].concat(_ref3 = tokenState.captureStack.pop())), _ref3;
           }
-          return 0;
-        default:
+          return new Result(Indeterminate);
+        case Success:
           tokenState.instances.push(this.collectSubStates(state, token));
-          if (result === state.currentPosition && tokenState.instances.length > this.min) {
+          if (result.nextPosition === state.currentPosition && tokenState.instances.length > this.min) {
             return this.nextMatch(state);
           }
           tokenState.captureStack.push(state.captures.slice(this.minGroup, this.minGroup + this.nGroups));
           [].splice.apply(state.captures, [(_ref4 = this.minGroup), (this.minGroup + this.nGroups) - _ref4].concat(_ref5 = this.clearer)), _ref5;
           tokenState.instances.push(Helper.clone(tokenState.freshSubStates));
           tokenState.pos.push(state.currentPosition);
-          state.currentPosition = result;
-          return -1;
+          state.currentPosition = result.nextPosition;
+          return new Result(Indeterminate);
       }
     };
 

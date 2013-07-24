@@ -21,26 +21,26 @@ class root.Sequence extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.i == -1
             @reset(state)
-            return false
+            return new Result(Failure)
 
         if @subtokens.length == 0
             tokenState.i = -1
-            return state.currentPosition
+            return new Result(Success, state.currentPosition)
 
         result = @subtokens[tokenState.i].nextMatch(state)
-        switch result
-            when false
+        switch result.type
+            when Failure
                 --tokenState.i
                 if tokenState.pos.length > 0
                     state.currentPosition = tokenState.pos.pop()
-                return 0
-            when -1, 0
+                return new Result(Indeterminate)
+            when Indeterminate
                 return result
-            else
+            when Success
                 if tokenState.i == @subtokens.length - 1
                     return result
                 else
                     ++tokenState.i
                     tokenState.pos.push(state.currentPosition)
-                    state.currentPosition = result
-                    return -1
+                    state.currentPosition = result.nextPosition
+                    return new Result(Indeterminate)
