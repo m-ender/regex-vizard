@@ -115,7 +115,7 @@
         id: 3
       }, "c"));
       token.register(state);
-      this.assertNextMatchSequence(token, state, [-1, -1, 4, 0, 0, 0]);
+      this.assertNextMatchSequence(token, state, [0, 0, 4, 0, 0, 0]);
       state = this.Matcher.setupInitialState("abc");
       token = new Sequence({
         id: 0
@@ -132,7 +132,7 @@
         id: 4
       }, "b"));
       token.register(state);
-      return this.assertNextMatchSequence(token, state, [-1, -1, -1, 0, 0, -1, 3, 0, 0, 0]);
+      return this.assertNextMatchSequence(token, state, [0, 0, 0, 0, 0, 0, 3, 0, 0, 0]);
     },
     "testEmptySequenceToken": function() {
       var state, token;
@@ -157,7 +157,7 @@
         id: 1
       }, "a"));
       token.register(state);
-      this.assertNextMatchSequence(token, state, [-1, 2, 0, 1]);
+      this.assertNextMatchSequence(token, state, [0, 2, 0, 1]);
       state.currentPosition = 2;
       this.assertNextMatchSequence(token, state, [0, 2]);
       state.currentPosition = 3;
@@ -174,7 +174,7 @@
         id: 2
       }, "a")));
       token.register(state);
-      return this.assertNextMatchSequence(token, state, [-1, -1, 2, 0, -1, 1, 0]);
+      return this.assertNextMatchSequence(token, state, [0, 0, 2, 0, 0, 1, 0]);
     },
     "testRepeatZeroOrMoreToken": function() {
       var disjunction, state, token;
@@ -185,7 +185,7 @@
         id: 1
       }, "a"));
       token.register(state);
-      this.assertNextMatchSequence(token, state, [-1, -1, -1, 0, 4, 0, 3, 0, 2, 0, 1]);
+      this.assertNextMatchSequence(token, state, [0, 0, 0, 0, 4, 0, 3, 0, 2, 0, 1]);
       state.currentPosition = 4;
       this.assertNextMatchSequence(token, state, [0, 4]);
       state = this.Matcher.setupInitialState("ab");
@@ -204,7 +204,7 @@
         id: 4
       }, disjunction));
       token.register(state);
-      return this.assertNextMatchSequence(token, state, [-1, -1, 0, -1, -1, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 1]);
+      return this.assertNextMatchSequence(token, state, [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 1]);
     },
     "testRepeatOneOrMoreToken": function() {
       var disjunction, state, token;
@@ -215,7 +215,7 @@
         id: 1
       }, "a"));
       token.register(state);
-      this.assertNextMatchSequence(token, state, [-1, -1, -1, 0, 4, 0, 3, 0, 2, 0, 0]);
+      this.assertNextMatchSequence(token, state, [0, 0, 0, 0, 4, 0, 3, 0, 2, 0, 0]);
       state.currentPosition = 4;
       this.assertNextMatchSequence(token, state, [0, 0]);
       state = this.Matcher.setupInitialState("ab");
@@ -234,7 +234,7 @@
         id: 4
       }, disjunction));
       token.register(state);
-      return this.assertNextMatchSequence(token, state, [-1, -1, 0, -1, -1, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0]);
+      return this.assertNextMatchSequence(token, state, [0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0]);
     },
     "testInfiniteLoop": function() {
       var state, token;
@@ -257,7 +257,7 @@
         id: 2
       }, "a")));
       token.register(state);
-      return this.assertNextMatchSequence(token, state, [0, -1, 0, 0, 1, 0, 0]);
+      return this.assertNextMatchSequence(token, state, [0, 0, 0, 0, 1, 0, 0]);
     },
     "testBasicCharacterClass": function() {
       var state, token;
@@ -370,24 +370,22 @@
       return this.assertNextMatchSequence(token, state, [2]);
     },
     assertNextMatchSequence: function(token, state, sequence) {
-      var actualResult, expectedResult, i, step, _i, _j, _len, _results;
-      _results = [];
-      for (i = _i = 1; _i <= 2; i = ++_i) {
-        step = 0;
-        for (_j = 0, _len = sequence.length; _j < _len; _j++) {
-          expectedResult = sequence[_j];
-          actualResult = token.nextMatch(state);
-          if (expectedResult === (-1) || expectedResult === 0) {
-            assertSame("Assertion failed at step " + step + ":", Indeterminate, actualResult.type);
-          } else {
-            assertSame("Assertion failed at step " + step + ":", Success, actualResult.type);
-            assertSame("Assertion failed at step " + step + ":", expectedResult, actualResult.nextPosition);
-          }
-          ++step;
+      var actualResult, expectedResult, msg, step, _i, _len;
+      token.reset(state);
+      step = 0;
+      for (_i = 0, _len = sequence.length; _i < _len; _i++) {
+        expectedResult = sequence[_i];
+        actualResult = token.nextMatch(state);
+        msg = "Assertion failed at step " + step + ":";
+        if (expectedResult === 0) {
+          assertSame(msg, Indeterminate, actualResult.type);
+        } else {
+          assertSame(msg, Success, actualResult.type);
+          assertSame(msg, expectedResult, actualResult.nextPosition);
         }
-        _results.push(assertSame(Failure, token.nextMatch(state).type));
+        ++step;
       }
-      return _results;
+      return assertSame(Failure, token.nextMatch(state).type);
     }
   });
 

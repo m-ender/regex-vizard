@@ -88,14 +88,13 @@
         pos = tokenState.nextPosition;
         tokenState.nextPosition = null;
         if (tokenState.instances.length >= this.min) {
-          return new Result(Success, pos);
+          return Result.Success(pos);
         } else {
-          return new Result(Indeterminate);
+          return Result.Indeterminate();
         }
       }
       if (tokenState.instances.length === 0) {
-        this.reset(state);
-        return new Result(Failure);
+        return Result.Failure();
       }
       if (tokenState.instances.length > this.max) {
         tokenState.instances.pop();
@@ -106,7 +105,7 @@
         if (tokenState.captureStack.length > 0) {
           [].splice.apply(state.captures, [(_ref = this.minGroup), (this.minGroup + this.nGroups) - _ref].concat(_ref1 = tokenState.captureStack.pop())), _ref1;
         }
-        return new Result(Success, pos);
+        return Result.Success(pos);
       }
       token = this.subtokens[0];
       this.restoreSubStates(state, tokenState.instances.pop());
@@ -123,7 +122,7 @@
           if (tokenState.captureStack.length > 0) {
             [].splice.apply(state.captures, [(_ref2 = this.minGroup), (this.minGroup + this.nGroups) - _ref2].concat(_ref3 = tokenState.captureStack.pop())), _ref3;
           }
-          return new Result(Indeterminate);
+          return Result.Indeterminate();
         case Success:
           tokenState.instances.push(this.collectSubStates(state, token));
           if (result.nextPosition === state.currentPosition && tokenState.instances.length > this.min) {
@@ -134,7 +133,7 @@
           tokenState.instances.push(Helper.clone(tokenState.freshSubStates));
           tokenState.pos.push(state.currentPosition);
           state.currentPosition = result.nextPosition;
-          return new Result(Indeterminate);
+          return Result.Indeterminate();
       }
     };
 

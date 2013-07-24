@@ -42,17 +42,20 @@ class root.CharacterClass extends root.Token
 
     nextMatch: (state) ->
         tokenState = state.tokens[@debug.id]
+
+        # A character class cannot backtrack. If this method is called
+        # a second time it will invariably report failure.
         if tokenState.attempted
-            @reset(state)
-            return new Result(Failure)
+            return Result.Failure()
 
+        tokenState.attempted = true
         char = state.input[state.currentPosition]
-
         if @isInClass(char)
-            tokenState.attempted = true
-            return new Result(Success, state.currentPosition + 1)
-
-        return new Result(Failure)
+            tokenState.status = Matched
+            return Result.Success(state.currentPosition + 1)
+        else
+            tokenState.status = Failed
+            return Result.Failure()
 
     # This can be used to query whether a character is inside the class without changing the token's
     # internal state. This is useful for nested character classes and word boundaries.
@@ -131,11 +134,16 @@ class root.Wildcard extends root.Token
 
     nextMatch: (state) ->
         tokenState = state.tokens[@debug.id]
-        if tokenState.attempted
-            @reset(state)
-            return new Result(Failure)
 
+        # A character class cannot backtrack. If this method is called
+        # a second time it will invariably report failure.
+        if tokenState.attempted
+            return Result.Failure()
+
+        tokenState.attempted = true
         unless state.input[state.currentPosition] in ["\n", "\r", "\u2028", "\u2029", EndGuard]
-            tokenState.attempted = true
-            return new Result(Success, state.currentPosition + 1)
-        return new Result(Failure)
+            tokenState.status = Matched
+            return Result.Success(state.currentPosition + 1)
+        else
+            tokenState.status = Failed
+            return Result.Failure()

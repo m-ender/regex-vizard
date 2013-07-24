@@ -23,10 +23,7 @@ class root.Token
     setupStateObject: ->
         {}
 
-    # this function will attempt one match at a time - that is one alternative of an disjunction or a certain
+    # this function will attempt one match at a time - that is one alternative of a disjunction or a certain
     # number of repetitions
-    # returns 0 if match unsuccessful but there might be matches on further attempts
-    # returns the position after the match if successful
-    # returns false if match ultimately unsuccessful (and internal state resets)
     nextMatch: (state) ->
         false

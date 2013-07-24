@@ -32,16 +32,17 @@
     Character.prototype.nextMatch = function(state) {
       var tokenState;
       tokenState = state.tokens[this.debug.id];
-      if (tokenState.status !== Inactive) {
-        this.reset(state);
-        return new Result(Failure);
+      if (tokenState.attempted) {
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       if (state.input[state.currentPosition] === this.character) {
         tokenState.status = Matched;
-        tokenState.attempted = true;
-        return new Result(Success, state.currentPosition + 1);
+        return Result.Success(state.currentPosition + 1);
+      } else {
+        tokenState.status = Failed;
+        return Result.Failure();
       }
-      return new Result(Failure);
     };
 
     return Character;

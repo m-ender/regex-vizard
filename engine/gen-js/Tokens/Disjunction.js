@@ -31,8 +31,7 @@
       var result, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.i === this.subtokens.length) {
-        this.reset(state);
-        return new Result(Failure);
+        return Result.Failure();
       }
       result = this.subtokens[tokenState.i].nextMatch(state);
       switch (result.type) {
@@ -41,7 +40,7 @@
           return result;
         case Failure:
           ++tokenState.i;
-          return new Result(Indeterminate);
+          return Result.Indeterminate();
       }
     };
 

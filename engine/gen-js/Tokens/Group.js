@@ -41,12 +41,8 @@
       tokenState = state.tokens[this.debug.id];
       if (tokenState.result !== null) {
         result = tokenState.result;
-        switch (result.type) {
-          case Failure:
-            this.reset(state);
-            break;
-          case Success:
-            tokenState.result = null;
+        if (result.type === Success) {
+          tokenState.result = null;
         }
         return result;
       }
@@ -62,12 +58,12 @@
           tokenState.status = Failed;
           tokenState.result = result;
           state.captures[this.index] = void 0;
-          return new Result(Indeterminate);
+          return Result.Indeterminate();
         case Success:
           tokenState.status = Matched;
           state.captures[this.index] = state.input.slice(tokenState.firstPosition, result.nextPosition).join("");
           tokenState.result = result;
-          return new Result(Indeterminate);
+          return Result.Indeterminate();
       }
     };
 

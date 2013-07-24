@@ -30,6 +30,7 @@ class root.Matcher
         switch result.type
             when Failure
                 @state.currentPosition = ++@startingPosition
+                @regex.reset(@state)
                 return @startingPosition < @state.input.length
             when Indeterminate
                 return true

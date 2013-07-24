@@ -31,14 +31,14 @@
       var tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return new Result(Failure);
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       if (state.input[state.currentPosition - 1] === StartGuard) {
-        tokenState.attempted = true;
-        return new Result(Success, state.currentPosition);
+        return Result.Success(state.currentPosition);
+      } else {
+        return Result.Failure();
       }
-      return new Result(Failure);
     };
 
     return StartAnchor;
@@ -70,14 +70,14 @@
       var tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return new Result(Failure);
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       if (state.input[state.currentPosition] === EndGuard) {
-        tokenState.attempted = true;
-        return new Result(Success, state.currentPosition);
+        return Result.Success(state.currentPosition);
+      } else {
+        return Result.Failure();
       }
-      return new Result(Failure);
     };
 
     return EndAnchor;
@@ -111,16 +111,16 @@
       var leftChar, rightChar, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return new Result(Failure);
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       leftChar = state.input[state.currentPosition - 1];
       rightChar = state.input[state.currentPosition];
       if ((this.wordClass.isInClass(leftChar) !== this.wordClass.isInClass(rightChar)) !== this.negated) {
-        tokenState.attempted = true;
-        return new Result(Success, state.currentPosition);
+        return Result.Success(state.currentPosition);
+      } else {
+        return Result.Failure();
       }
-      return new Result(Failure);
     };
 
     return WordBoundary;

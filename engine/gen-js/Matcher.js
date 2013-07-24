@@ -39,6 +39,7 @@
       switch (result.type) {
         case Failure:
           this.state.currentPosition = ++this.startingPosition;
+          this.regex.reset(this.state);
           return this.startingPosition < this.state.input.length;
         case Indeterminate:
           return true;

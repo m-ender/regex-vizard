@@ -17,6 +17,22 @@
       this.nextPosition = nextPosition != null ? nextPosition : null;
     }
 
+    Result.failureInstance = new Result(Failure);
+
+    Result.Failure = function() {
+      return this.failureInstance;
+    };
+
+    Result.indeterminateInstance = new Result(Indeterminate);
+
+    Result.Indeterminate = function() {
+      return this.indeterminateInstance;
+    };
+
+    Result.Success = function(nextPosition) {
+      return new Result(Success, nextPosition);
+    };
+
     return Result;
 
   })();

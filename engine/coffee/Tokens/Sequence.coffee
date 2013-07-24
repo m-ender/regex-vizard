@@ -19,21 +19,28 @@ class root.Sequence extends root.Token
 
     nextMatch: (state) ->
         tokenState = state.tokens[@debug.id]
-        if tokenState.i == -1
-            @reset(state)
-            return new Result(Failure)
 
+        # Once the first token (index 0) fails, i will be set to -1 and
+        # there will be nothing else to backtrack.
+        if tokenState.i == -1
+            return Result.Failure()
+
+        # If the sequence is empty, it cannot fail. But at the same time
+        # there is nothing to backtrack, so we make sure the above condition
+        # catches the next call of this function.
         if @subtokens.length == 0
             tokenState.i = -1
-            return new Result(Success, state.currentPosition)
+            return Result.Success(state.currentPosition)
 
-        result = @subtokens[tokenState.i].nextMatch(state)
+        currentToken = @subtokens[tokenState.i]
+        result = currentToken.nextMatch(state)
         switch result.type
             when Failure
+                currentToken.reset(state)
                 --tokenState.i
                 if tokenState.pos.length > 0
                     state.currentPosition = tokenState.pos.pop()
-                return new Result(Indeterminate)
+                return Result.Indeterminate()
             when Indeterminate
                 return result
             when Success
@@ -43,4 +50,4 @@ class root.Sequence extends root.Token
                     ++tokenState.i
                     tokenState.pos.push(state.currentPosition)
                     state.currentPosition = result.nextPosition
-                    return new Result(Indeterminate)
+                    return Result.Indeterminate()

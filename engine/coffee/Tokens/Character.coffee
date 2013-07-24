@@ -17,12 +17,16 @@ class root.Character extends root.Token
 
     nextMatch: (state) ->
         tokenState = state.tokens[@debug.id]
-        if tokenState.status isnt Inactive
-            @reset(state)
-            return new Result(Failure)
 
+        # A character cannot backtrack. If this method is called
+        # a second time it will invariably report failure.
+        if tokenState.attempted
+            return Result.Failure()
+
+        tokenState.attempted = true
         if state.input[state.currentPosition] == @character
             tokenState.status = Matched
-            tokenState.attempted = true
-            return new Result(Success, state.currentPosition + 1)
-        return new Result(Failure)
+            return Result.Success(state.currentPosition + 1)
+        else
+            tokenState.status = Failed
+            return Result.Failure()

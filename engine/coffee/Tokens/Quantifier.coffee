@@ -53,13 +53,12 @@ class root.Quantifier extends root.Token
             pos = tokenState.nextPosition
             tokenState.nextPosition = null
             if tokenState.instances.length >= @min
-                return new Result(Success, pos)
+                return Result.Success(pos)
             else
-                return new Result(Indeterminate)
+                return Result.Indeterminate()
 
         if tokenState.instances.length == 0
-            @reset(state)
-            return new Result(Failure)
+            return Result.Failure()
 
         if tokenState.instances.length > @max
             tokenState.instances.pop()
@@ -69,7 +68,7 @@ class root.Quantifier extends root.Token
 
             if tokenState.captureStack.length > 0
                 state.captures[@minGroup...@minGroup+@nGroups] = tokenState.captureStack.pop()
-            return new Result(Success, pos)
+            return Result.Success(pos)
 
         token = @subtokens[0]
         @restoreSubStates(state, tokenState.instances.pop())
@@ -86,7 +85,7 @@ class root.Quantifier extends root.Token
                 if tokenState.captureStack.length > 0
                     state.captures[@minGroup...@minGroup+@nGroups] = tokenState.captureStack.pop()
 
-                return new Result(Indeterminate)
+                return Result.Indeterminate()
             when Success
                 tokenState.instances.push(@collectSubStates(state, token))
                 # only the first @min instances are allowed to match empty, to avoid infinite loops
@@ -99,7 +98,7 @@ class root.Quantifier extends root.Token
                 tokenState.instances.push(Helper.clone tokenState.freshSubStates)
                 tokenState.pos.push(state.currentPosition)
                 state.currentPosition = result.nextPosition
-                return new Result(Indeterminate)
+                return Result.Indeterminate()
 
 class root.Option extends root.Quantifier
     constructor: (debug, token) ->

@@ -30,24 +30,25 @@
     };
 
     Sequence.prototype.nextMatch = function(state) {
-      var result, tokenState;
+      var currentToken, result, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.i === -1) {
-        this.reset(state);
-        return new Result(Failure);
+        return Result.Failure();
       }
       if (this.subtokens.length === 0) {
         tokenState.i = -1;
-        return new Result(Success, state.currentPosition);
+        return Result.Success(state.currentPosition);
       }
-      result = this.subtokens[tokenState.i].nextMatch(state);
+      currentToken = this.subtokens[tokenState.i];
+      result = currentToken.nextMatch(state);
       switch (result.type) {
         case Failure:
+          currentToken.reset(state);
           --tokenState.i;
           if (tokenState.pos.length > 0) {
             state.currentPosition = tokenState.pos.pop();
           }
-          return new Result(Indeterminate);
+          return Result.Indeterminate();
         case Indeterminate:
           return result;
         case Success:
@@ -57,7 +58,7 @@
             ++tokenState.i;
             tokenState.pos.push(state.currentPosition);
             state.currentPosition = result.nextPosition;
-            return new Result(Indeterminate);
+            return Result.Indeterminate();
           }
       }
     };

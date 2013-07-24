@@ -121,8 +121,8 @@ TestCase("TokenTests",
         token.subtokens.push(new Character({id: 3}, "c"))
         token.register(state)
         @assertNextMatchSequence(token, state, [
-           -1 # subtoken "a" matches
-           -1 # subtoken "b" matches
+            0 # subtoken "a" matches
+            0 # subtoken "b" matches
             4 # last subtoken "c" matches, so report overall match
             0 # subtoken "c" cannot backtrack, so subtoken fail
             0 # subtoken "b" cannot backtrack, so subtoken fails
@@ -137,12 +137,12 @@ TestCase("TokenTests",
         token.subtokens.push(new Character({id: 4}, "b"))
         token.register(state)
         @assertNextMatchSequence(token, state, [
-           -1 # subtoken "a" matches
-           -1 # subsubtoken "b" matches
-           -1 # therefore, subtoken "b?" matches
+            0 # subtoken "a" matches
+            0 # subsubtoken "b" matches
+            0 # therefore, subtoken "b?" matches
             0 # subtoken "b" fails
             0 # the subtoken "b" inside "b?" cannot backtrack, so that fails
-           -1 # subtoken "b?" matches (with "")
+            0 # subtoken "b?" matches (with "")
             3 # last subtoken "b" matches, so report overall match
             0 # subtoken "b" cannot backtrack, so subtoken fails
             0 # subtoken "b?" cannot backtrack, so subtoken fails
@@ -173,7 +173,7 @@ TestCase("TokenTests",
         token = new Option({id: 0}, new Character({id: 1}, "a"))
         token.register(state)
         @assertNextMatchSequence(token, state, [
-           -1 # subtoken "a" matches
+            0 # subtoken "a" matches
             2 # subtoken has matched, so report overall match
             0 # subtoken "a" cannot backtrack, so subtoken fails
             1 # omitting the subtoken matches
@@ -195,11 +195,11 @@ TestCase("TokenTests",
         token = new Group({id: 0}, new Option({id: 1}, new Character({id: 2}, "a")))
         token.register(state)
         @assertNextMatchSequence(token, state, [
-           -1 # subsubtoken "a" matches
-           -1 # subsubtoken has matched, so subtoken "a?" matches
+            0 # subsubtoken "a" matches
+            0 # subsubtoken has matched, so subtoken "a?" matches
             2 # subtoken has matched, so report overall match
             0 # subsubtoken "a" cannot backtrack, so subsubtoken fails
-           -1 # subtoken "a?" matches by omitting the subsubtoken
+            0 # subtoken "a?" matches by omitting the subsubtoken
             1 # subtoken has matched, so report overall match
             0 # subtoken "a?" cannot backtrack, so subtoken fails
             #false: the group reports overall failure after the subtoken has ultimately failed
@@ -211,9 +211,9 @@ TestCase("TokenTests",
         token = new RepeatZeroOrMore({id: 0}, new Character({id: 1}, "a"))
         token.register(state)
         @assertNextMatchSequence(token, state, [
-           -1 # first instance of subtoken "a" matches
-           -1 # second instance of subtoken "a" matches
-           -1 # third instances of subtokn "a" matches
+            0 # first instance of subtoken "a" matches
+            0 # second instance of subtoken "a" matches
+            0 # third instances of subtokn "a" matches
             0 # fourth instance of subtoken "a" fails
             4 # fourth instance is discarded to give a match
             0 # third instance of subtoken "a" cannot backtrack, so subtoken fails
@@ -237,11 +237,11 @@ TestCase("TokenTests",
         token = new RepeatZeroOrMore({id: 3}, new Group({id: 4}, disjunction))
         token.register(state)
         @assertNextMatchSequence(token, state, [
-           -1 # subsubtoken "a" matches
-           -1 # therefore, first instance of subtoken "(a|b)" matches
+            0 # subsubtoken "a" matches
+            0 # therefore, first instance of subtoken "(a|b)" matches
             0 # second instance fails when trying "a"
-           -1 # second instance matches with subsubtoken "b"
-           -1 # therefore, second instance of subtoken "(a|b)" matches
+            0 # second instance matches with subsubtoken "b"
+            0 # therefore, second instance of subtoken "(a|b)" matches
             0 # third instance fails when trying "a"
             0 # third instance fails again when trying "b"
             0 # disjunction in third instance reports overall failure
@@ -264,9 +264,9 @@ TestCase("TokenTests",
         token = new RepeatOneOrMore({id: 0}, new Character({id: 1}, "a"))
         token.register(state)
         @assertNextMatchSequence(token, state, [
-           -1 # first instance of subtoken "a" matches
-           -1 # second instance of subtoken "a" matches
-           -1 # third instances of subtokn "a" matches
+            0 # first instance of subtoken "a" matches
+            0 # second instance of subtoken "a" matches
+            0 # third instances of subtokn "a" matches
             0 # fourth instance of subtoken "a" fails
             4 # fourth instance is discarded to give a match
             0 # third instance of subtoken "a" cannot backtrack, so subtoken fails
@@ -290,11 +290,11 @@ TestCase("TokenTests",
         token = new RepeatOneOrMore({id: 3}, new Group({id: 4}, disjunction))
         token.register(state)
         @assertNextMatchSequence(token, state, [
-           -1 # subsubtoken "a" matches
-           -1 # therefore, first instance of subtoken "(a|b)" matches
+            0 # subsubtoken "a" matches
+            0 # therefore, first instance of subtoken "(a|b)" matches
             0 # second instance fails when trying "a"
-           -1 # second instance matches with subsubtoken "b"
-           -1 # therefore, second instance of subtoken "(a|b)" matches
+            0 # second instance matches with subsubtoken "b"
+            0 # therefore, second instance of subtoken "(a|b)" matches
             0 # third instance fails when trying "a"
             0 # third instance fails again when trying "b"
             0 # disjunction in third instance reports overall failure
@@ -328,7 +328,7 @@ TestCase("TokenTests",
         token.register(state)
         @assertNextMatchSequence(token, state, [
             0 # first instance of subtoken "a?" fails when trying "a"
-           -1 # first instance of subtoken "a?" matches empty
+            0 # first instance of subtoken "a?" matches empty
             0 # second instance fails when trying "a"
             0 # second instance of subtoken "a?" matches empty, but more than one empty submatch is disregarded, so subtoken fails
             1 # second instance is discarded to give a match
@@ -492,18 +492,23 @@ TestCase("TokenTests",
             2
         ])
 
-    # This function assumes that the sequence does not contain the ultimate "false"
+    # Supply a list of expected results from subsequent nextMatch() calls.
+    # 0 stands for an Indeterminate result, while any non-zero entry will
+    # will be treated as Success with the given integer as result.nextPosition.
+    # This function assumes that the sequence does not contain the ultimate Failure.
     assertNextMatchSequence: (token, state, sequence) ->
-        for i in [1..2] # run twice to make sure that token's state is reset after reporting "false"
-            step = 0
-            for expectedResult in sequence
-                actualResult = token.nextMatch(state)
-                if expectedResult in [-1, 0]
-                    assertSame("Assertion failed at step #{step}:", Indeterminate, actualResult.type)
-                else
-                    assertSame("Assertion failed at step #{step}:", Success, actualResult.type)
-                    assertSame("Assertion failed at step #{step}:", expectedResult, actualResult.nextPosition)
+        token.reset(state)
 
-                ++step
-            assertSame(Failure, token.nextMatch(state).type)
+        step = 0
+        for expectedResult in sequence
+            actualResult = token.nextMatch(state)
+            msg = "Assertion failed at step #{step}:"
+            if expectedResult is 0
+                assertSame(msg, Indeterminate, actualResult.type)
+            else
+                assertSame(msg, Success, actualResult.type)
+                assertSame(msg, expectedResult, actualResult.nextPosition)
+
+            ++step
+        assertSame(Failure, token.nextMatch(state).type)
 )

@@ -24,11 +24,14 @@ class root.Group extends root.Token
         tokenState = state.tokens[@debug.id]
         if tokenState.result isnt null
             result = tokenState.result
-            switch result.type
-                when Failure
-                    @reset(state)
-                when Success
-                    tokenState.result = null
+
+            # If we got here from a previous subtoken Success, we reset the result
+            # so that the next call can keep backtracking the subtoken.
+            # If we got here from a Failure instead, we leave the result in place
+            # so that subsequent calls will keep failing as there is nothing left
+            # to backtrack in the subtoken.
+            if result.type is Success
+                tokenState.result = null
             return result
 
         if tokenState.firstPosition is false
@@ -43,9 +46,9 @@ class root.Group extends root.Token
                 tokenState.status = Failed
                 tokenState.result = result
                 state.captures[@index] = undefined
-                return new Result(Indeterminate)
+                return Result.Indeterminate()
             when Success
                 tokenState.status = Matched
                 state.captures[@index] = state.input[tokenState.firstPosition...result.nextPosition].join("")
                 tokenState.result = result
-                return new Result(Indeterminate)
+                return Result.Indeterminate()

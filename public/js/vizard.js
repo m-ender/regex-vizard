@@ -48,6 +48,41 @@
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
+  root.Indeterminate = "indeterminate";
+
+  root.Failure = "failure";
+
+  root.Success = "success";
+
+  root.Result = (function() {
+
+    function Result(type, nextPosition) {
+      this.type = type;
+      this.nextPosition = nextPosition != null ? nextPosition : null;
+    }
+
+    Result.failureInstance = new Result(Failure);
+
+    Result.Failure = function() {
+      return this.failureInstance;
+    };
+
+    Result.indeterminateInstance = new Result(Indeterminate);
+
+    Result.Indeterminate = function() {
+      return this.indeterminateInstance;
+    };
+
+    Result.Success = function(nextPosition) {
+      return new Result(Success, nextPosition);
+    };
+
+    return Result;
+
+  })();
+
+  root = typeof global !== "undefined" && global !== null ? global : window;
+
   root.Inactive = "inactive";
 
   root.Active = "active";
@@ -128,14 +163,14 @@
       var tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return false;
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       if (state.input[state.currentPosition - 1] === StartGuard) {
-        tokenState.attempted = true;
-        return state.currentPosition;
+        return Result.Success(state.currentPosition);
+      } else {
+        return Result.Failure();
       }
-      return false;
     };
 
     return StartAnchor;
@@ -167,14 +202,14 @@
       var tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return false;
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       if (state.input[state.currentPosition] === EndGuard) {
-        tokenState.attempted = true;
-        return state.currentPosition;
+        return Result.Success(state.currentPosition);
+      } else {
+        return Result.Failure();
       }
-      return false;
     };
 
     return EndAnchor;
@@ -208,16 +243,16 @@
       var leftChar, rightChar, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return false;
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       leftChar = state.input[state.currentPosition - 1];
       rightChar = state.input[state.currentPosition];
       if ((this.wordClass.isInClass(leftChar) !== this.wordClass.isInClass(rightChar)) !== this.negated) {
-        tokenState.attempted = true;
-        return state.currentPosition;
+        return Result.Success(state.currentPosition);
+      } else {
+        return Result.Failure();
       }
-      return false;
     };
 
     return WordBoundary;
@@ -252,16 +287,17 @@
     Character.prototype.nextMatch = function(state) {
       var tokenState;
       tokenState = state.tokens[this.debug.id];
-      if (tokenState.status !== Inactive) {
-        this.reset(state);
-        return false;
+      if (tokenState.attempted) {
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       if (state.input[state.currentPosition] === this.character) {
         tokenState.status = Matched;
-        tokenState.attempted = true;
-        return state.currentPosition + 1;
+        return Result.Success(state.currentPosition + 1);
+      } else {
+        tokenState.status = Failed;
+        return Result.Failure();
       }
-      return false;
     };
 
     return Character;
@@ -334,15 +370,17 @@
       var char, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return false;
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       char = state.input[state.currentPosition];
       if (this.isInClass(char)) {
-        tokenState.attempted = true;
-        return state.currentPosition + 1;
+        tokenState.status = Matched;
+        return Result.Success(state.currentPosition + 1);
+      } else {
+        tokenState.status = Failed;
+        return Result.Failure();
       }
-      return false;
     };
 
     CharacterClass.prototype.isInClass = function(char) {
@@ -455,14 +493,16 @@
       var tokenState, _ref;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return false;
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       if ((_ref = state.input[state.currentPosition]) !== "\n" && _ref !== "\r" && _ref !== "\u2028" && _ref !== "\u2029" && _ref !== EndGuard) {
-        tokenState.attempted = true;
-        return state.currentPosition + 1;
+        tokenState.status = Matched;
+        return Result.Success(state.currentPosition + 1);
+      } else {
+        tokenState.status = Failed;
+        return Result.Failure();
       }
-      return false;
     };
 
     return Wildcard;
@@ -496,15 +536,16 @@
       var result, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.i === this.subtokens.length) {
-        this.reset(state);
-        return false;
+        return Result.Failure();
       }
       result = this.subtokens[tokenState.i].nextMatch(state);
-      if (result !== false) {
-        return result;
-      } else {
-        ++tokenState.i;
-        return 0;
+      switch (result.type) {
+        case Success:
+        case Indeterminate:
+          return result;
+        case Failure:
+          ++tokenState.i;
+          return Result.Indeterminate();
       }
     };
 
@@ -526,7 +567,7 @@
     Group.prototype.reset = function(state) {
       Group.__super__.reset.apply(this, arguments);
       state.tokens[this.debug.id].status = Inactive;
-      state.tokens[this.debug.id].result = 0;
+      state.tokens[this.debug.id].result = null;
       return state.tokens[this.debug.id].firstPosition = false;
     };
 
@@ -534,7 +575,7 @@
       return {
         type: 'group',
         status: Inactive,
-        result: 0,
+        result: null,
         firstPosition: false
       };
     };
@@ -547,12 +588,10 @@
     Group.prototype.nextMatch = function(state) {
       var result, tokenState;
       tokenState = state.tokens[this.debug.id];
-      if (tokenState.result !== 0) {
+      if (tokenState.result !== null) {
         result = tokenState.result;
-        if (result === false) {
-          this.reset(state);
-        } else {
-          tokenState.result = 0;
+        if (result.type === Success) {
+          tokenState.result = null;
         }
         return result;
       }
@@ -560,21 +599,20 @@
         tokenState.firstPosition = state.currentPosition;
       }
       result = this.subtokens[0].nextMatch(state);
-      switch (result) {
-        case 0:
-        case -1:
+      switch (result.type) {
+        case Indeterminate:
           tokenState.status = Active;
           return result;
-        case false:
+        case Failure:
           tokenState.status = Failed;
-          tokenState.result = false;
-          state.captures[this.index] = void 0;
-          return 0;
-        default:
-          tokenState.status = Matched;
-          state.captures[this.index] = state.input.slice(tokenState.firstPosition, result).join("");
           tokenState.result = result;
-          return -1;
+          state.captures[this.index] = void 0;
+          return Result.Indeterminate();
+        case Success:
+          tokenState.status = Matched;
+          state.captures[this.index] = state.input.slice(tokenState.firstPosition, result.nextPosition).join("");
+          tokenState.result = result;
+          return Result.Indeterminate();
       }
     };
 
@@ -602,7 +640,7 @@
       state.tokens[this.debug.id].freshSubStates = this.collectSubStates(state, this.subtokens[0]);
       state.tokens[this.debug.id].instances = [Helper.clone(state.tokens[this.debug.id].freshSubStates)];
       state.tokens[this.debug.id].pos = [];
-      state.tokens[this.debug.id].result = false;
+      state.tokens[this.debug.id].nextPosition = null;
       return state.tokens[this.debug.id].captureStack = [];
     };
 
@@ -614,7 +652,7 @@
         freshSubStates: this.collectSubStates(state, this.subtokens[0]),
         instances: [],
         pos: [],
-        result: false,
+        nextPosition: null,
         captureStack: []
       };
       stateObject.instances.push(Helper.clone(stateObject.freshSubStates));
@@ -660,60 +698,58 @@
     };
 
     Quantifier.prototype.nextMatch = function(state) {
-      var result, token, tokenState, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+      var pos, result, token, tokenState, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
       tokenState = state.tokens[this.debug.id];
-      if (tokenState.result) {
-        result = tokenState.result;
-        tokenState.result = false;
+      if (tokenState.nextPosition !== null) {
+        pos = tokenState.nextPosition;
+        tokenState.nextPosition = null;
         if (tokenState.instances.length >= this.min) {
-          return result;
+          return Result.Success(pos);
         } else {
-          return 0;
+          return Result.Indeterminate();
         }
       }
       if (tokenState.instances.length === 0) {
-        this.reset(state);
-        return false;
+        return Result.Failure();
       }
       if (tokenState.instances.length > this.max) {
         tokenState.instances.pop();
-        result = state.currentPosition;
+        pos = state.currentPosition;
         if (tokenState.pos.length > 0) {
           state.currentPosition = tokenState.pos.pop();
         }
         if (tokenState.captureStack.length > 0) {
           [].splice.apply(state.captures, [(_ref = this.minGroup), (this.minGroup + this.nGroups) - _ref].concat(_ref1 = tokenState.captureStack.pop())), _ref1;
         }
-        return result;
+        return Result.Success(pos);
       }
       token = this.subtokens[0];
       this.restoreSubStates(state, tokenState.instances.pop());
       result = token.nextMatch(state);
-      switch (result) {
-        case 0:
-        case -1:
+      switch (result.type) {
+        case Indeterminate:
           tokenState.instances.push(this.collectSubStates(state, token));
           return result;
-        case false:
-          tokenState.result = state.currentPosition;
+        case Failure:
+          tokenState.nextPosition = state.currentPosition;
           if (tokenState.pos.length > 0) {
             state.currentPosition = tokenState.pos.pop();
           }
           if (tokenState.captureStack.length > 0) {
             [].splice.apply(state.captures, [(_ref2 = this.minGroup), (this.minGroup + this.nGroups) - _ref2].concat(_ref3 = tokenState.captureStack.pop())), _ref3;
           }
-          return 0;
-        default:
+          return Result.Indeterminate();
+        case Success:
           tokenState.instances.push(this.collectSubStates(state, token));
-          if (result === state.currentPosition && tokenState.instances.length > this.min) {
+          if (result.nextPosition === state.currentPosition && tokenState.instances.length > this.min) {
             return this.nextMatch(state);
           }
           tokenState.captureStack.push(state.captures.slice(this.minGroup, this.minGroup + this.nGroups));
           [].splice.apply(state.captures, [(_ref4 = this.minGroup), (this.minGroup + this.nGroups) - _ref4].concat(_ref5 = this.clearer)), _ref5;
           tokenState.instances.push(Helper.clone(tokenState.freshSubStates));
           tokenState.pos.push(state.currentPosition);
-          state.currentPosition = result;
-          return -1;
+          state.currentPosition = result.nextPosition;
+          return Result.Indeterminate();
       }
     };
 
@@ -804,35 +840,35 @@
     };
 
     Sequence.prototype.nextMatch = function(state) {
-      var result, tokenState;
+      var currentToken, result, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.i === -1) {
-        this.reset(state);
-        return false;
+        return Result.Failure();
       }
       if (this.subtokens.length === 0) {
         tokenState.i = -1;
-        return state.currentPosition;
+        return Result.Success(state.currentPosition);
       }
-      result = this.subtokens[tokenState.i].nextMatch(state);
-      switch (result) {
-        case false:
+      currentToken = this.subtokens[tokenState.i];
+      result = currentToken.nextMatch(state);
+      switch (result.type) {
+        case Failure:
+          currentToken.reset(state);
           --tokenState.i;
           if (tokenState.pos.length > 0) {
             state.currentPosition = tokenState.pos.pop();
           }
-          return 0;
-        case -1:
-        case 0:
+          return Result.Indeterminate();
+        case Indeterminate:
           return result;
-        default:
+        case Success:
           if (tokenState.i === this.subtokens.length - 1) {
             return result;
           } else {
             ++tokenState.i;
             tokenState.pos.push(state.currentPosition);
-            state.currentPosition = result;
-            return -1;
+            state.currentPosition = result.nextPosition;
+            return Result.Indeterminate();
           }
       }
     };
@@ -1208,14 +1244,16 @@
     };
 
     Matcher.prototype.stepForward = function() {
-      switch (this.regex.nextMatch(this.state)) {
-        case false:
+      var result;
+      result = this.regex.nextMatch(this.state);
+      switch (result.type) {
+        case Failure:
           this.state.currentPosition = ++this.startingPosition;
+          this.regex.reset(this.state);
           return this.startingPosition < this.state.input.length;
-        case 0:
-        case -1:
+        case Indeterminate:
           return true;
-        default:
+        case Success:
           this.success = true;
           return false;
       }

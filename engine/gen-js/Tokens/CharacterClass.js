@@ -70,15 +70,17 @@
       var char, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return new Result(Failure);
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       char = state.input[state.currentPosition];
       if (this.isInClass(char)) {
-        tokenState.attempted = true;
-        return new Result(Success, state.currentPosition + 1);
+        tokenState.status = Matched;
+        return Result.Success(state.currentPosition + 1);
+      } else {
+        tokenState.status = Failed;
+        return Result.Failure();
       }
-      return new Result(Failure);
     };
 
     CharacterClass.prototype.isInClass = function(char) {
@@ -191,14 +193,16 @@
       var tokenState, _ref;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
-        this.reset(state);
-        return new Result(Failure);
+        return Result.Failure();
       }
+      tokenState.attempted = true;
       if ((_ref = state.input[state.currentPosition]) !== "\n" && _ref !== "\r" && _ref !== "\u2028" && _ref !== "\u2029" && _ref !== EndGuard) {
-        tokenState.attempted = true;
-        return new Result(Success, state.currentPosition + 1);
+        tokenState.status = Matched;
+        return Result.Success(state.currentPosition + 1);
+      } else {
+        tokenState.status = Failed;
+        return Result.Failure();
       }
-      return new Result(Failure);
     };
 
     return Wildcard;

@@ -15,15 +15,15 @@ class root.Disjunction extends root.Token
 
     nextMatch: (state) ->
         tokenState = state.tokens[@debug.id]
+
+        # When we've exhausted all subtokens, there is nothing more to backtrack.
         if tokenState.i == @subtokens.length
-            @reset(state)
-            return new Result(Failure)
+            return Result.Failure()
 
         result = @subtokens[tokenState.i].nextMatch(state)
-
         switch result.type
             when Success, Indeterminate
                 return result
             when Failure
                 ++tokenState.i
-                return new Result(Indeterminate)
+                return Result.Indeterminate()
