@@ -1,6 +1,6 @@
 root = global ? window
 
-class root.Quantifier extends root.Token
+class root.Quantifier extends Token
     constructor: (debug, token, @min, @max) ->
         super(debug, token)
         @minGroup = -1

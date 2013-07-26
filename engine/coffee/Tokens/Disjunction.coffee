@@ -1,6 +1,6 @@
 root = global ? window
 
-class root.Disjunction extends root.Token
+class root.Disjunction extends Token
     constructor: (debug, token) ->
         super
 

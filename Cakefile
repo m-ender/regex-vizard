@@ -93,6 +93,7 @@ task 'build:backend', 'Compile regex engine to JavaScript for client.', (options
         'Tokens/Assertion'
         'Tokens/Character'
         'Tokens/CharacterClass'
+        'Tokens/Wildcard'
         'Tokens/Disjunction'
         'Tokens/Group'
         'Tokens/Quantifier'

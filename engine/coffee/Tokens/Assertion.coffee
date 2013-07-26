@@ -1,6 +1,6 @@
 root = global ? window
 
-class root.StartAnchor extends root.BasicToken
+class root.StartAnchor extends BasicToken
     constructor: (debug) ->
         super
 
@@ -15,7 +15,7 @@ class root.StartAnchor extends root.BasicToken
         else
             return Result.Failure()
 
-class root.EndAnchor extends root.BasicToken
+class root.EndAnchor extends BasicToken
     constructor: (debug) ->
         super
 
@@ -30,7 +30,7 @@ class root.EndAnchor extends root.BasicToken
         else
             return Result.Failure()
 
-class root.WordBoundary extends root.BasicToken
+class root.WordBoundary extends BasicToken
     constructor: (debug, @negated = false) ->
         super(debug)
         @wordClass = new WordClass()

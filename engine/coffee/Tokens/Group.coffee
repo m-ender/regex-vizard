@@ -1,6 +1,6 @@
 root = global ? window
 
-class root.Group extends root.Token
+class root.Group extends Token
     constructor: (debug, token, @index) ->
         super(debug, token)
 

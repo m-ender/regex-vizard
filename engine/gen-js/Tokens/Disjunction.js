@@ -46,6 +46,6 @@
 
     return Disjunction;
 
-  })(root.Token);
+  })(Token);
 
 }).call(this);

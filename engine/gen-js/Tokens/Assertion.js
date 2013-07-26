@@ -31,7 +31,7 @@
 
     return StartAnchor;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
   root.EndAnchor = (function(_super) {
 
@@ -58,7 +58,7 @@
 
     return EndAnchor;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
   root.WordBoundary = (function(_super) {
 
@@ -90,6 +90,6 @@
 
     return WordBoundary;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
 }).call(this);

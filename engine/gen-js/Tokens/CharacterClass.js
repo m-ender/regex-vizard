@@ -82,7 +82,7 @@
 
     return CharacterClass;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
   root.DigitClass = (function(_super) {
 
@@ -104,7 +104,7 @@
 
     return DigitClass;
 
-  })(root.CharacterClass);
+  })(CharacterClass);
 
   root.WordClass = (function(_super) {
 
@@ -126,7 +126,7 @@
 
     return WordClass;
 
-  })(root.CharacterClass);
+  })(CharacterClass);
 
   root.WhitespaceClass = (function(_super) {
 
@@ -148,34 +148,6 @@
 
     return WhitespaceClass;
 
-  })(root.CharacterClass);
-
-  root.Wildcard = (function(_super) {
-
-    __extends(Wildcard, _super);
-
-    function Wildcard(debug) {
-      Wildcard.__super__.constructor.apply(this, arguments);
-    }
-
-    Wildcard.prototype.setupStateObject = function() {
-      var obj;
-      obj = Wildcard.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'wildcard';
-      return obj;
-    };
-
-    Wildcard.prototype.matches = function(state) {
-      var _ref;
-      if ((_ref = state.input[state.currentPosition]) !== "\n" && _ref !== "\r" && _ref !== "\u2028" && _ref !== "\u2029" && _ref !== EndGuard) {
-        return Result.Success(state.currentPosition + 1);
-      } else {
-        return Result.Failure();
-      }
-    };
-
-    return Wildcard;
-
-  })(root.BasicToken);
+  })(CharacterClass);
 
 }).call(this);

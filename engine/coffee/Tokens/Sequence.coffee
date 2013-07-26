@@ -2,7 +2,7 @@ root = global ? window
 
 # This encapsulates concatenation.
 # Empty (sub)patterns are also represented by (empty) sequences
-class root.Sequence extends root.Token
+class root.Sequence extends Token
     constructor: (debug) ->
         super(debug)
 

@@ -65,6 +65,6 @@
 
     return Sequence;
 
-  })(root.Token);
+  })(Token);
 
 }).call(this);

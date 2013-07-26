@@ -69,6 +69,6 @@
 
     return Group;
 
-  })(root.Token);
+  })(Token);
 
 }).call(this);

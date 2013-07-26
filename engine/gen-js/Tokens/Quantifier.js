@@ -139,7 +139,7 @@
 
     return Quantifier;
 
-  })(root.Token);
+  })(Token);
 
   root.Option = (function(_super) {
 

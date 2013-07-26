@@ -14,7 +14,7 @@ class root.CharacterRange
     sanitize: (char) ->
         if typeof char is "string" then char.charCodeAt 0 else char
 
-class root.CharacterClass extends root.BasicToken
+class root.CharacterClass extends BasicToken
     # negated is a boolean
     # elements is an array of (string) characters, CharacterRange objects and other CharacterClass tokens
     constructor: (debug, @negated = false, @elements = []) ->
@@ -53,7 +53,7 @@ class root.CharacterClass extends root.BasicToken
         return @negated
 
 # For built-in \d and \D
-class root.DigitClass extends root.CharacterClass
+class root.DigitClass extends CharacterClass
     constructor: (debug, negated = false) ->
         super(debug, negated, [new CharacterRange("0", "9")])
 
@@ -63,7 +63,7 @@ class root.DigitClass extends root.CharacterClass
         return obj
 
 # For built-in \w and \W
-class root.WordClass extends root.CharacterClass
+class root.WordClass extends CharacterClass
     constructor: (debug, negated = false) ->
         super(debug, negated, [
             new CharacterRange("A", "Z")
@@ -78,7 +78,7 @@ class root.WordClass extends root.CharacterClass
         return obj
 
 # For built-in \s and \S
-class root.WhitespaceClass extends root.CharacterClass
+class root.WhitespaceClass extends CharacterClass
     constructor: (debug, negated = false) ->
         super(debug, negated, [
             new CharacterRange(0x9, 0xd) # horizontal tab, line feed, vertical tab, form feed, carriage return
@@ -99,18 +99,3 @@ class root.WhitespaceClass extends root.CharacterClass
         obj = super
         obj.subtype = 'whitespaceClass'
         return obj
-
-class root.Wildcard extends root.BasicToken
-    constructor: (debug) ->
-        super
-
-    setupStateObject: ->
-        obj = super
-        obj.type = 'wildcard'
-        return obj
-
-    matches: (state) ->
-        unless state.input[state.currentPosition] in ["\n", "\r", "\u2028", "\u2029", EndGuard]
-            return Result.Success(state.currentPosition + 1)
-        else
-            return Result.Failure()

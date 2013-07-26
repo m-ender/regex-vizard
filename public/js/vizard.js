@@ -208,7 +208,7 @@
 
     return StartAnchor;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
   root.EndAnchor = (function(_super) {
 
@@ -235,7 +235,7 @@
 
     return EndAnchor;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
   root.WordBoundary = (function(_super) {
 
@@ -267,7 +267,7 @@
 
     return WordBoundary;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
@@ -377,7 +377,7 @@
 
     return CharacterClass;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
   root.DigitClass = (function(_super) {
 
@@ -399,7 +399,7 @@
 
     return DigitClass;
 
-  })(root.CharacterClass);
+  })(CharacterClass);
 
   root.WordClass = (function(_super) {
 
@@ -421,7 +421,7 @@
 
     return WordClass;
 
-  })(root.CharacterClass);
+  })(CharacterClass);
 
   root.WhitespaceClass = (function(_super) {
 
@@ -443,7 +443,9 @@
 
     return WhitespaceClass;
 
-  })(root.CharacterClass);
+  })(CharacterClass);
+
+  root = typeof global !== "undefined" && global !== null ? global : window;
 
   root.Wildcard = (function(_super) {
 
@@ -471,7 +473,7 @@
 
     return Wildcard;
 
-  })(root.BasicToken);
+  })(BasicToken);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
@@ -515,7 +517,7 @@
 
     return Disjunction;
 
-  })(root.Token);
+  })(Token);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
@@ -582,7 +584,7 @@
 
     return Group;
 
-  })(root.Token);
+  })(Token);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
@@ -719,7 +721,7 @@
 
     return Quantifier;
 
-  })(root.Token);
+  })(Token);
 
   root.Option = (function(_super) {
 
@@ -839,7 +841,7 @@
 
     return Sequence;
 
-  })(root.Token);
+  })(Token);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
