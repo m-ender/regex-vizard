@@ -138,6 +138,51 @@
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
+  root.BasicToken = (function(_super) {
+
+    __extends(BasicToken, _super);
+
+    function BasicToken(debug) {
+      BasicToken.__super__.constructor.apply(this, arguments);
+    }
+
+    BasicToken.prototype.reset = function(state) {
+      BasicToken.__super__.reset.apply(this, arguments);
+      state.tokens[this.debug.id].status = Inactive;
+      return state.tokens[this.debug.id].attempted = false;
+    };
+
+    BasicToken.prototype.setupStateObject = function() {
+      return {
+        status: Inactive,
+        attempted: false
+      };
+    };
+
+    BasicToken.prototype.nextMatch = function(state) {
+      var result, tokenState;
+      tokenState = state.tokens[this.debug.id];
+      if (tokenState.attempted) {
+        return Result.Failure();
+      }
+      tokenState.attempted = true;
+      result = this.matches(state);
+      switch (result.type) {
+        case Success:
+          tokenState.status = Matched;
+          break;
+        case Failure:
+          tokenState.status = Failed;
+      }
+      return result;
+    };
+
+    return BasicToken;
+
+  })(Token);
+
+  root = typeof global !== "undefined" && global !== null ? global : window;
+
   root.StartAnchor = (function(_super) {
 
     __extends(StartAnchor, _super);
@@ -146,26 +191,14 @@
       StartAnchor.__super__.constructor.apply(this, arguments);
     }
 
-    StartAnchor.prototype.reset = function(state) {
-      StartAnchor.__super__.reset.apply(this, arguments);
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     StartAnchor.prototype.setupStateObject = function() {
-      return {
-        type: 'startAnchor',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = StartAnchor.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'startAnchor';
+      return obj;
     };
 
-    StartAnchor.prototype.nextMatch = function(state) {
-      var tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    StartAnchor.prototype.matches = function(state) {
       if (state.input[state.currentPosition - 1] === StartGuard) {
         return Result.Success(state.currentPosition);
       } else {
@@ -175,7 +208,7 @@
 
     return StartAnchor;
 
-  })(root.Token);
+  })(root.BasicToken);
 
   root.EndAnchor = (function(_super) {
 
@@ -185,26 +218,14 @@
       EndAnchor.__super__.constructor.apply(this, arguments);
     }
 
-    EndAnchor.prototype.reset = function(state) {
-      EndAnchor.__super__.reset.apply(this, arguments);
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     EndAnchor.prototype.setupStateObject = function() {
-      return {
-        type: 'endAnchor',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = EndAnchor.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'endAnchor';
+      return obj;
     };
 
-    EndAnchor.prototype.nextMatch = function(state) {
-      var tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    EndAnchor.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === EndGuard) {
         return Result.Success(state.currentPosition);
       } else {
@@ -214,7 +235,7 @@
 
     return EndAnchor;
 
-  })(root.Token);
+  })(root.BasicToken);
 
   root.WordBoundary = (function(_super) {
 
@@ -226,26 +247,15 @@
       this.wordClass = new WordClass();
     }
 
-    WordBoundary.prototype.reset = function(state) {
-      WordBoundary.__super__.reset.apply(this, arguments);
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     WordBoundary.prototype.setupStateObject = function() {
-      return {
-        type: 'wordBoundary',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = WordBoundary.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'wordBoundary';
+      return obj;
     };
 
-    WordBoundary.prototype.nextMatch = function(state) {
-      var leftChar, rightChar, tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    WordBoundary.prototype.matches = function(state) {
+      var leftChar, rightChar;
       leftChar = state.input[state.currentPosition - 1];
       rightChar = state.input[state.currentPosition];
       if ((this.wordClass.isInClass(leftChar) !== this.wordClass.isInClass(rightChar)) !== this.negated) {
@@ -257,7 +267,7 @@
 
     return WordBoundary;
 
-  })(root.Token);
+  })(root.BasicToken);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
@@ -270,39 +280,24 @@
       Character.__super__.constructor.call(this, debug);
     }
 
-    Character.prototype.reset = function(state) {
-      Character.__super__.reset.apply(this, arguments);
-      state.tokens[this.debug.id].status = Inactive;
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     Character.prototype.setupStateObject = function() {
-      return {
-        type: 'character',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = Character.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'character';
+      return obj;
     };
 
-    Character.prototype.nextMatch = function(state) {
-      var tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    Character.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === this.character) {
-        tokenState.status = Matched;
         return Result.Success(state.currentPosition + 1);
       } else {
-        tokenState.status = Failed;
         return Result.Failure();
       }
     };
 
     return Character;
 
-  })(root.Token);
+  })(BasicToken);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 
@@ -340,22 +335,11 @@
       CharacterClass.__super__.constructor.call(this, debug);
     }
 
-    CharacterClass.prototype.reset = function(state) {
-      CharacterClass.__super__.reset.apply(this, arguments);
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     CharacterClass.prototype.setupStateObject = function() {
-      return {
-        type: 'characterClass',
-        subtype: 'customClass',
-        status: Inactive,
-        attempted: false
-      };
-    };
-
-    CharacterClass.prototype.register = function(state) {
-      return state.tokens[this.debug.id] = this.setupStateObject();
+      var obj;
+      obj = CharacterClass.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'characterClass';
+      return obj;
     };
 
     CharacterClass.prototype.addElement = function(element) {
@@ -366,19 +350,12 @@
       return this.elements.push(new CharacterRange(first, last));
     };
 
-    CharacterClass.prototype.nextMatch = function(state) {
-      var char, tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    CharacterClass.prototype.matches = function(state) {
+      var char;
       char = state.input[state.currentPosition];
       if (this.isInClass(char)) {
-        tokenState.status = Matched;
         return Result.Success(state.currentPosition + 1);
       } else {
-        tokenState.status = Failed;
         return Result.Failure();
       }
     };
@@ -400,7 +377,7 @@
 
     return CharacterClass;
 
-  })(root.Token);
+  })(root.BasicToken);
 
   root.DigitClass = (function(_super) {
 
@@ -476,38 +453,25 @@
       Wildcard.__super__.constructor.apply(this, arguments);
     }
 
-    Wildcard.prototype.reset = function(state) {
-      Wildcard.__super__.reset.apply(this, arguments);
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     Wildcard.prototype.setupStateObject = function() {
-      return {
-        type: 'wildcard',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = Wildcard.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'wildcard';
+      return obj;
     };
 
-    Wildcard.prototype.nextMatch = function(state) {
-      var tokenState, _ref;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    Wildcard.prototype.matches = function(state) {
+      var _ref;
       if ((_ref = state.input[state.currentPosition]) !== "\n" && _ref !== "\r" && _ref !== "\u2028" && _ref !== "\u2029" && _ref !== EndGuard) {
-        tokenState.status = Matched;
         return Result.Success(state.currentPosition + 1);
       } else {
-        tokenState.status = Failed;
         return Result.Failure();
       }
     };
 
     return Wildcard;
 
-  })(root.Token);
+  })(root.BasicToken);
 
   root = typeof global !== "undefined" && global !== null ? global : window;
 

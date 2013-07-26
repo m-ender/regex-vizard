@@ -15,38 +15,23 @@
       Character.__super__.constructor.call(this, debug);
     }
 
-    Character.prototype.reset = function(state) {
-      Character.__super__.reset.apply(this, arguments);
-      state.tokens[this.debug.id].status = Inactive;
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     Character.prototype.setupStateObject = function() {
-      return {
-        type: 'character',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = Character.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'character';
+      return obj;
     };
 
-    Character.prototype.nextMatch = function(state) {
-      var tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    Character.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === this.character) {
-        tokenState.status = Matched;
         return Result.Success(state.currentPosition + 1);
       } else {
-        tokenState.status = Failed;
         return Result.Failure();
       }
     };
 
     return Character;
 
-  })(root.Token);
+  })(BasicToken);
 
 }).call(this);

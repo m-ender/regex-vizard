@@ -14,25 +14,16 @@ class root.CharacterRange
     sanitize: (char) ->
         if typeof char is "string" then char.charCodeAt 0 else char
 
-class root.CharacterClass extends root.Token
+class root.CharacterClass extends root.BasicToken
     # negated is a boolean
-    # elements is an array of (string) characters, anonymous range objects and other CharacterClass tokens
+    # elements is an array of (string) characters, CharacterRange objects and other CharacterClass tokens
     constructor: (debug, @negated = false, @elements = []) ->
         super(debug)
 
-    reset: (state) ->
-        super
-        state.tokens[@debug.id].attempted = false
-
     setupStateObject: ->
-        type: 'characterClass'
-        subtype: 'customClass'
-        status: Inactive
-        attempted: false
-
-    register: (state) ->
-        state.tokens[@debug.id] = @setupStateObject()
-        # do not recurse into subtokens as they are not "full-fledged" tokens
+        obj = super
+        obj.type = 'characterClass'
+        return obj
 
     addElement: (element) ->
         @elements.push(element)
@@ -40,21 +31,11 @@ class root.CharacterClass extends root.Token
     addRange: (first, last) ->
         @elements.push(new CharacterRange(first, last))
 
-    nextMatch: (state) ->
-        tokenState = state.tokens[@debug.id]
-
-        # A character class cannot backtrack. If this method is called
-        # a second time it will invariably report failure.
-        if tokenState.attempted
-            return Result.Failure()
-
-        tokenState.attempted = true
+    matches: (state) ->
         char = state.input[state.currentPosition]
         if @isInClass(char)
-            tokenState.status = Matched
             return Result.Success(state.currentPosition + 1)
         else
-            tokenState.status = Failed
             return Result.Failure()
 
     # This can be used to query whether a character is inside the class without changing the token's
@@ -119,31 +100,17 @@ class root.WhitespaceClass extends root.CharacterClass
         obj.subtype = 'whitespaceClass'
         return obj
 
-class root.Wildcard extends root.Token
+class root.Wildcard extends root.BasicToken
     constructor: (debug) ->
         super
 
-    reset: (state) ->
-        super
-        state.tokens[@debug.id].attempted = false
-
     setupStateObject: ->
-        type: 'wildcard'
-        status: Inactive
-        attempted: false
+        obj = super
+        obj.type = 'wildcard'
+        return obj
 
-    nextMatch: (state) ->
-        tokenState = state.tokens[@debug.id]
-
-        # A character class cannot backtrack. If this method is called
-        # a second time it will invariably report failure.
-        if tokenState.attempted
-            return Result.Failure()
-
-        tokenState.attempted = true
+    matches: (state) ->
         unless state.input[state.currentPosition] in ["\n", "\r", "\u2028", "\u2029", EndGuard]
-            tokenState.status = Matched
             return Result.Success(state.currentPosition + 1)
         else
-            tokenState.status = Failed
             return Result.Failure()

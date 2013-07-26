@@ -14,26 +14,14 @@
       StartAnchor.__super__.constructor.apply(this, arguments);
     }
 
-    StartAnchor.prototype.reset = function(state) {
-      StartAnchor.__super__.reset.apply(this, arguments);
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     StartAnchor.prototype.setupStateObject = function() {
-      return {
-        type: 'startAnchor',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = StartAnchor.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'startAnchor';
+      return obj;
     };
 
-    StartAnchor.prototype.nextMatch = function(state) {
-      var tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    StartAnchor.prototype.matches = function(state) {
       if (state.input[state.currentPosition - 1] === StartGuard) {
         return Result.Success(state.currentPosition);
       } else {
@@ -43,7 +31,7 @@
 
     return StartAnchor;
 
-  })(root.Token);
+  })(root.BasicToken);
 
   root.EndAnchor = (function(_super) {
 
@@ -53,26 +41,14 @@
       EndAnchor.__super__.constructor.apply(this, arguments);
     }
 
-    EndAnchor.prototype.reset = function(state) {
-      EndAnchor.__super__.reset.apply(this, arguments);
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     EndAnchor.prototype.setupStateObject = function() {
-      return {
-        type: 'endAnchor',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = EndAnchor.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'endAnchor';
+      return obj;
     };
 
-    EndAnchor.prototype.nextMatch = function(state) {
-      var tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    EndAnchor.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === EndGuard) {
         return Result.Success(state.currentPosition);
       } else {
@@ -82,7 +58,7 @@
 
     return EndAnchor;
 
-  })(root.Token);
+  })(root.BasicToken);
 
   root.WordBoundary = (function(_super) {
 
@@ -94,26 +70,15 @@
       this.wordClass = new WordClass();
     }
 
-    WordBoundary.prototype.reset = function(state) {
-      WordBoundary.__super__.reset.apply(this, arguments);
-      return state.tokens[this.debug.id].attempted = false;
-    };
-
     WordBoundary.prototype.setupStateObject = function() {
-      return {
-        type: 'wordBoundary',
-        status: Inactive,
-        attempted: false
-      };
+      var obj;
+      obj = WordBoundary.__super__.setupStateObject.apply(this, arguments);
+      obj.type = 'wordBoundary';
+      return obj;
     };
 
-    WordBoundary.prototype.nextMatch = function(state) {
-      var leftChar, rightChar, tokenState;
-      tokenState = state.tokens[this.debug.id];
-      if (tokenState.attempted) {
-        return Result.Failure();
-      }
-      tokenState.attempted = true;
+    WordBoundary.prototype.matches = function(state) {
+      var leftChar, rightChar;
       leftChar = state.input[state.currentPosition - 1];
       rightChar = state.input[state.currentPosition];
       if ((this.wordClass.isInClass(leftChar) !== this.wordClass.isInClass(rightChar)) !== this.negated) {
@@ -125,6 +90,6 @@
 
     return WordBoundary;
 
-  })(root.Token);
+  })(root.BasicToken);
 
 }).call(this);

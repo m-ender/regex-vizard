@@ -89,6 +89,7 @@ task 'build:backend', 'Compile regex engine to JavaScript for client.', (options
         'Result'
         'Tokens/TokenStatus'
         'Tokens/Token'
+        'Tokens/BasicToken'
         'Tokens/Assertion'
         'Tokens/Character'
         'Tokens/CharacterClass'
@@ -165,7 +166,7 @@ task 'driver', 'Starts up jsTestDriver', (options) ->
     driver = spawn 'java', [
                 '-jar', ".\\tools\\jsTestDriver\\JsTestDriver-1.3.5.jar",
                 '--port', port,
-                browserOption, browserArgument,
-                '--browserTimeout', '120000'
+                #'--browserTimeout', '120000',
+                browserOption, browserArgument
             ]
     captureOutput(driver)

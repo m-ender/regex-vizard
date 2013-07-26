@@ -1,84 +1,52 @@
 root = global ? window
 
-class root.StartAnchor extends root.Token
+class root.StartAnchor extends root.BasicToken
     constructor: (debug) ->
         super
 
-    reset: (state) ->
-        super
-        state.tokens[@debug.id].attempted = false
-
     setupStateObject: ->
-        type: 'startAnchor'
-        status: Inactive
-        attempted: false
+        obj = super
+        obj.type = 'startAnchor'
+        return obj
 
-    nextMatch: (state) ->
-        tokenState = state.tokens[@debug.id]
-
-        # An anchor cannot backtrack. If this method is called
-        # a second time it will invariably report failure.
-        if tokenState.attempted
-            return Result.Failure()
-
-        tokenState.attempted = true
+    matches: (state) ->
         if state.input[state.currentPosition - 1] == StartGuard
             return Result.Success(state.currentPosition)
         else
             return Result.Failure()
 
-class root.EndAnchor extends root.Token
+class root.EndAnchor extends root.BasicToken
     constructor: (debug) ->
         super
 
-    reset: (state) ->
-        super
-        state.tokens[@debug.id].attempted = false
-
     setupStateObject: ->
-        type: 'endAnchor'
-        status: Inactive
-        attempted: false
+        obj = super
+        obj.type = 'endAnchor'
+        return obj
 
-    nextMatch: (state) ->
-        tokenState = state.tokens[@debug.id]
-
-        # An anchor cannot backtrack. If this method is called
-        # a second time it will invariably report failure.
-        if tokenState.attempted
-            return Result.Failure()
-
-        tokenState.attempted = true
+    matches: (state) ->
         if state.input[state.currentPosition] == EndGuard
             return Result.Success(state.currentPosition)
         else
             return Result.Failure()
 
-class root.WordBoundary extends root.Token
+class root.WordBoundary extends root.BasicToken
     constructor: (debug, @negated = false) ->
         super(debug)
         @wordClass = new WordClass()
 
-    reset: (state) ->
-        super
-        state.tokens[@debug.id].attempted = false
-
     setupStateObject: () ->
-        type: 'wordBoundary'
-        status: Inactive
-        attempted: false
+        obj = super
+        obj.type = 'wordBoundary'
+        return obj
 
-    nextMatch: (state) ->
-        tokenState = state.tokens[@debug.id]
-
-        # A word boundary cannot backtrack. If this method is called
-        # a second time it will invariably report failure.
-        if tokenState.attempted
-            return Result.Failure()
-
-        tokenState.attempted = true
-        leftChar = state.input[state.currentPosition-1]
+    matches: (state) ->
+        leftChar = state.input[state.currentPosition - 1]
         rightChar = state.input[state.currentPosition]
+        # "isnt" is basically XOR. The first one ensures that one character is a
+        # word character while the other isn't. The final "isnt" inverts the result
+        # if the @negated flag was set (XORing with true inverts a boolean, XORing
+        # with false does not change it)
         if (@wordClass.isInClass(leftChar) isnt @wordClass.isInClass(rightChar)) isnt @negated
             return Result.Success(state.currentPosition)
         else

@@ -510,5 +510,5 @@ TestCase("TokenTests",
                 assertSame(msg, expectedResult, actualResult.nextPosition)
 
             ++step
-        assertSame(Failure, token.nextMatch(state).type)
+        assertSame(msg, Failure, token.nextMatch(state).type)
 )

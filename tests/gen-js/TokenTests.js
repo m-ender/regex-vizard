@@ -385,7 +385,7 @@
         }
         ++step;
       }
-      return assertSame(Failure, token.nextMatch(state).type);
+      return assertSame(msg, Failure, token.nextMatch(state).type);
     }
   });
 
