@@ -14,13 +14,6 @@
       Wildcard.__super__.constructor.apply(this, arguments);
     }
 
-    Wildcard.prototype.setupStateObject = function() {
-      var obj;
-      obj = Wildcard.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'wildcard';
-      return obj;
-    };
-
     Wildcard.prototype.matches = function(state) {
       var _ref;
       if ((_ref = state.input[state.currentPosition]) !== "\n" && _ref !== "\r" && _ref !== "\u2028" && _ref !== "\u2029" && _ref !== EndGuard) {

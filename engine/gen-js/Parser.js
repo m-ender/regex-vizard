@@ -12,8 +12,8 @@
       var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, nGroups, nestingStack, squash, start, treeRoot, _, _ref, _ref1;
       lastId = -1;
       treeRoot = new Group({
-        sourceOpenLength: 0,
-        sourceCloseLength: 0,
+        sourceOpen: '',
+        sourceClose: '',
         id: ++lastId
       }, new Disjunction({
         id: ++lastId
@@ -31,7 +31,7 @@
             start = i;
             _ref = this.parseEscapeSequence(false, string, i + 1), i = _ref[0], element = _ref[1];
             element.debug = {
-              sourceLength: i - start,
+              source: string.substring(start, i),
               id: ++lastId
             };
             this.append(current, element);
@@ -41,7 +41,7 @@
             break;
           case "^":
             debug = {
-              sourceLength: 1,
+              source: char,
               id: ++lastId
             };
             this.append(current, new StartAnchor(debug));
@@ -49,7 +49,7 @@
             break;
           case "$":
             debug = {
-              sourceLength: 1,
+              source: char,
               id: ++lastId
             };
             this.append(current, new EndAnchor(debug));
@@ -57,7 +57,7 @@
             break;
           case ".":
             debug = {
-              sourceLength: 1,
+              source: char,
               id: ++lastId
             };
             this.append(current, new Wildcard(debug));
@@ -71,8 +71,8 @@
             break;
           case "(":
             debug = {
-              sourceOpenLength: 1,
-              sourceCloseLength: 1,
+              sourceOpen: '(',
+              sourceClose: ')',
               id: ++lastId
             };
             group = new Group(debug, new Disjunction({
@@ -103,7 +103,7 @@
             break;
           default:
             debug = {
-              sourceLength: 1,
+              source: char,
               id: ++lastId
             };
             this.append(current, new Character(debug, char));
@@ -161,7 +161,7 @@
     };
 
     Parser.parseCharacterClass = function(string, current, i, id) {
-      var char, debug, element, elements, endC, lastElement, negated, newI, nextElement, startC, _ref, _ref1;
+      var char, debug, element, elements, endC, lastElement, negated, newI, nextElement, start, startC, _ref, _ref1;
       if (i < string.length && string.charAt(i) === "^") {
         negated = true;
         ++i;
@@ -169,13 +169,15 @@
         negated = false;
       }
       elements = [];
+      start = i;
       while (i < string.length) {
         char = string.charAt(i);
         switch (char) {
           case "]":
             debug = {
-              sourceOpenLength: negated ? 2 : 1,
-              sourceCloseLength: 1,
+              sourceOpen: negated ? '[^' : '[',
+              sourceClose: string.substring(start, i),
+              sourceCloseLength: ']',
               id: id
             };
             this.append(current, new CharacterClass(debug, negated, elements));
@@ -309,7 +311,7 @@
         };
       }
       debug = {
-        sourceLength: 1,
+        source: char,
         id: id
       };
       quantifierClass = {

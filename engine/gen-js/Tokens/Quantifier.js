@@ -31,7 +31,6 @@
     Quantifier.prototype.setupStateObject = function(state) {
       var stateObject;
       stateObject = {
-        type: 'quantifier',
         status: Inactive,
         freshSubStates: this.collectSubStates(state, this.subtokens[0]),
         instances: [],
@@ -149,13 +148,6 @@
       Option.__super__.constructor.call(this, debug, token, 0, 1);
     }
 
-    Option.prototype.setupStateObject = function() {
-      var obj;
-      obj = Option.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'option';
-      return obj;
-    };
-
     return Option;
 
   })(root.Quantifier);
@@ -168,13 +160,6 @@
       RepeatZeroOrMore.__super__.constructor.call(this, debug, token, 0, Infinity);
     }
 
-    RepeatZeroOrMore.prototype.setupStateObject = function() {
-      var obj;
-      obj = RepeatZeroOrMore.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'zeroOrMore';
-      return obj;
-    };
-
     return RepeatZeroOrMore;
 
   })(root.Quantifier);
@@ -186,13 +171,6 @@
     function RepeatOneOrMore(debug, token) {
       RepeatOneOrMore.__super__.constructor.call(this, debug, token, 1, Infinity);
     }
-
-    RepeatOneOrMore.prototype.setupStateObject = function() {
-      var obj;
-      obj = RepeatOneOrMore.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'oneOrMore';
-      return obj;
-    };
 
     return RepeatOneOrMore;
 

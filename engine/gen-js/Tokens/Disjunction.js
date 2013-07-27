@@ -21,7 +21,6 @@
 
     Disjunction.prototype.setupStateObject = function() {
       return {
-        type: 'disjunction',
         status: Inactive,
         i: 0
       };

@@ -40,13 +40,6 @@
       CharacterClass.__super__.constructor.call(this, debug);
     }
 
-    CharacterClass.prototype.setupStateObject = function() {
-      var obj;
-      obj = CharacterClass.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'characterClass';
-      return obj;
-    };
-
     CharacterClass.prototype.addElement = function(element) {
       return this.elements.push(element);
     };
@@ -95,13 +88,6 @@
       DigitClass.__super__.constructor.call(this, debug, negated, [new CharacterRange("0", "9")]);
     }
 
-    DigitClass.prototype.setupStateObject = function() {
-      var obj;
-      obj = DigitClass.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'digitClass';
-      return obj;
-    };
-
     return DigitClass;
 
   })(CharacterClass);
@@ -117,13 +103,6 @@
       WordClass.__super__.constructor.call(this, debug, negated, [new CharacterRange("A", "Z"), new CharacterRange("a", "z"), new CharacterRange("0", "9"), "_"]);
     }
 
-    WordClass.prototype.setupStateObject = function() {
-      var obj;
-      obj = WordClass.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'wordClass';
-      return obj;
-    };
-
     return WordClass;
 
   })(CharacterClass);
@@ -138,13 +117,6 @@
       }
       WhitespaceClass.__super__.constructor.call(this, debug, negated, [new CharacterRange(0x9, 0xd), "\u0020", "\u00a0", "\u1680", "\u180e", new CharacterRange(0x2000, 0x200a), "\u2028", "\u2029", "\u202f", "\u205f", "\u3000", "\ufeff"]);
     }
-
-    WhitespaceClass.prototype.setupStateObject = function() {
-      var obj;
-      obj = WhitespaceClass.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'whitespaceClass';
-      return obj;
-    };
 
     return WhitespaceClass;
 

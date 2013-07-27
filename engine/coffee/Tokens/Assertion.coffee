@@ -4,11 +4,6 @@ class root.StartAnchor extends BasicToken
     constructor: (debug) ->
         super
 
-    setupStateObject: ->
-        obj = super
-        obj.type = 'startAnchor'
-        return obj
-
     matches: (state) ->
         if state.input[state.currentPosition - 1] == StartGuard
             return Result.Success(state.currentPosition)
@@ -18,11 +13,6 @@ class root.StartAnchor extends BasicToken
 class root.EndAnchor extends BasicToken
     constructor: (debug) ->
         super
-
-    setupStateObject: ->
-        obj = super
-        obj.type = 'endAnchor'
-        return obj
 
     matches: (state) ->
         if state.input[state.currentPosition] == EndGuard
@@ -34,11 +24,6 @@ class root.WordBoundary extends BasicToken
     constructor: (debug, @negated = false) ->
         super(debug)
         @wordClass = new WordClass()
-
-    setupStateObject: () ->
-        obj = super
-        obj.type = 'wordBoundary'
-        return obj
 
     matches: (state) ->
         leftChar = state.input[state.currentPosition - 1]

@@ -83,9 +83,25 @@
 
   root.Renderer = (function() {
 
-    function Renderer(input, regex) {
-      this.input = input;
+    function Renderer(regex, input) {
+      var collect,
+        _this = this;
       this.regex = regex;
+      this.input = input;
+      this.tokens = [];
+      collect = function(token) {
+        var id, subtoken, _i, _len, _ref, _results;
+        id = token.debug.id;
+        _this.tokens[id] = token;
+        _ref = token.subtokens;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          subtoken = _ref[_i];
+          _results.push(collect(subtoken));
+        }
+        return _results;
+      };
+      collect(this.regex.regex);
     }
 
     Renderer.prototype.render = function(state) {

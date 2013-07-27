@@ -11,7 +11,6 @@ class root.Group extends Token
         state.tokens[@debug.id].firstPosition = false
 
     setupStateObject: ->
-        type: 'group'
         status: Inactive
         result: null
         firstPosition: false

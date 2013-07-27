@@ -191,13 +191,6 @@
       StartAnchor.__super__.constructor.apply(this, arguments);
     }
 
-    StartAnchor.prototype.setupStateObject = function() {
-      var obj;
-      obj = StartAnchor.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'startAnchor';
-      return obj;
-    };
-
     StartAnchor.prototype.matches = function(state) {
       if (state.input[state.currentPosition - 1] === StartGuard) {
         return Result.Success(state.currentPosition);
@@ -217,13 +210,6 @@
     function EndAnchor(debug) {
       EndAnchor.__super__.constructor.apply(this, arguments);
     }
-
-    EndAnchor.prototype.setupStateObject = function() {
-      var obj;
-      obj = EndAnchor.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'endAnchor';
-      return obj;
-    };
 
     EndAnchor.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === EndGuard) {
@@ -246,13 +232,6 @@
       WordBoundary.__super__.constructor.call(this, debug);
       this.wordClass = new WordClass();
     }
-
-    WordBoundary.prototype.setupStateObject = function() {
-      var obj;
-      obj = WordBoundary.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'wordBoundary';
-      return obj;
-    };
 
     WordBoundary.prototype.matches = function(state) {
       var leftChar, rightChar;
@@ -279,13 +258,6 @@
       this.character = character;
       Character.__super__.constructor.call(this, debug);
     }
-
-    Character.prototype.setupStateObject = function() {
-      var obj;
-      obj = Character.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'character';
-      return obj;
-    };
 
     Character.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === this.character) {
@@ -335,13 +307,6 @@
       CharacterClass.__super__.constructor.call(this, debug);
     }
 
-    CharacterClass.prototype.setupStateObject = function() {
-      var obj;
-      obj = CharacterClass.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'characterClass';
-      return obj;
-    };
-
     CharacterClass.prototype.addElement = function(element) {
       return this.elements.push(element);
     };
@@ -390,13 +355,6 @@
       DigitClass.__super__.constructor.call(this, debug, negated, [new CharacterRange("0", "9")]);
     }
 
-    DigitClass.prototype.setupStateObject = function() {
-      var obj;
-      obj = DigitClass.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'digitClass';
-      return obj;
-    };
-
     return DigitClass;
 
   })(CharacterClass);
@@ -411,13 +369,6 @@
       }
       WordClass.__super__.constructor.call(this, debug, negated, [new CharacterRange("A", "Z"), new CharacterRange("a", "z"), new CharacterRange("0", "9"), "_"]);
     }
-
-    WordClass.prototype.setupStateObject = function() {
-      var obj;
-      obj = WordClass.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'wordClass';
-      return obj;
-    };
 
     return WordClass;
 
@@ -434,13 +385,6 @@
       WhitespaceClass.__super__.constructor.call(this, debug, negated, [new CharacterRange(0x9, 0xd), "\u0020", "\u00a0", "\u1680", "\u180e", new CharacterRange(0x2000, 0x200a), "\u2028", "\u2029", "\u202f", "\u205f", "\u3000", "\ufeff"]);
     }
 
-    WhitespaceClass.prototype.setupStateObject = function() {
-      var obj;
-      obj = WhitespaceClass.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'whitespaceClass';
-      return obj;
-    };
-
     return WhitespaceClass;
 
   })(CharacterClass);
@@ -454,13 +398,6 @@
     function Wildcard(debug) {
       Wildcard.__super__.constructor.apply(this, arguments);
     }
-
-    Wildcard.prototype.setupStateObject = function() {
-      var obj;
-      obj = Wildcard.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'wildcard';
-      return obj;
-    };
 
     Wildcard.prototype.matches = function(state) {
       var _ref;
@@ -492,7 +429,6 @@
 
     Disjunction.prototype.setupStateObject = function() {
       return {
-        type: 'disjunction',
         status: Inactive,
         i: 0
       };
@@ -539,7 +475,6 @@
 
     Group.prototype.setupStateObject = function() {
       return {
-        type: 'group',
         status: Inactive,
         result: null,
         firstPosition: false
@@ -613,7 +548,6 @@
     Quantifier.prototype.setupStateObject = function(state) {
       var stateObject;
       stateObject = {
-        type: 'quantifier',
         status: Inactive,
         freshSubStates: this.collectSubStates(state, this.subtokens[0]),
         instances: [],
@@ -731,13 +665,6 @@
       Option.__super__.constructor.call(this, debug, token, 0, 1);
     }
 
-    Option.prototype.setupStateObject = function() {
-      var obj;
-      obj = Option.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'option';
-      return obj;
-    };
-
     return Option;
 
   })(root.Quantifier);
@@ -750,13 +677,6 @@
       RepeatZeroOrMore.__super__.constructor.call(this, debug, token, 0, Infinity);
     }
 
-    RepeatZeroOrMore.prototype.setupStateObject = function() {
-      var obj;
-      obj = RepeatZeroOrMore.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'zeroOrMore';
-      return obj;
-    };
-
     return RepeatZeroOrMore;
 
   })(root.Quantifier);
@@ -768,13 +688,6 @@
     function RepeatOneOrMore(debug, token) {
       RepeatOneOrMore.__super__.constructor.call(this, debug, token, 1, Infinity);
     }
-
-    RepeatOneOrMore.prototype.setupStateObject = function() {
-      var obj;
-      obj = RepeatOneOrMore.__super__.setupStateObject.apply(this, arguments);
-      obj.subtype = 'oneOrMore';
-      return obj;
-    };
 
     return RepeatOneOrMore;
 
@@ -798,7 +711,6 @@
 
     Sequence.prototype.setupStateObject = function() {
       return {
-        type: 'sequence',
         status: Inactive,
         i: 0,
         pos: []
@@ -853,8 +765,8 @@
       var char, current, debug, element, fillGroupRanges, group, i, lastCaptureIndex, lastId, nGroups, nestingStack, squash, start, treeRoot, _, _ref, _ref1;
       lastId = -1;
       treeRoot = new Group({
-        sourceOpenLength: 0,
-        sourceCloseLength: 0,
+        sourceOpen: '',
+        sourceClose: '',
         id: ++lastId
       }, new Disjunction({
         id: ++lastId
@@ -872,7 +784,7 @@
             start = i;
             _ref = this.parseEscapeSequence(false, string, i + 1), i = _ref[0], element = _ref[1];
             element.debug = {
-              sourceLength: i - start,
+              source: string.substring(start, i),
               id: ++lastId
             };
             this.append(current, element);
@@ -882,7 +794,7 @@
             break;
           case "^":
             debug = {
-              sourceLength: 1,
+              source: char,
               id: ++lastId
             };
             this.append(current, new StartAnchor(debug));
@@ -890,7 +802,7 @@
             break;
           case "$":
             debug = {
-              sourceLength: 1,
+              source: char,
               id: ++lastId
             };
             this.append(current, new EndAnchor(debug));
@@ -898,7 +810,7 @@
             break;
           case ".":
             debug = {
-              sourceLength: 1,
+              source: char,
               id: ++lastId
             };
             this.append(current, new Wildcard(debug));
@@ -912,8 +824,8 @@
             break;
           case "(":
             debug = {
-              sourceOpenLength: 1,
-              sourceCloseLength: 1,
+              sourceOpen: '(',
+              sourceClose: ')',
               id: ++lastId
             };
             group = new Group(debug, new Disjunction({
@@ -944,7 +856,7 @@
             break;
           default:
             debug = {
-              sourceLength: 1,
+              source: char,
               id: ++lastId
             };
             this.append(current, new Character(debug, char));
@@ -1002,7 +914,7 @@
     };
 
     Parser.parseCharacterClass = function(string, current, i, id) {
-      var char, debug, element, elements, endC, lastElement, negated, newI, nextElement, startC, _ref, _ref1;
+      var char, debug, element, elements, endC, lastElement, negated, newI, nextElement, start, startC, _ref, _ref1;
       if (i < string.length && string.charAt(i) === "^") {
         negated = true;
         ++i;
@@ -1010,13 +922,15 @@
         negated = false;
       }
       elements = [];
+      start = i;
       while (i < string.length) {
         char = string.charAt(i);
         switch (char) {
           case "]":
             debug = {
-              sourceOpenLength: negated ? 2 : 1,
-              sourceCloseLength: 1,
+              sourceOpen: negated ? '[^' : '[',
+              sourceClose: string.substring(start, i),
+              sourceCloseLength: ']',
               id: id
             };
             this.append(current, new CharacterClass(debug, negated, elements));
@@ -1150,7 +1064,7 @@
         };
       }
       debug = {
-        sourceLength: 1,
+        source: char,
         id: id
       };
       quantifierClass = {

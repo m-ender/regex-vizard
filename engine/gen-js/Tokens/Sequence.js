@@ -22,7 +22,6 @@
 
     Sequence.prototype.setupStateObject = function() {
       return {
-        type: 'sequence',
         status: Inactive,
         i: 0,
         pos: []

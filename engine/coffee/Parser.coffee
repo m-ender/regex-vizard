@@ -9,8 +9,8 @@ class root.Parser
         lastId = -1
 
         treeRoot = new Group(
-                     sourceOpenLength: 0
-                     sourceCloseLength: 0
+                     sourceOpen: ''
+                     sourceClose: ''
                      id: ++lastId
                     ,
                      new Disjunction({id: ++lastId}, new Sequence({id: ++lastId}))
@@ -28,26 +28,26 @@ class root.Parser
                     start = i
                     [i, element] = @parseEscapeSequence(false, string, i+1)
                     element.debug =
-                        sourceLength: i - start
+                        source: string.substring(start, i)
                         id: ++lastId
                     @append(current, element)
                 when "["
                     i = @parseCharacterClass(string, current, i+1, ++lastId)
                 when "^"
                     debug =
-                        sourceLength: 1
+                        source: char
                         id: ++lastId
                     @append(current, new StartAnchor(debug))
                     ++i
                 when "$"
                     debug =
-                        sourceLength: 1
+                        source: char
                         id: ++lastId
                     @append(current, new EndAnchor(debug))
                     ++i
                 when "."
                     debug =
-                        sourceLength: 1
+                        source: char
                         id: ++lastId
                     @append(current, new Wildcard(debug))
                     ++i
@@ -56,8 +56,8 @@ class root.Parser
                     ++i
                 when "("
                     debug =
-                        sourceOpenLength: 1
-                        sourceCloseLength: 1
+                        sourceOpen: '('
+                        sourceClose: ')'
                         id: ++lastId
                     group = new Group(debug, new Disjunction({id: ++lastId}, new Sequence({id: ++lastId})), ++lastCaptureIndex)
                     @append(current, group)
@@ -78,7 +78,7 @@ class root.Parser
                     i = @parseQuantifier(current, char, i, ++lastId)
                 else
                     debug =
-                        sourceLength: 1
+                        source: char
                         id: ++lastId
                     @append(current, new Character(debug, char))
                     ++i
@@ -135,13 +135,16 @@ class root.Parser
 
         elements = []
 
+        start = i
+
         while i < string.length
             char = string.charAt(i)
             switch char
                 when "]"
                     debug =
-                        sourceOpenLength: if negated then 2 else 1
-                        sourceCloseLength: 1
+                        sourceOpen: if negated then '[^' else '['
+                        sourceClose: string.substring(start, i)
+                        sourceCloseLength: ']'
                         id: id
                     @append(current, new CharacterClass(debug, negated, elements))
                     return i+1
@@ -259,7 +262,7 @@ class root.Parser
             }
 
         debug =
-            sourceLength: 1
+            source: char
             id: id
 
         quantifierClass =

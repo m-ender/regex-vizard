@@ -17,7 +17,6 @@ class root.Quantifier extends Token
 
     setupStateObject: (state) ->
         stateObject =
-            type: 'quantifier'
             status: Inactive
             freshSubStates: @collectSubStates(state, @subtokens[0])
             instances: []                           # instances of the subtoken used for the individual repetitions
@@ -104,25 +103,10 @@ class root.Option extends root.Quantifier
     constructor: (debug, token) ->
         super(debug, token, 0, 1)
 
-    setupStateObject: ->
-        obj = super
-        obj.subtype = 'option'
-        return obj
-
 class root.RepeatZeroOrMore extends root.Quantifier
     constructor: (debug, token) ->
         super(debug, token, 0, Infinity)
 
-    setupStateObject: ->
-        obj = super
-        obj.subtype = 'zeroOrMore'
-        return obj
-
 class root.RepeatOneOrMore extends root.Quantifier
     constructor: (debug, token) ->
         super(debug, token, 1, Infinity)
-
-    setupStateObject: ->
-        obj = super
-        obj.subtype = 'oneOrMore'
-        return obj

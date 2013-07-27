@@ -15,13 +15,6 @@
       Character.__super__.constructor.call(this, debug);
     }
 
-    Character.prototype.setupStateObject = function() {
-      var obj;
-      obj = Character.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'character';
-      return obj;
-    };
-
     Character.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === this.character) {
         return Result.Success(state.currentPosition + 1);

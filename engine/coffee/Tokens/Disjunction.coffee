@@ -9,7 +9,6 @@ class root.Disjunction extends Token
         state.tokens[@debug.id].i = 0 # the first subtoken to try upon calling nextMatch
 
     setupStateObject: ->
-        type: 'disjunction'
         status: Inactive
         i: 0
 

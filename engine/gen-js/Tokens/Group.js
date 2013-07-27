@@ -24,7 +24,6 @@
 
     Group.prototype.setupStateObject = function() {
       return {
-        type: 'group',
         status: Inactive,
         result: null,
         firstPosition: false

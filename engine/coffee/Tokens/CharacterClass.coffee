@@ -20,11 +20,6 @@ class root.CharacterClass extends BasicToken
     constructor: (debug, @negated = false, @elements = []) ->
         super(debug)
 
-    setupStateObject: ->
-        obj = super
-        obj.type = 'characterClass'
-        return obj
-
     addElement: (element) ->
         @elements.push(element)
 
@@ -57,11 +52,6 @@ class root.DigitClass extends CharacterClass
     constructor: (debug, negated = false) ->
         super(debug, negated, [new CharacterRange("0", "9")])
 
-    setupStateObject: ->
-        obj = super
-        obj.subtype = 'digitClass'
-        return obj
-
 # For built-in \w and \W
 class root.WordClass extends CharacterClass
     constructor: (debug, negated = false) ->
@@ -71,11 +61,6 @@ class root.WordClass extends CharacterClass
             new CharacterRange("0", "9")
             "_"
         ])
-
-    setupStateObject: ->
-        obj = super
-        obj.subtype = 'wordClass'
-        return obj
 
 # For built-in \s and \S
 class root.WhitespaceClass extends CharacterClass
@@ -94,8 +79,3 @@ class root.WhitespaceClass extends CharacterClass
             "\u3000" # ideographic space
             "\ufeff" # zero-width no-break space
         ])
-
-    setupStateObject: ->
-        obj = super
-        obj.subtype = 'whitespaceClass'
-        return obj

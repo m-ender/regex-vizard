@@ -14,13 +14,6 @@
       StartAnchor.__super__.constructor.apply(this, arguments);
     }
 
-    StartAnchor.prototype.setupStateObject = function() {
-      var obj;
-      obj = StartAnchor.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'startAnchor';
-      return obj;
-    };
-
     StartAnchor.prototype.matches = function(state) {
       if (state.input[state.currentPosition - 1] === StartGuard) {
         return Result.Success(state.currentPosition);
@@ -40,13 +33,6 @@
     function EndAnchor(debug) {
       EndAnchor.__super__.constructor.apply(this, arguments);
     }
-
-    EndAnchor.prototype.setupStateObject = function() {
-      var obj;
-      obj = EndAnchor.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'endAnchor';
-      return obj;
-    };
 
     EndAnchor.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === EndGuard) {
@@ -69,13 +55,6 @@
       WordBoundary.__super__.constructor.call(this, debug);
       this.wordClass = new WordClass();
     }
-
-    WordBoundary.prototype.setupStateObject = function() {
-      var obj;
-      obj = WordBoundary.__super__.setupStateObject.apply(this, arguments);
-      obj.type = 'wordBoundary';
-      return obj;
-    };
 
     WordBoundary.prototype.matches = function(state) {
       var leftChar, rightChar;
