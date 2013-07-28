@@ -15,8 +15,21 @@
       Character.__super__.constructor.call(this, debug);
     }
 
+    Character.prototype.reset = function(state) {
+      Character.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].matchedPosition = null;
+    };
+
+    Character.prototype.setupStateObject = function() {
+      var obj;
+      obj = Character.__super__.setupStateObject.apply(this, arguments);
+      obj.matchedPosition = null;
+      return obj;
+    };
+
     Character.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === this.character) {
+        state.tokens[this.debug.id].matchedPosition = state.currentPosition;
         return Result.Success(state.currentPosition + 1);
       } else {
         return Result.Failure();

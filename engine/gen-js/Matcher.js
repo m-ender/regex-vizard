@@ -9,7 +9,6 @@
     function Matcher(regex, nGroups, subject) {
       this.regex = regex;
       this.subject = subject;
-      this.startingPosition = 1;
       this.success = false;
       this.state = Matcher.setupInitialState(this.subject);
       this.regex.register(this.state);
@@ -19,6 +18,7 @@
       var state;
       state = {
         input: this.parseInput(subject),
+        startingPosition: 1,
         currentPosition: 1,
         tokens: [],
         captures: []
@@ -38,9 +38,9 @@
       result = this.regex.nextMatch(this.state);
       switch (result.type) {
         case Failure:
-          this.state.currentPosition = ++this.startingPosition;
+          this.state.currentPosition = ++this.state.startingPosition;
           this.regex.reset(this.state);
-          return this.startingPosition < this.state.input.length;
+          return this.state.startingPosition < this.state.input.length;
         case Indeterminate:
           return true;
         case Success:

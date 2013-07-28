@@ -2,7 +2,6 @@ root = global ? window
 
 class root.Matcher
     constructor: (@regex, nGroups, @subject) ->
-        @startingPosition = 1
         @success = false
         @state = Matcher.setupInitialState(@subject)
         @regex.register(@state)
@@ -10,6 +9,7 @@ class root.Matcher
     @setupInitialState: (subject) ->
         state =
             input: @parseInput(subject)
+            startingPosition: 1
             currentPosition: 1
             tokens: []
             captures: []
@@ -29,9 +29,9 @@ class root.Matcher
         result = @regex.nextMatch(@state)
         switch result.type
             when Failure
-                @state.currentPosition = ++@startingPosition
+                @state.currentPosition = ++@state.startingPosition
                 @regex.reset(@state)
-                return @startingPosition < @state.input.length
+                return @state.startingPosition < @state.input.length
             when Indeterminate
                 return true
             when Success

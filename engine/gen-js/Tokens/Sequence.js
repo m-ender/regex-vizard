@@ -42,7 +42,6 @@
       result = currentToken.nextMatch(state);
       switch (result.type) {
         case Failure:
-          currentToken.reset(state);
           --tokenState.i;
           if (tokenState.pos.length > 0) {
             state.currentPosition = tokenState.pos.pop();
@@ -54,9 +53,10 @@
           if (tokenState.i === this.subtokens.length - 1) {
             return result;
           } else {
-            ++tokenState.i;
             tokenState.pos.push(state.currentPosition);
             state.currentPosition = result.nextPosition;
+            ++tokenState.i;
+            this.subtokens[tokenState.i].reset(state);
             return Result.Indeterminate();
           }
       }

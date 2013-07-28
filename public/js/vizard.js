@@ -259,8 +259,21 @@
       Character.__super__.constructor.call(this, debug);
     }
 
+    Character.prototype.reset = function(state) {
+      Character.__super__.reset.apply(this, arguments);
+      return state.tokens[this.debug.id].matchedPosition = null;
+    };
+
+    Character.prototype.setupStateObject = function() {
+      var obj;
+      obj = Character.__super__.setupStateObject.apply(this, arguments);
+      obj.matchedPosition = null;
+      return obj;
+    };
+
     Character.prototype.matches = function(state) {
       if (state.input[state.currentPosition] === this.character) {
+        state.tokens[this.debug.id].matchedPosition = state.currentPosition;
         return Result.Success(state.currentPosition + 1);
       } else {
         return Result.Failure();
@@ -731,7 +744,6 @@
       result = currentToken.nextMatch(state);
       switch (result.type) {
         case Failure:
-          currentToken.reset(state);
           --tokenState.i;
           if (tokenState.pos.length > 0) {
             state.currentPosition = tokenState.pos.pop();
@@ -743,9 +755,10 @@
           if (tokenState.i === this.subtokens.length - 1) {
             return result;
           } else {
-            ++tokenState.i;
             tokenState.pos.push(state.currentPosition);
             state.currentPosition = result.nextPosition;
+            ++tokenState.i;
+            this.subtokens[tokenState.i].reset(state);
             return Result.Indeterminate();
           }
       }
@@ -1099,7 +1112,6 @@
     function Matcher(regex, nGroups, subject) {
       this.regex = regex;
       this.subject = subject;
-      this.startingPosition = 1;
       this.success = false;
       this.state = Matcher.setupInitialState(this.subject);
       this.regex.register(this.state);
@@ -1109,6 +1121,7 @@
       var state;
       state = {
         input: this.parseInput(subject),
+        startingPosition: 1,
         currentPosition: 1,
         tokens: [],
         captures: []
@@ -1128,9 +1141,9 @@
       result = this.regex.nextMatch(this.state);
       switch (result.type) {
         case Failure:
-          this.state.currentPosition = ++this.startingPosition;
+          this.state.currentPosition = ++this.state.startingPosition;
           this.regex.reset(this.state);
-          return this.startingPosition < this.state.input.length;
+          return this.state.startingPosition < this.state.input.length;
         case Indeterminate:
           return true;
         case Success:

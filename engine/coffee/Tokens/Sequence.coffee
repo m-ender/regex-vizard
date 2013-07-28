@@ -35,7 +35,6 @@ class root.Sequence extends Token
         result = currentToken.nextMatch(state)
         switch result.type
             when Failure
-                currentToken.reset(state)
                 --tokenState.i
                 if tokenState.pos.length > 0
                     state.currentPosition = tokenState.pos.pop()
@@ -46,7 +45,8 @@ class root.Sequence extends Token
                 if tokenState.i == @subtokens.length - 1
                     return result
                 else
-                    ++tokenState.i
                     tokenState.pos.push(state.currentPosition)
                     state.currentPosition = result.nextPosition
+                    ++tokenState.i
+                    @subtokens[tokenState.i].reset(state)
                     return Result.Indeterminate()

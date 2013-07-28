@@ -53,16 +53,17 @@ div#output {
   width: 900px;
   margin: auto;
 }
-div#output-subject,
-div#output-pattern,
-div#output-colortest {
+div#output-target,
+div#output-pattern {
   margin-bottom: 50px;
   font-size: 24pt;
   width: 900px;
 }
-div#output-subject .match {
+div#output-pattern .match,
+div#output-target .match {
   color: #57ff62;
 }
-div#output-subject .nomatch {
+div#output-pattern .nomatch,
+div#output-target .nomatch {
   color: #9d3d3d;
 }
