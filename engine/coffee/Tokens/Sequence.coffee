@@ -43,6 +43,7 @@ class root.Sequence extends Token
                 return result
             when Success
                 if tokenState.i == @subtokens.length - 1
+                    tokenState.wasFinal = true
                     return result
                 else
                     tokenState.pos.push(state.currentPosition)

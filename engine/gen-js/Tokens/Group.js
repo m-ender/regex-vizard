@@ -59,6 +59,9 @@
           state.captures[this.index] = void 0;
           return Result.Indeterminate();
         case Success:
+          if (this.index === 0) {
+            state.currentPosition = result.nextPosition;
+          }
           tokenState.status = Matched;
           state.captures[this.index] = state.input.slice(tokenState.firstPosition, result.nextPosition).join("");
           tokenState.result = result;

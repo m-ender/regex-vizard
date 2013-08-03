@@ -47,6 +47,10 @@ class root.Group extends Token
                 state.captures[@index] = undefined
                 return Result.Indeterminate()
             when Success
+                # baaaaad hack
+                if @index is 0
+                    state.currentPosition = result.nextPosition
+
                 tokenState.status = Matched
                 state.captures[@index] = state.input[tokenState.firstPosition...result.nextPosition].join("")
                 tokenState.result = result

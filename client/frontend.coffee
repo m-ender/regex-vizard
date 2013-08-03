@@ -20,6 +20,7 @@ setupEngine = () ->
     renderer = new Renderer regex, targetString
 
     $('#output-target').html targetString
+    $('#output-cursor').html "^"
     $('#output-pattern').html regexString
     $('#button-step-fw').visible()
 
@@ -33,6 +34,7 @@ stepForward = () ->
         else
             [targetHtml, patternHtml] = renderer.render matcher.state
             $('#output-target').html targetHtml
+            $('#output-cursor').html(new Array(matcher.state.currentPosition).join("&nbsp;") + "^")
             $('#output-pattern').html patternHtml
     else
         $('#button-step-fw').invisible()

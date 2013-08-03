@@ -213,6 +213,7 @@
     matcher = regex.getMatcher(targetString);
     renderer = new Renderer(regex, targetString);
     $('#output-target').html(targetString);
+    $('#output-cursor').html("^");
     $('#output-pattern').html(regexString);
     return $('#button-step-fw').visible();
   };
@@ -228,6 +229,7 @@
       } else {
         _ref = renderer.render(matcher.state), targetHtml = _ref[0], patternHtml = _ref[1];
         $('#output-target').html(targetHtml);
+        $('#output-cursor').html(new Array(matcher.state.currentPosition).join("&nbsp;") + "^");
         return $('#output-pattern').html(patternHtml);
       }
     } else {

@@ -51,6 +51,7 @@
           return result;
         case Success:
           if (tokenState.i === this.subtokens.length - 1) {
+            tokenState.wasFinal = true;
             return result;
           } else {
             tokenState.pos.push(state.currentPosition);
