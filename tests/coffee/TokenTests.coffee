@@ -124,9 +124,12 @@ TestCase("TokenTests",
             0 # subtoken "a" matches
             0 # subtoken "b" matches
             4 # last subtoken "c" matches, so report overall match
-            0 # subtoken "c" cannot backtrack, so subtoken fail
+            0 # subtoken "c" cannot backtrack, so subtoken fails
+            0 # sequence backtracks
             0 # subtoken "b" cannot backtrack, so subtoken fails
+            0 # sequence backtracks
             0 # subtoken "a" cannot backtrack, so subtoken fails
+            0 # sequence backtracks
         ])
 
         state = @Matcher.setupInitialState("abc")
@@ -141,12 +144,16 @@ TestCase("TokenTests",
             0 # subsubtoken "b" matches
             0 # therefore, subtoken "b?" matches
             0 # subtoken "b" fails
+            0 # sequence backtracks
             0 # the subtoken "b" inside "b?" cannot backtrack, so that fails
             0 # subtoken "b?" matches (with "")
             3 # last subtoken "b" matches, so report overall match
             0 # subtoken "b" cannot backtrack, so subtoken fails
+            0 # sequence backtracks
             0 # subtoken "b?" cannot backtrack, so subtoken fails
+            0 # sequence backtracks
             0 # subtoken "a" cannot backtrack, so subtoken fails
+            0 # sequence backtracks
         ])
 
     "testEmptySequenceToken": () ->

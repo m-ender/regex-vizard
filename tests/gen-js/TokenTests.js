@@ -115,7 +115,7 @@
         id: 3
       }, "c"));
       token.register(state);
-      this.assertNextMatchSequence(token, state, [0, 0, 4, 0, 0, 0]);
+      this.assertNextMatchSequence(token, state, [0, 0, 4, 0, 0, 0, 0, 0, 0]);
       state = this.Matcher.setupInitialState("abc");
       token = new Sequence({
         id: 0
@@ -132,7 +132,7 @@
         id: 4
       }, "b"));
       token.register(state);
-      return this.assertNextMatchSequence(token, state, [0, 0, 0, 0, 0, 0, 3, 0, 0, 0]);
+      return this.assertNextMatchSequence(token, state, [0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0]);
     },
     "testEmptySequenceToken": function() {
       var state, token;

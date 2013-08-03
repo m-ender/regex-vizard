@@ -31,6 +31,7 @@
       var result, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
+        tokenState.status = Failed;
         return Result.Failure();
       }
       tokenState.attempted = true;

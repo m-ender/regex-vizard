@@ -163,6 +163,7 @@
       var result, tokenState;
       tokenState = state.tokens[this.debug.id];
       if (tokenState.attempted) {
+        tokenState.status = Failed;
         return Result.Failure();
       }
       tokenState.attempted = true;
@@ -722,6 +723,7 @@
     Sequence.prototype.reset = function(state) {
       Sequence.__super__.reset.apply(this, arguments);
       state.tokens[this.debug.id].i = 0;
+      state.tokens[this.debug.id].subtokenFailed = false;
       return state.tokens[this.debug.id].pos = [];
     };
 
@@ -729,13 +731,23 @@
       return {
         status: Inactive,
         i: 0,
-        pos: []
+        pos: [],
+        subtokenFailed: false
       };
     };
 
     Sequence.prototype.nextMatch = function(state) {
       var currentToken, result, tokenState;
       tokenState = state.tokens[this.debug.id];
+      if (tokenState.subtokenFailed) {
+        this.subtokens[tokenState.i].reset(state);
+        --tokenState.i;
+        if (tokenState.pos.length > 0) {
+          state.currentPosition = tokenState.pos.pop();
+        }
+        tokenState.subtokenFailed = false;
+        return Result.Indeterminate();
+      }
       if (tokenState.i === -1) {
         return Result.Failure();
       }
@@ -747,10 +759,7 @@
       result = currentToken.nextMatch(state);
       switch (result.type) {
         case Failure:
-          --tokenState.i;
-          if (tokenState.pos.length > 0) {
-            state.currentPosition = tokenState.pos.pop();
-          }
+          tokenState.subtokenFailed = true;
           return Result.Indeterminate();
         case Indeterminate:
           return result;
@@ -762,7 +771,6 @@
             tokenState.pos.push(state.currentPosition);
             state.currentPosition = result.nextPosition;
             ++tokenState.i;
-            this.subtokens[tokenState.i].reset(state);
             return Result.Indeterminate();
           }
       }

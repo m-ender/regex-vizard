@@ -21,6 +21,7 @@ class root.BasicToken extends Token
         # A basic token cannot backtrack. If this method is called
         # a second time it will invariably report failure.
         if tokenState.attempted
+            tokenState.status = Failed
             return Result.Failure()
 
         tokenState.attempted = true
