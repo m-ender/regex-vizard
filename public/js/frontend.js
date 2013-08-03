@@ -176,7 +176,7 @@
           break;
         case Failed:
           color = failedColor.toHexString();
-          n = 0;
+          n = 1;
           break;
         case Matched:
           color = this.colors[id].toHexString();
@@ -218,15 +218,18 @@
   };
 
   stepForward = function() {
-    var highlight, length, patternHtml, result, s, startPos, targetHtml, _ref;
+    var highlight, i, length, patternHtml, result, s, startPos, targetHtml, _ref;
     s = matcher.subject;
     if (matcher.stepForward()) {
       if (matcher.state.tokens[0].status === Failed) {
-        return stepForward();
+        i = matcher.state.startingPosition - 1;
+        $('#output-target').html("<span style='color: #888;'>" + (targetString.substring(0, i)) + "</span>" + (targetString.substring(i)));
+        return $('#output-pattern').html("<span style='color: #f55;'>" + regexString + "</span>");
+      } else {
+        _ref = renderer.render(matcher.state), targetHtml = _ref[0], patternHtml = _ref[1];
+        $('#output-target').html(targetHtml);
+        return $('#output-pattern').html(patternHtml);
       }
-      _ref = renderer.render(matcher.state), targetHtml = _ref[0], patternHtml = _ref[1];
-      $('#output-target').html(targetHtml);
-      return $('#output-pattern').html(patternHtml);
     } else {
       $('#button-step-fw').invisible();
       if (matcher.success) {

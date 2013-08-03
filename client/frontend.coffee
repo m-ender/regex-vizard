@@ -27,11 +27,13 @@ stepForward = () ->
     s = matcher.subject
     if matcher.stepForward()
         if matcher.state.tokens[0].status is Failed
-            return stepForward()
-
-        [targetHtml, patternHtml] = renderer.render matcher.state
-        $('#output-target').html targetHtml
-        $('#output-pattern').html patternHtml
+            i = matcher.state.startingPosition - 1
+            $('#output-target').html "<span style='color: #888;'>#{targetString.substring(0, i)}</span>#{targetString.substring(i)}"
+            $('#output-pattern').html "<span style='color: #f55;'>#{regexString}</span>"
+        else
+            [targetHtml, patternHtml] = renderer.render matcher.state
+            $('#output-target').html targetHtml
+            $('#output-pattern').html patternHtml
     else
         $('#button-step-fw').invisible()
         if matcher.success

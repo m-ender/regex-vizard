@@ -69,7 +69,7 @@ class root.Renderer
                 n = 0
             when Failed
                 color = failedColor.toHexString()
-                n = 0
+                n = 1
             when Matched
                 color = @colors[id].toHexString()
                 n = 1
