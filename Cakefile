@@ -39,10 +39,14 @@ task 'build:assets', 'Copy assets to public folder.', () ->
         'index.html'
         'js/jquery-1.10.1.js'
         'js/jquery.color-2.1.2.js'
+        'fonts/inconsolata-dz-webfont.eot'
+        'fonts/inconsolata-dz-webfont.svg'
+        'fonts/inconsolata-dz-webfont.ttf'
+        'fonts/inconsolata-dz-webfont.woff'
     ]
 
     for file in assets
-        fs.createReadStream("assets/#{file}").pipe fs.createWriteStream "public/#{file}"
+        fs.createReadStream("./assets/#{file}").pipe fs.createWriteStream "./public/#{file}"
 
     console.log "Done."
 

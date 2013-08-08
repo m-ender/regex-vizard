@@ -1,6 +1,11 @@
+@font-face {
+  font-family: "Inconsolata-dz";
+  src: url("../fonts/inconsolata-dz-webfont.eot?#iefix") format('embedded-opentype'), url("../fonts/inconsolata-dz-webfont.woff") format('woff'), url("../fonts/inconsolata-dz-webfont.ttf") format('truetype'), url("../fonts/inconsolata-dz-webfont.svg#inconsolata-dzdz") format('svg');
+}
 body {
   background: #282828;
-  font-family: Consolas, "Courier New", Courier, monospace;
+  font-family: "Inconsolata-dz", Inconsolata, Consolas, "Courier New", Courier, monospace;
+  font-size: 17px;
   color: #fff;
 }
 h1 {
@@ -15,7 +20,7 @@ input.input-text {
   background: #282828;
   border: 1px solid #fff;
   color: #fff;
-  font-family: Consolas, "Courier New", Courier, monospace;
+  font-family: "Inconsolata-dz", Inconsolata, Consolas, "Courier New", Courier, monospace;
   font-size: 16pt;
   width: 900px;
 }
@@ -23,7 +28,7 @@ input.input-button {
   background: #282828;
   border: 1px solid #fff;
   color: #fff;
-  font-family: Consolas, "Courier New", Courier, monospace;
+  font-family: "Inconsolata-dz", Inconsolata, Consolas, "Courier New", Courier, monospace;
   width: 250px;
   font-size: 16pt;
   font-weight: bold;
@@ -61,7 +66,7 @@ div#output-pattern {
 }
 div#output-cursor {
   margin-top: -13px;
-  margin-left: -9px;
+  margin-left: -10px;
   margin-bottom: 30px;
 }
 div#output-pattern .match,

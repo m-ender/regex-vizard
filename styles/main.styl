@@ -1,9 +1,18 @@
 bgcolor      = #282828
 successcolor = #57FF62
+fonts        = "Inconsolata-dz", Inconsolata, Consolas, "Courier New", Courier, monospace
+
+@font-face
+    font-family: "Inconsolata-dz";
+    src: url('../fonts/inconsolata-dz-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/inconsolata-dz-webfont.woff') format('woff'),
+         url('../fonts/inconsolata-dz-webfont.ttf')  format('truetype'),
+         url('../fonts/inconsolata-dz-webfont.svg#inconsolata-dzdz') format('svg');
 
 body
     background: bgcolor
-    font-family: Consolas, "Courier New", Courier, monospace
+    font-family: fonts
+    font-size: 17px
     color: #FFF
 
 h1
@@ -18,7 +27,7 @@ input.input-text
     background: bgcolor
     border: 1px solid white
     color: #FFF
-    font-family: Consolas, "Courier New", Courier, monospace
+    font-family: fonts
     font-size: 16pt
     width: 900px
 
@@ -26,7 +35,7 @@ input.input-button
     background: bgcolor
     border: 1px solid #FFF
     color: #FFF
-    font-family: Consolas, "Courier New", Courier, monospace
+    font-family: fonts
     width:250px
     font-size: 16pt
     font-weight: bold
@@ -63,7 +72,7 @@ div#output-pattern
 
 div#output-cursor
     margin-top: -13px
-    margin-left: -9px
+    margin-left: -10px
     margin-bottom: 30px
 
 div#output-pattern
